@@ -1,0 +1,241 @@
+{% extends 'Dashboards/Layout/psychologist_base.html' %}
+{% load static %}
+{% block title %}Assessment Detail | Mental Health Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-6 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header Section -->
+        <div class="mb-8 flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ assessment.title }}</h1>
+                <p class="mt-2 text-lg text-gray-600">{{ assessment.description }}</p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        {{ assessment.get_difficulty_level_display }}
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                        {{ assessment.category.name }}
+                    </span>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        {{ assessment.estimated_time_minutes }} min
+                    </span>
+                </div>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{% url 'assign_assessment' assessment.id %}" 
+                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                    Assign to Athletes
+                </a>
+                <a href="#" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50">
+                    Edit Assessment
+                </a>
+            </div>
+        </div>
+
+        <!-- Assessment Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Questions Section -->
+            <div class="lg:col-span-2 bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-200">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Assessment Questions</h3>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="space-y-8">
+                        {% for question in assessment.questions.all %}
+                        <div class="border-l-4 border-indigo-200 pl-4 py-2">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                                    {{ forloop.counter }}
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-base font-medium text-gray-900">{{ question.text }}</h4>
+                                    {% if question.help_text %}
+                                    <p class="mt-1 text-sm text-gray-500">{{ question.help_text }}</p>
+                                    {% endif %}
+                                    <div class="mt-3">
+                                        {% if question.question_type == 'likert_5' %}
+                                        <div class="flex justify-between text-xs text-gray-500">
+                                            <span>Strongly Disagree</span>
+                                            <span>Neutral</span>
+                                            <span>Strongly Agree</span>
+                                        </div>
+                                        <div class="mt-1 flex justify-between">
+                                            {% for i in "12345" %}
+                                            <span class="inline-flex items-center justify-center h-8 w-8 rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                                {{ i }}
+                                            </span>
+                                            {% endfor %}
+                                        </div>
+                                        {% elif question.question_type == 'likert_7' %}
+                                        <!-- Similar for 7-point scale -->
+                                        {% elif question.question_type == 'yes_no' %}
+                                        <div class="flex space-x-4">
+                                            <label class="inline-flex items-center">
+                                                <input type="radio" class="h-4 w-4 text-indigo-600" disabled>
+                                                <span class="ml-2 text-gray-700">Yes</span>
+                                            </label>
+                                            <label class="inline-flex items-center">
+                                                <input type="radio" class="h-4 w-4 text-indigo-600" disabled>
+                                                <span class="ml-2 text-gray-700">No</span>
+                                            </label>
+                                        </div>
+                                        {% elif question.question_type == 'multiple_choice' %}
+                                        <div class="space-y-2">
+                                            {% for choice in question.choices %}
+                                            <label class="flex items-start">
+                                                <input type="radio" class="mt-1 h-4 w-4 text-indigo-600" disabled>
+                                                <span class="ml-2 text-gray-700">{{ choice.text }}</span>
+                                            </label>
+                                            {% endfor %}
+                                        </div>
+                                        {% elif question.question_type == 'slider' %}
+                                        <input type="range" min="{{ question.min_value }}" max="{{ question.max_value }}" 
+                                               step="{{ question.step }}" class="w-full mt-2" disabled>
+                                        {% else %}
+                                        <textarea rows="3" class="w-full border-gray-300 rounded-md shadow-sm" disabled></textarea>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Info Sidebar -->
+            <div class="space-y-6">
+                <!-- Assessment Details Card -->
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-200">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Assessment Details</h3>
+                    </div>
+                    <div class="px-6 py-4">
+                        <dl class="space-y-4">
+                            <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                                <dt class="text-sm font-medium text-gray-500">Status</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if assessment.status == 'published' %}bg-green-100 text-green-800
+                                        {% elif assessment.status == 'draft' %}bg-yellow-100 text-yellow-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ assessment.get_status_display }}
+                                    </span>
+                                </dd>
+                            </div>
+                            <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                                <dt class="text-sm font-medium text-gray-500">Created</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ assessment.created_at|date:"M d, Y" }}</dd>
+                            </div>
+                            <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                                <dt class="text-sm font-medium text-gray-500">Last Updated</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">{{ assessment.updated_at|date:"M d, Y" }}</dd>
+                            </div>
+                            <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                                <dt class="text-sm font-medium text-gray-500">Visibility</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                                    {% if assessment.is_public %}
+                                    <span class="text-green-600">Public (all athletes)</span>
+                                    {% else %}
+                                    <span class="text-indigo-600">Private (assigned only)</span>
+                                    {% endif %}
+                                </dd>
+                            </div>
+                            <div class="sm:grid sm:grid-cols-3 sm:gap-4">
+                                <dt class="text-sm font-medium text-gray-500">Retake Policy</dt>
+                                <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                                    {% if assessment.allow_retake %}
+                                    Allowed (min {{ assessment.minimum_days_between_retakes }} days between)
+                                    {% else %}
+                                    Not allowed
+                                    {% endif %}
+                                </dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Response Statistics Card -->
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-200">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Response Statistics</h3>
+                    </div>
+                    <div class="px-6 py-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-indigo-600">{{ assessment.responses.count }}</p>
+                                <p class="text-sm text-gray-500">Total Responses</p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-3xl font-bold text-green-600">
+                                    {% if assessment.responses.count > 0 %}
+                                    {{ assessment.responses.filter(status='completed').count|floatformat:0 }}
+                                    {% else %}0{% endif %}%
+                                </p>
+                                <p class="text-sm text-gray-500">Completion Rate</p>
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <h4 class="text-sm font-medium text-gray-500 mb-2">Average Completion Time</h4>
+                            <div class="flex items-center">
+                                <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                    <div class="bg-indigo-600 h-2 rounded-full" style="width: 75%"></div>
+                                </div>
+                                <span class="ml-3 text-sm font-medium text-gray-700">
+                                    {{ assessment.estimated_time_minutes|add:"-5" }}-{{ assessment.estimated_time_minutes|add:"5" }} min
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Responses Card -->
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <div class="px-6 py-5 border-b border-gray-200">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">Recent Responses</h3>
+                    </div>
+                    <div class="px-6 py-4">
+                        <ul class="divide-y divide-gray-200">
+                            {% for response in assessment.responses.all|slice:":3" %}
+                            <li class="py-3">
+                                <div class="flex items-center space-x-4">
+                                    <div class="flex-shrink-0">
+                                        <img class="h-8 w-8 rounded-full" src="{{ response.athlete.profile.image.url }}" alt="">
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 truncate">
+                                            {{ response.athlete.get_full_name }}
+                                        </p>
+                                        <p class="text-sm text-gray-500 truncate">
+                                            {{ response.completed_at|date:"M d, Y" }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <a href="{% url 'view_results' response.id %}" class="inline-flex items-center shadow-sm px-2.5 py-0.5 border border-gray-300 text-sm leading-5 font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50">
+                                            View
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                            {% empty %}
+                            <li class="py-3 text-center text-sm text-gray-500">
+                                No responses yet
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% if assessment.responses.count > 3 %}
+                        <div class="mt-4 text-center">
+                            <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                                View all {{ assessment.responses.count }} responses
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

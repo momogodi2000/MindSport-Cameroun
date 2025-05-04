@@ -1,0 +1,364 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+{% load journal_filters %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header with back button -->
+        <div class="flex items-center mb-8">
+            <a href="{% if entry %}{% url 'view_journal_entry' entry.id %}{% else %}{% url 'journal_home' %}{% endif %}" 
+               class="mr-4 p-2 rounded-full hover:bg-gray-200 transition-all duration-300 transform hover:-translate-x-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+            </a>
+            <h1 class="text-3xl font-bold text-gray-800">Edit Journal Entry</h1>
+            <span class="ml-auto text-sm text-gray-500">{{ entry.date|date:"F j, Y" }}</span>
+        </div>
+
+        <!-- Mood indicator animation with validation -->
+        <div class="mb-8 relative">
+            <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg blur opacity-20"></div>
+            <div class="relative bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">How are you feeling today? <span class="text-red-500">*</span></h2>
+                <div class="flex justify-between mb-2">
+                    {% for mood_value, mood_display in entry.MOOD_CHOICES %}
+                        {% with color=mood_value|mood_color %}
+                        <button type="button" 
+                                class="mood-option flex flex-col items-center justify-center p-2 rounded-full transition-all duration-300 transform hover:scale-110 {% if entry.mood == mood_value %}bg-{{ color }}-100 border-2 border-{{ color }}-400{% else %}hover:bg-gray-100{% endif %}"
+                                data-mood="{{ mood_value }}"
+                                onclick="document.getElementById('mood-select').value = '{{ mood_value }}'; updateMoodSelection()">
+                            <div class="w-12 h-12 rounded-full flex items-center justify-center mb-1 bg-{{ color }}-100">
+                                {% if mood_value == 'excellent' %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-{{ color }}-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                {% elif mood_value == 'good' %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-{{ color }}-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                {% elif mood_value == 'neutral' %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-{{ color }}-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                {% elif mood_value == 'bad' %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-{{ color }}-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                {% elif mood_value == 'terrible' %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-{{ color }}-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                {% endif %}
+                            </div>
+                            <span class="text-xs text-gray-600">{{ mood_display }}</span>
+                        </button>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+                
+                <!-- Hidden required mood select -->
+                <div class="hidden">
+                    <select name="mood" id="mood-select" required>
+                        <option value="">Select a mood</option>
+                        {% for mood_value, mood_display in entry.MOOD_CHOICES %}
+                            <option value="{{ mood_value }}" {% if entry.mood == mood_value %}selected{% endif %}>{{ mood_display }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Validation message -->
+                <div id="mood-error" class="text-red-500 text-sm mt-1 hidden">Please select your mood</div>
+            </div>
+        </div>
+
+        <!-- Main form -->
+        <form method="post" class="space-y-6" id="journal-form">
+            {% csrf_token %}
+            
+            <!-- Title field -->
+            <div class="relative">
+                <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg blur opacity-20"></div>
+                <div class="relative bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title (optional)</label>
+                    <input type="text" name="title" id="title" value="{{ entry.title|default:'' }}" 
+                           class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+                           placeholder="Give your entry a title...">
+                </div>
+            </div>
+
+            <!-- Content field -->
+            <div class="relative">
+                <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg blur opacity-20"></div>
+                <div class="relative bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+                    <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Your Thoughts</label>
+                    <textarea name="content" id="content" rows="10" 
+                              class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" 
+                              placeholder="Write about your day, your feelings, or anything on your mind...">{{ entry.content }}</textarea>
+                </div>
+            </div>
+
+            <!-- Stats section with sliding panels -->
+            <div class="relative">
+                <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg blur opacity-20"></div>
+                <div class="relative bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Daily Stats</h2>
+                    
+                    <!-- Energy Level -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Energy Level</label>
+                        <div class="grid grid-cols-5 gap-2">
+                            {% for energy_value, energy_display in entry.ENERGY_LEVEL_CHOICES %}
+                                <label class="flex flex-col items-center">
+                                    <input type="radio" name="energy_level" value="{{ energy_value }}" 
+                                           {% if entry.energy_level == energy_value %}checked{% endif %}
+                                           class="energy-radio hidden">
+                                    <div class="w-full p-2 text-center rounded-md transition-all duration-300 
+                                                {% if entry.energy_level == energy_value %}bg-blue-100 border border-blue-400{% else %}bg-gray-100 hover:bg-gray-200{% endif %}">
+                                        <span class="text-xs">{{ energy_display }}</span>
+                                    </div>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Stress Level -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Stress Level</label>
+                        <div class="grid grid-cols-5 gap-2">
+                            {% for stress_value, stress_display in entry.STRESS_LEVEL_CHOICES %}
+                                <label class="flex flex-col items-center">
+                                    <input type="radio" name="stress_level" value="{{ stress_value }}" 
+                                           {% if entry.stress_level == stress_value %}checked{% endif %}
+                                           class="stress-radio hidden">
+                                    <div class="w-full p-2 text-center rounded-md transition-all duration-300 
+                                                {% if entry.stress_level == stress_value %}bg-blue-100 border border-blue-400{% else %}bg-gray-100 hover:bg-gray-200{% endif %}">
+                                        <span class="text-xs">{{ stress_display }}</span>
+                                    </div>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Sleep Hours -->
+                    <div>
+                        <label for="sleep_hours" class="block text-sm font-medium text-gray-700 mb-1">Hours of Sleep</label>
+                        <input type="number" name="sleep_hours" id="sleep_hours" step="0.5" min="0" max="24" 
+                               value="{{ entry.sleep_hours|default:'' }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tags and Privacy -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Tags -->
+                <div class="relative">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg blur opacity-20"></div>
+                    <div class="relative bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+                        <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                        <input type="text" name="tags" id="tags" value="{{ entry.tags|default:'' }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                               placeholder="stress, training, recovery (comma separated)">
+                        <div class="mt-2 flex flex-wrap gap-2" id="tags-container">
+                            {% if entry.tags %}
+                                {% for tag in entry.get_tags_list %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ tag }}
+                                    </span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacy Settings -->
+                <div class="relative">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-lg blur opacity-20"></div>
+                    <div class="relative bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Privacy Settings</label>
+                        
+                        <div class="flex items-center mb-4">
+                            <input type="checkbox" name="is_private" id="is_private" 
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" 
+                                   {% if entry.is_private %}checked{% endif %}>
+                            <label for="is_private" class="ml-2 block text-sm text-gray-700">Keep this entry private</label>
+                        </div>
+
+                        <div id="shared-with-container" class="{% if entry.is_private %}hidden{% endif %} transition-all duration-300">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Share with:</label>
+                            <select name="shared_with" id="shared_with" multiple 
+                                    class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                {% for professional in request.user.get_available_professionals %}
+                                    <option value="{{ professional.id }}" 
+                                            {% if professional in entry.shared_with.all %}selected{% endif %}>
+                                        {{ professional.get_full_name }} ({{ professional.user_type }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <p class="mt-1 text-xs text-gray-500">Hold Ctrl/Cmd to select multiple</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+                <a href="{% if entry %}{% url 'view_journal_entry' entry.id %}{% else %}{% url 'journal_home' %}{% endif %}" 
+                   class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:-translate-y-0.5">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-md">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Floating save button for mobile -->
+<div class="md:hidden fixed bottom-6 right-6 z-10">
+    <button type="submit" form="journal-form" 
+            class="p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-110">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Form validation
+    document.getElementById('journal-form').addEventListener('submit', function(e) {
+        const moodSelect = document.getElementById('mood-select');
+        const moodError = document.getElementById('mood-error');
+        
+        if (!moodSelect.value) {
+            e.preventDefault();
+            moodError.classList.remove('hidden');
+            moodError.classList.add('block');
+            
+            // Scroll to error
+            moodError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        } else {
+            moodError.classList.add('hidden');
+            moodError.classList.remove('block');
+        }
+        
+        return true;
+    });
+
+    // Update mood selection UI
+    function updateMoodSelection() {
+        const moodSelect = document.getElementById('mood-select');
+        document.querySelectorAll('.mood-option').forEach(option => {
+            const moodValue = option.getAttribute('data-mood');
+            const isSelected = moodSelect.value === moodValue;
+            
+            if (isSelected) {
+                option.classList.add('bg-blue-100', 'border-blue-400', 'border-2');
+                option.classList.remove('hover:bg-gray-100');
+            } else {
+                option.classList.remove('bg-blue-100', 'border-blue-400', 'border-2');
+                option.classList.add('hover:bg-gray-100');
+            }
+        });
+        
+        // Hide error if mood is selected
+        document.getElementById('mood-error').classList.add('hidden');
+    }
+
+    // Initialize mood selection
+    updateMoodSelection();
+
+    // Toggle shared with container based on privacy setting
+    document.getElementById('is_private').addEventListener('change', function() {
+        const sharedContainer = document.getElementById('shared-with-container');
+        if (this.checked) {
+            sharedContainer.classList.add('hidden');
+        } else {
+            sharedContainer.classList.remove('hidden');
+        }
+    });
+
+    // Tag input functionality
+    document.getElementById('tags').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            const tagText = this.value.trim().replace(',', '');
+            if (tagText) {
+                addTag(tagText);
+                this.value = '';
+            }
+        }
+    });
+
+    function addTag(tagText) {
+        if (!tagText) return;
+        
+        const tagsContainer = document.getElementById('tags-container');
+        const tagElement = document.createElement('span');
+        tagElement.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800';
+        tagElement.textContent = tagText;
+        
+        // Add animation
+        tagElement.style.opacity = '0';
+        tagElement.style.transform = 'translateY(10px)';
+        tagsContainer.appendChild(tagElement);
+        
+        // Animate in
+        setTimeout(() => {
+            tagElement.style.transition = 'all 0.3s ease';
+            tagElement.style.opacity = '1';
+            tagElement.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Update hidden input value
+        updateTagsInput();
+    }
+
+    function updateTagsInput() {
+        const tagsContainer = document.getElementById('tags-container');
+        const tagsInput = document.getElementById('tags');
+        const tags = Array.from(tagsContainer.children).map(tag => tag.textContent.trim());
+        tagsInput.value = tags.join(', ');
+    }
+
+    // Add animation to radio buttons
+    document.querySelectorAll('.energy-radio, .stress-radio').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const parent = this.closest('label');
+            const allOptions = parent.parentElement.querySelectorAll('label > div');
+            
+            allOptions.forEach(option => {
+                option.classList.remove('bg-blue-100', 'border-blue-400', 'border');
+                option.classList.add('bg-gray-100');
+            });
+            
+            parent.querySelector('div').classList.add('bg-blue-100', 'border-blue-400', 'border');
+            parent.querySelector('div').classList.remove('bg-gray-100');
+        });
+    });
+
+    // Add floating label effect to inputs
+    document.querySelectorAll('input, textarea, select').forEach(input => {
+        input.addEventListener('focus', function() {
+            const label = this.closest('.relative').querySelector('label');
+            if (label) {
+                label.classList.add('text-blue-600');
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            const label = this.closest('.relative').querySelector('label');
+            if (label) {
+                label.classList.remove('text-blue-600');
+            }
+        });
+    });
+</script>
+{% endblock %}

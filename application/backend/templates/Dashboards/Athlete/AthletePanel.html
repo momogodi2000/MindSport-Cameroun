@@ -1,0 +1,766 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AthleteMind - Mental Health Platform for Athletes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap');
+        
+        :root {
+            --scrollbar-track: #f1f5f9;
+            --scrollbar-thumb: #94a3b8;
+            --gradient-1: #2978ff;
+            --gradient-2: #105ef7;
+            --gradient-3: #0c4ae3;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            background-color: #f8fafc;
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        /* 3D Card Effect */
+        .tilt-card {
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        .tilt-card-inner {
+            transform: translateZ(20px);
+        }
+        
+        .tilt-card-icon {
+            transform: translateZ(40px);
+        }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        /* Moving Gradient Background */
+        .gradient-bg {
+            background: linear-gradient(-45deg, var(--gradient-1), var(--gradient-2), var(--gradient-3), var(--gradient-1));
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        /* Floating Animation */
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        /* Ripple Effect */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ripple::after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+            background-repeat: no-repeat;
+            background-position: 50%;
+            transform: scale(10, 10);
+            opacity: 0;
+            transition: transform .5s, opacity 1s;
+        }
+        
+        .ripple:active::after {
+            transform: scale(0, 0);
+            opacity: 0.3;
+            transition: 0s;
+        }
+        
+        /* Pulse Animation */
+        .pulse-ring {
+            animation: pulse-ring 1.25s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(41, 120, 255, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(41, 120, 255, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(41, 120, 255, 0);
+            }
+        }
+        
+        /* Progress Ring Animation */
+        .progress-ring {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        
+        /* Blob Animation */
+        .blob {
+            animation: blob 7s infinite;
+        }
+        
+        @keyframes blob {
+            0% {
+                border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            }
+            50% {
+                border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+            }
+            100% {
+                border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            }
+        }
+        
+        /* Hover Animations */
+        .hover-translate {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-translate:hover {
+            transform: translateY(-8px);
+        }
+        
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        
+        /* 3D Button Effect */
+        .btn-3d {
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 0 0 rgba(12, 74, 227, 0.7);
+            transform: translateY(-4px);
+        }
+        
+        .btn-3d:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 0 0 rgba(12, 74, 227, 0.7);
+        }
+        
+        /* Custom Wave Animation */
+        .wave {
+            animation: wave 3s linear infinite;
+        }
+        
+        @keyframes wave {
+            0% {
+                d: path("M0,96 C320,100,420,0,500,16 C568,32,620,76,800,96 L800,103 L0,103 Z");
+            }
+            25% {
+                d: path("M0,96 C320,16,420,96,500,96 C568,96,620,16,800,96 L800,103 L0,103 Z");
+            }
+            50% {
+                d: path("M0,96 C320,76,420,96,500,56 C568,16,620,96,800,96 L800,103 L0,103 Z");
+            }
+            75% {
+                d: path("M0,96 C320,56,420,16,500,96 C568,96,620,76,800,96 L800,103 L0,103 Z");
+            }
+            100% {
+                d: path("M0,96 C320,100,420,0,500,16 C568,32,620,76,800,96 L800,103 L0,103 Z");
+            }
+        }
+        
+        /* Three.js Canvas */
+        #particles-canvas {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            top: 0;
+            left: 0;
+        }
+        
+        /* Responsive Card Grid */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+    <!-- Three.js Background Canvas -->
+    <canvas id="particles-canvas"></canvas>
+    
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Welcome back, Michael!</h1>
+                <p class="text-gray-600 mt-1">Ready to improve your mental wellness today?</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <button class="btn-3d bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg flex items-center space-x-2 ripple transition-all">
+                    <i class="fas fa-plus"></i>
+                    <span>New Assessment</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Wellness Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Wellness Score -->
+            <div class="tilt-card glass bg-white rounded-2xl shadow-lg overflow-hidden hover-translate">
+                <div class="p-6 relative">
+                    <div class="flex justify-between items-start">
+                        <div class="tilt-card-inner">
+                            <h3 class="text-gray-500 text-sm font-medium">Wellness Score</h3>
+                            <div class="flex items-baseline mt-1">
+                                <p class="text-4xl font-bold text-gray-800">84</p>
+                                <p class="text-lg text-gray-500 ml-1">/100</p>
+                            </div>
+                        </div>
+                        <div class="tilt-card-icon bg-green-100 text-green-600 rounded-full p-2">
+                            <i class="fas fa-arrow-up text-sm mr-1"></i>
+                            <span class="text-xs font-semibold">12%</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 relative">
+                        <div class="h-2 bg-gray-200 rounded-full w-full">
+                            <div class="h-2 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full" style="width: 84%"></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-2">Last assessment: 3 days ago</p>
+                    
+                    <!-- Floating Orb -->
+                    <div class="absolute -top-2 -right-2 w-32 h-32 blob bg-blue-100/50 rounded-full filter blur-xl opacity-70 z-0"></div>
+                </div>
+            </div>
+            
+            <!-- Sleep Quality -->
+            <div class="tilt-card bg-white rounded-2xl shadow-lg overflow-hidden hover-translate">
+                <div class="p-6 relative">
+                    <div class="flex justify-between items-start">
+                        <div class="tilt-card-inner">
+                            <h3 class="text-gray-500 text-sm font-medium">Sleep Quality</h3>
+                            <div class="flex items-baseline mt-1">
+                                <p class="text-4xl font-bold text-gray-800">7.5</p>
+                                <p class="text-lg text-gray-500 ml-1">/10</p>
+                            </div>
+                        </div>
+                        <div class="tilt-card-icon bg-gray-100 text-gray-600 rounded-full p-2">
+                            <i class="fas fa-moon text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="mt-6 relative">
+                        <div class="h-2 bg-gray-200 rounded-full w-full">
+                            <div class="h-2 bg-gradient-to-r from-indigo-400 to-indigo-600 rounded-full" style="width: 75%"></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-2">Avg. 7.2 hours last week</p>
+                    
+                    <!-- Floating Orb -->
+                    <div class="absolute -top-2 -right-2 w-32 h-32 blob bg-indigo-100/50 rounded-full filter blur-xl opacity-70 z-0"></div>
+                </div>
+            </div>
+            
+            <!-- Stress Level -->
+            <div class="tilt-card bg-white rounded-2xl shadow-lg overflow-hidden hover-translate">
+                <div class="p-6 relative">
+                    <div class="flex justify-between items-start">
+                        <div class="tilt-card-inner">
+                            <h3 class="text-gray-500 text-sm font-medium">Stress Level</h3>
+                            <div class="flex items-baseline mt-1">
+                                <p class="text-4xl font-bold text-gray-800">Medium</p>
+                            </div>
+                        </div>
+                        <div class="tilt-card-icon bg-yellow-100 text-yellow-600 rounded-full p-2">
+                            <i class="fas fa-bolt text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="mt-6 relative">
+                        <div class="h-2 bg-gray-200 rounded-full w-full">
+                            <div class="h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full" style="width: 60%"></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-2">4% lower than last week</p>
+                    
+                    <!-- Floating Orb -->
+                    <div class="absolute -top-2 -right-2 w-32 h-32 blob bg-yellow-100/50 rounded-full filter blur-xl opacity-70 z-0"></div>
+                </div>
+            </div>
+            
+            <!-- Mindfulness -->
+            <div class="tilt-card bg-white rounded-2xl shadow-lg overflow-hidden hover-translate">
+                <div class="p-6 relative">
+                    <div class="flex justify-between items-start">
+                        <div class="tilt-card-inner">
+                            <h3 class="text-gray-500 text-sm font-medium">Mindfulness</h3>
+                            <div class="flex items-baseline mt-1">
+                                <p class="text-4xl font-bold text-gray-800">13</p>
+                                <p class="text-lg text-gray-500 ml-1">days</p>
+                            </div>
+                        </div>
+                        <div class="tilt-card-icon bg-purple-100 text-purple-600 rounded-full p-2">
+                            <i class="fas fa-brain text-lg"></i>
+                        </div>
+                    </div>
+                    <div class="mt-6 relative">
+                        <div class="h-2 bg-gray-200 rounded-full w-full">
+                            <div class="h-2 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full" style="width: 43%"></div>
+                        </div>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-2">Meditation streak</p>
+                    
+                    <!-- Floating Orb -->
+                    <div class="absolute -top-2 -right-2 w-32 h-32 blob bg-purple-100/50 rounded-full filter blur-xl opacity-70 z-0"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Section - Chart and Appointments -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Mood Tracking Chart -->
+            <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6 hover-scale">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Mood Tracking</h3>
+                    <div class="flex items-center space-x-2">
+                        <button class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 py-1 px-3 rounded-lg">Week</button>
+                        <button class="text-sm bg-blue-600 text-white py-1 px-3 rounded-lg">Month</button>
+                        <button class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 py-1 px-3 rounded-lg">Year</button>
+                    </div>
+                </div>
+                
+                <!-- Chart Container -->
+                <div class="relative">
+                    <canvas id="moodChart" height="250"></canvas>
+                </div>
+                
+                <div class="flex justify-between mt-4 text-xs text-gray-500 px-2">
+                    <div class="flex items-center">
+                        <span class="h-3 w-3 rounded-full bg-blue-500 mr-1"></span>
+                        <span>Mood</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="h-3 w-3 rounded-full bg-purple-500 mr-1"></span>
+                        <span>Energy</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="h-3 w-3 rounded-full bg-yellow-500 mr-1"></span>
+                        <span>Focus</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upcoming Appointments -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 hover-scale">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Upcoming Appointments</h3>
+                    <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        View All
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- Appointment 1 -->
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                        <div class="flex justify-between">
+                            <p class="text-sm font-medium text-gray-800">Performance Coach</p>
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">Tomorrow</span>
+                        </div>
+                        <div class="flex items-center space-x-2 mt-2">
+                            <div class="h-10 w-10 rounded-full bg-blue-200 flex items-center justify-center text-blue-600">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Dr. Sarah Williams</p>
+                                <p class="text-xs text-gray-500">10:00 AM - 11:00 AM</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2 mt-3">
+                            <button class="flex-1 bg-white border border-gray-200 text-gray-700 text-xs py-2 rounded-lg hover:bg-gray-50">Reschedule</button>
+                            <button class="flex-1 bg-blue-600 text-white text-xs py-2 rounded-lg hover:bg-blue-700">Join</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Appointment 2 -->
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <div class="flex justify-between">
+                            <p class="text-sm font-medium text-gray-800">Team Meditation</p>
+                            <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full font-medium">May 2</span>
+                        </div>
+                        <div class="flex items-center space-x-2 mt-2">
+                            <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Group Session</p>
+                                <p class="text-xs text-gray-500">8:30 AM - 9:00 AM</p>
+                            </div>
+                        </div>
+                        <div class="flex space-x-2 mt-3">
+                            <button class="flex-1 bg-white border border-gray-200 text-gray-700 text-xs py-2 rounded-lg hover:bg-gray-50">Reschedule</button>
+                            <button class="flex-1 bg-gray-600 text-white text-xs py-2 rounded-lg hover:bg-gray-700">Join</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources and Tools -->
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Resources & Tools</h2>
+        <div class="card-grid mb-8">
+            <!-- Mental Performance -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden group hover-scale">
+                <div class="absolute top-0 right-0 h-32 w-32 bg-blue-100 rounded-full -mr-16 -mt-16 opacity-70"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mb-4">
+                        <i class="fas fa-brain text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2">Mental Performance</h3>
+                    <p class="text-gray-600 text-sm mb-4">Performance optimization techniques and visualization exercises.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">5 New Resources</span>
+                        <button class="text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stress Management -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden group hover-scale">
+                <div class="absolute top-0 right-0 h-32 w-32 bg-green-100 rounded-full -mr-16 -mt-16 opacity-70"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center text-green-600 mb-4">
+                        <i class="fas fa-heart-pulse text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2">Stress Management</h3>
+                    <p class="text-gray-600 text-sm mb-4">Techniques to handle pressure and maintain optimal performance.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">3 New Resources</span>
+                        <button class="text-green-600 hover:text-green-800">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sleep Optimization -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden group hover-scale">
+                <div class="absolute top-0 right-0 h-32 w-32 bg-indigo-100 rounded-full -mr-16 -mt-16 opacity-70"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 mb-4">
+                        <i class="fas fa-moon text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2">Sleep Optimization</h3>
+                    <p class="text-gray-600 text-sm mb-4">Tools and strategies to improve sleep quality for better recovery.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded-full">New Guide</span>
+                        <button class="text-indigo-600 hover:text-indigo-800">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Team Dynamics -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 relative overflow-hidden group hover-scale">
+                <div class="absolute top-0 right-0 h-32 w-32 bg-orange-100 rounded-full -mr-16 -mt-16 opacity-70"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600 mb-4">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-2">Team Dynamics</h3>
+                    <p class="text-gray-600 text-sm mb-4">Resources for improving communication and team cohesion.</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">Workshop</span>
+                        <button class="text-orange-600 hover:text-orange-800">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily Practice -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-gray-800">Daily Practice</h2>
+            <div class="flex space-x-2">
+                <button class="bg-gray-100 text-gray-600 hover:bg-gray-200 text-sm py-1 px-3 rounded-lg flex items-center space-x-1">
+                    <i class="fas fa-filter"></i>
+                    <span>Filter</span>
+                </button>
+                <button class="bg-blue-600 text-white hover:bg-blue-700 text-sm py-1 px-3 rounded-lg flex items-center space-x-1">
+                    <i class="fas fa-plus"></i>
+                    <span>Add</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Meditation Exercise -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden group relative hover-translate">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="flex items-stretch">
+                    <div class="bg-gradient-to-br from-purple-500 to-blue-600 text-white p-6 flex flex-col items-center justify-center" style="min-width: 100px;">
+                        <i class="fas fa-om text-3xl mb-2"></i>
+                        <p class="text-sm font-medium">05:00</p>
+                        <p class="text-xs opacity-75">minutes</p>
+                    </div>
+                    <div class="p-6 flex-grow">
+                        <h3 class="font-bold text-gray-800 mb-2">Pre-Competition Meditation</h3>
+                        <p class="text-gray-600 text-sm mb-4">Focus your mind and calm your nerves before your event.</p>
+                        <div class="flex items-center space-x-4">
+                            <button class="bg-blue-100 text-blue-700 hover:bg-blue-200 py-2 px-4 rounded-lg text-sm font-medium flex items-center space-x-2">
+                                <i class="fas fa-play"></i>
+                                <span>Start</span>
+                            </button>
+                            <button class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visualization Exercise -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden group relative hover-translate">
+                <div class="absolute inset-0 bg-gradient-to-r from-green-500/20 to-teal-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div class="flex items-stretch">
+                    <div class="bg-gradient-to-br from-green-500 to-teal-600 text-white p-6 flex flex-col items-center justify-center" style="min-width: 100px;">
+                        <i class="fas fa-eye text-3xl mb-2"></i>
+                        <p class="text-sm font-medium">10:00</p>
+                        <p class="text-xs opacity-75">minutes</p>
+                    </div>
+                    <div class="p-6 flex-grow">
+                        <h3 class="font-bold text-gray-800 mb-2">Success Visualization</h3>
+                        <p class="text-gray-600 text-sm mb-4">Visualize your perfect performance and build confidence.</p>
+                        <div class="flex items-center space-x-4">
+                            <button class="bg-green-100 text-green-700 hover:bg-green-200 py-2 px-4 rounded-lg text-sm font-medium flex items-center space-x-2">
+                                <i class="fas fa-play"></i>
+                                <span>Start</span>
+                            </button>
+                            <button class="text-gray-500 hover:text-gray-700">
+                                <i class="fas fa-bookmark"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup Three.js Background
+            const canvas = document.getElementById('particles-canvas');
+            const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 50;
+            
+            const particles = new THREE.Group();
+            scene.add(particles);
+            
+            const particleCount = 100;
+            const particleGeometry = new THREE.SphereGeometry(0.2, 16, 16);
+            const particleMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x2978ff,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+                particle.position.x = (Math.random() - 0.5) * 100;
+                particle.position.y = (Math.random() - 0.5) * 100;
+                particle.position.z = (Math.random() - 0.5) * 50;
+                particle.userData = {
+                    velocity: new THREE.Vector3(
+                        (Math.random() - 0.5) * 0.05,
+                        (Math.random() - 0.5) * 0.05,
+                        (Math.random() - 0.5) * 0.05
+                    )
+                };
+                particles.add(particle);
+            }
+            
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                particles.children.forEach(particle => {
+                    particle.position.add(particle.userData.velocity);
+                    
+                    if (Math.abs(particle.position.x) > 50) {
+                        particle.userData.velocity.x *= -1;
+                    }
+                    if (Math.abs(particle.position.y) > 50) {
+                        particle.userData.velocity.y *= -1;
+                    }
+                    if (Math.abs(particle.position.z) > 25) {
+                        particle.userData.velocity.z *= -1;
+                    }
+                });
+                
+                particles.rotation.x += 0.0003;
+                particles.rotation.y += 0.0005;
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Handle window resize for Three.js
+            window.addEventListener('resize', function() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+            
+            // Initialize Charts
+            const ctx = document.getElementById('moodChart').getContext('2d');
+            const moodChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'],
+                    datasets: [
+                        {
+                            label: 'Mood',
+                            data: [7, 6.5, 6, 7, 7.5, 8, 8.5, 8, 7.5, 8, 8.5, 9, 8.5, 8],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Energy',
+                            data: [6, 6, 5.5, 6, 6.5, 7, 7.5, 7, 6.5, 7, 7.5, 8, 7.5, 7],
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Focus',
+                            data: [5, 5.5, 6, 6.5, 7, 7.5, 8, 7.5, 7, 7.5, 8, 8.5, 8, 7.5],
+                            borderColor: '#eab308',
+                            backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 3,
+                            max: 10,
+                            grid: {
+                                drawBorder: false
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: 2,
+                            hoverRadius: 5
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

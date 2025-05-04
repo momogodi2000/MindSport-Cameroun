@@ -1,0 +1,384 @@
+{% extends 'Dashboards/Layout/nutritionist_base.html' %}
+{% load custom_filters %}
+
+
+{% block title %}My Athletes | Nutritionist Dashboard{% endblock %}
+
+
+{% block nav_athletes %}text-white border-white hover:border-white border-b-2{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Page Header with Animation -->
+        <div class="mb-8 relative overflow-hidden rounded-lg bg-gradient-to-r from-teal-500 to-emerald-600 shadow-lg transform transition-all duration-500 hover:scale-[1.02]">
+            <div class="absolute -right-16 -top-16 opacity-10">
+                <svg class="w-64 h-64" viewBox="0 0 24 24" fill="white">
+                    <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6.5A3.5,3.5 0 0,1 15.5,10A3.5,3.5 0 0,1 12,13.5A3.5,3.5 0 0,1 8.5,10A3.5,3.5 0 0,1 12,6.5M12,8.5A1.5,1.5 0 0,0 10.5,10A1.5,1.5 0 0,0 12,11.5A1.5,1.5 0 0,0 13.5,10A1.5,1.5 0 0,0 12,8.5M12,14C13.75,14 15.29,14.72 16.19,15.81L14.77,17.23C14.32,16.5 13.25,16 12,16C10.75,16 9.68,16.5 9.23,17.23L7.81,15.81C8.71,14.72 10.25,14 12,14Z" />
+                </svg>
+            </div>
+            <div class="py-6 px-8">
+                <h1 class="text-3xl font-bold text-white mb-2 animate-fadeIn">My Athletes</h1>
+                <p class="text-teal-100 max-w-3xl animate-slideInRight">Manage your athlete clients, track their nutritional progress, and provide personalized plans to enhance their mental and physical wellness.</p>
+            </div>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <!-- Total Athletes Card -->
+            <div class="bg-white rounded-xl shadow-md p-6 flex items-center transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 group">
+                <div class="rounded-full bg-emerald-100 p-3 mr-4 group-hover:bg-emerald-200 transition-colors duration-300">
+                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm mb-1">Total Athletes</p>
+                    <p class="text-2xl font-bold text-gray-800 animate-countUp">{{ total_athletes }}</p>
+                </div>
+            </div>
+
+            <!-- Upcoming Consultations Card -->
+            <div class="bg-white rounded-xl shadow-md p-6 flex items-center transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 group">
+                <div class="rounded-full bg-blue-100 p-3 mr-4 group-hover:bg-blue-200 transition-colors duration-300">
+                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm mb-1">Upcoming Sessions</p>
+                    <p class="text-2xl font-bold text-gray-800 animate-countUp">{{ upcoming_sessions }}</p>
+                </div>
+            </div>
+
+            <!-- Plans Created Card -->
+            <div class="bg-white rounded-xl shadow-md p-6 flex items-center transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 group">
+                <div class="rounded-full bg-purple-100 p-3 mr-4 group-hover:bg-purple-200 transition-colors duration-300">
+                    <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm mb-1">Plans Created</p>
+                    <p class="text-2xl font-bold text-gray-800 animate-countUp">{{ plans_created }}</p>
+                </div>
+            </div>
+
+            <!-- Avg Progress Card -->
+            <div class="bg-white rounded-xl shadow-md p-6 flex items-center transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1 group">
+                <div class="rounded-full bg-amber-100 p-3 mr-4 group-hover:bg-amber-200 transition-colors duration-300">
+                    <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-sm mb-1">Avg. Progress</p>
+                    <p class="text-2xl font-bold text-gray-800 animate-countUp">{{ avg_progress }}%</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="mb-6 bg-white rounded-xl shadow-md p-4 animate-fadeIn">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
+                <div class="relative w-full md:w-1/3">
+                    <input type="text" id="athlete-search" placeholder="Search athletes..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                    <div class="absolute left-3 top-2.5 text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <select class="bg-gray-50 border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                        <option value="">All Sports</option>
+                        <option value="boxing">Boxing</option>
+                        <option value="judo">Judo</option>
+                        <option value="wrestling">Wrestling</option>
+                        <option value="karate">Karate</option>
+                        <option value="taekwondo">Taekwondo</option>
+                    </select>
+                    <select class="bg-gray-50 border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                        <option value="">All Levels</option>
+                        <option value="beginner">Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                        <option value="professional">Professional</option>
+                    </select>
+                    <select class="bg-gray-50 border border-gray-300 text-gray-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                        <option value="">Sort By</option>
+                        <option value="name">Name</option>
+                        <option value="recent">Recently Active</option>
+                        <option value="progress">Progress</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Athlete List Section -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden animate-fadeIn">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Athlete</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sport & Level</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Plan</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Progress</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Next Session</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for athlete in athletes %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-200 animate-fadeIn" style="animation-delay: {{ forloop.counter|multiply:100 }}ms">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        {% if athlete.profile_picture %}
+                                        <img class="h-10 w-10 rounded-full object-cover" src="{{ athlete.profile_picture.url }}" alt="{{ athlete.name }}">
+                                        {% else %}
+                                        <div class="h-10 w-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-medium">
+                                            {{ athlete.name|make_list|first|upper }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ athlete.name }}</div>
+                                        <div class="text-sm text-gray-500">{{ athlete.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ athlete.sport }}</div>
+                                <div class="text-sm text-gray-500">{{ athlete.level }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {% if athlete.current_plan %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ athlete.current_plan|default:"No Active Plan" }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-1">
+                                    <div class="bg-teal-600 h-2.5 rounded-full transition-all duration-1000 ease-out" style="width: {{ athlete.progress }}%"></div>
+                                </div>
+                                <div class="text-xs text-gray-500">{{ athlete.progress }}% Complete</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ athlete.next_session|default:"Not Scheduled" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex justify-end space-x-2">
+                                    <a href="{% url 'nutritionist:athlete_detail' athlete.id %}" class="text-teal-600 hover:text-teal-900 transition-colors duration-200">
+                                        <span class="sr-only">View</span>
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </a>
+                                    <a href="{% url 'nutritionist:create_plan' athlete.id %}" class="text-blue-600 hover:text-blue-900 transition-colors duration-200">
+                                        <span class="sr-only">Plan</span>
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                        </svg>
+                                    </a>
+                                    <a href="{% url 'nutritionist:message' athlete.id %}" class="text-purple-600 hover:text-purple-900 transition-colors duration-200">
+                                        <span class="sr-only">Message</span>
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                                <div class="flex flex-col items-center">
+                                    <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                    <p class="text-lg font-medium">No athletes found</p>
+                                    <p class="text-sm">Get started by connecting with athletes who need nutritional guidance</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if athletes.has_other_pages %}
+            <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200">
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Showing
+                            <span class="font-medium">{{ athletes.start_index }}</span>
+                            to
+                            <span class="font-medium">{{ athletes.end_index }}</span>
+                            of
+                            <span class="font-medium">{{ athletes.paginator.count }}</span>
+                            results
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                            {% if athletes.has_previous %}
+                            <a href="?page={{ athletes.previous_page_number }}" class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                <span class="sr-only">Previous</span>
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                            {% endif %}
+                            
+                            {% for num in athletes.paginator.page_range %}
+                            {% if athletes.number == num %}
+                            <a href="#" aria-current="page" class="relative z-10 inline-flex items-center bg-teal-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600">{{ num }}</a>
+                            {% elif num > athletes.number|add:'-3' and num < athletes.number|add:'3' %}
+                            <a href="?page={{ num }}" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">{{ num }}</a>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if athletes.has_next %}
+                            <a href="?page={{ athletes.next_page_number }}" class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                <span class="sr-only">Next</span>
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                </svg>
+                            </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- 3D Nutrition Animation -->
+<div class="fixed bottom-10 right-10 z-10 hidden lg:block">
+    <div id="nutrition-3d" class="w-40 h-40 transform transition-all duration-500 hover:scale-110"></div>
+</div>
+
+{% block extra_js %}
+<!-- Three.js for 3D Animation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // Initialize animations when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Counter animation for stats
+        document.querySelectorAll('.animate-countUp').forEach(function(element) {
+            const target = parseInt(element.textContent);
+            let count = 0;
+            const duration = 2000; // 2 seconds
+            const frameDuration = 1000/60; // 60fps
+            const totalFrames = Math.round(duration/frameDuration);
+            const increment = target / totalFrames;
+            
+            const counter = setInterval(() => {
+                count += increment;
+                if (count >= target) {
+                    element.textContent = target;
+                    clearInterval(counter);
+                } else {
+                    element.textContent = Math.floor(count);
+                }
+            }, frameDuration);
+        });
+
+        // 3D Nutrition Animation
+        if (document.getElementById('nutrition-3d')) {
+            initNutrition3D();
+        }
+    });
+
+    function initNutrition3D() {
+        const container = document.getElementById('nutrition-3d');
+        
+        // Create scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(160, 160);
+        container.appendChild(renderer.domElement);
+        
+        // Create simple fruit shapes
+        const fruitGeometry = new THREE.SphereGeometry(1, 16, 16);
+        const appleMaterial = new THREE.MeshBasicMaterial({ color: 0xff6347 });
+        const apple = new THREE.Mesh(fruitGeometry, appleMaterial);
+        apple.position.set(-1.5, 0, 0);
+        
+        const orangeGeometry = new THREE.SphereGeometry(0.8, 16, 16);
+        const orangeMaterial = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+        const orange = new THREE.Mesh(orangeGeometry, orangeMaterial);
+        orange.position.set(1.5, 0, 0);
+        
+        const bananaGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
+        bananaGeometry.rotateZ(Math.PI / 4);
+        const bananaMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        const banana = new THREE.Mesh(bananaGeometry, bananaMaterial);
+        banana.position.set(0, 1, 0);
+        
+        // Add objects to scene
+        scene.add(apple);
+        scene.add(orange);
+        scene.add(banana);
+        
+        // Position camera
+        camera.position.z = 5;
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate fruits
+            apple.rotation.y += 0.01;
+            orange.rotation.y += 0.01;
+            banana.rotation.y += 0.01;
+            
+            // Add some gentle bouncing
+            const time = Date.now() * 0.001;
+            apple.position.y = Math.sin(time) * 0.2;
+            orange.position.y = Math.sin(time + 1) * 0.2;
+            banana.position.y = 1 + Math.sin(time + 2) * 0.2;
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+    }
+</script>
+
+<style>
+    /* Animation classes */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideInRight {
+        from { transform: translateX(20px); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .animate-fadeIn {
+        animation: fadeIn 0.8s ease-out forwards;
+    }
+    
+    .animate-slideInRight {
+        animation: slideInRight 0.8s ease-out forwards;
+    }
+    
+    /* Add responsive styles */
+    @media (max-width: 640px) {
+        .animate-fadeIn, .animate-slideInRight {
+            animation-duration: 0.4s;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock content %}

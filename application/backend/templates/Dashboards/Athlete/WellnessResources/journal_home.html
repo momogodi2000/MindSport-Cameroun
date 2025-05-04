@@ -1,0 +1,443 @@
+<!-- journal_home.html -->
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css">
+<style>
+    .journal-card {
+        transition: all 0.3s ease;
+        transform-style: preserve-3d;
+    }
+    .journal-card:hover {
+        transform: translateY(-5px) rotateX(5deg);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .streak-count {
+        font-family: 'Arial', sans-serif;
+        font-weight: bold;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .mood-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+    }
+    .mood-excellent { background-color: #10B981; }
+    .mood-good { background-color: #34D399; }
+    .mood-neutral { background-color: #6B7280; }
+    .mood-bad { background-color: #F59E0B; }
+    .mood-terrible { background-color: #EF4444; }
+    .prompt-card {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+    }
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    @keyframes floating {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <!-- Journal Header -->
+    <div class="bg-white">
+        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl md:text-6xl">
+                    <span class="block">Your Journal</span>
+                    <span class="block text-blue-600">Reflect. Grow. Thrive.</span>
+                </h1>
+                <p class="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+                    Document your thoughts, track your mood, and reflect on your journey.
+                </p>
+                <div class="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
+                    <div class="rounded-md shadow">
+                        <a href="{% url 'new_journal_entry' %}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-all duration-300 transform hover:scale-105">
+                            {% if has_entry_today %}Edit Today's Entry{% else %}New Entry{% endif %}
+                        </a>
+                    </div>
+                    <div class="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
+                        <a href="{% url 'journal_calendar' %}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 md:py-4 md:text-lg md:px-10 transition-all duration-300 transform hover:scale-105">
+                            View Calendar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 py-12 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg" data-aos="fade-up">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-white bg-opacity-10 p-3 rounded-lg">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5">
+                            <dt class="text-sm font-medium text-white text-opacity-90 truncate">Total Entries</dt>
+                            <dd class="flex items-baseline">
+                                <p class="text-2xl font-semibold text-white">{{ total_entries }}</p>
+                            </dd>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-white bg-opacity-10 p-3 rounded-lg">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5">
+                            <dt class="text-sm font-medium text-white text-opacity-90 truncate">Current Streak</dt>
+                            <dd class="flex items-baseline">
+                                <p class="text-2xl font-semibold text-white streak-count">{{ streak }} day{{ streak|pluralize }}</p>
+                            </dd>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-white bg-opacity-10 p-3 rounded-lg">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5">
+                            <dt class="text-sm font-medium text-white text-opacity-90 truncate">This Month</dt>
+                            <dd class="flex items-baseline">
+                                <p class="text-2xl font-semibold text-white">{{ entries_this_month }}</p>
+                            </dd>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-xl p-6 shadow-lg" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-white bg-opacity-10 p-3 rounded-lg">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-5">
+                            <dt class="text-sm font-medium text-white text-opacity-90 truncate">Average Mood</dt>
+                            <dd class="flex items-baseline">
+                                <p class="text-2xl font-semibold text-white">
+                                    {% if recent_entries %}
+                                        {% with recent_entries.0.get_mood_display as mood %}
+                                        <span class="mood-indicator mood-{{ mood|lower }}"></span>
+                                        {{ mood }}
+                                        {% endwith %}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </p>
+                            </dd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Entries & Prompt -->
+    <div class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+                <!-- Recent Entries -->
+                <div class="lg:col-span-2">
+                    <h2 class="text-2xl font-bold text-gray-900">Recent Entries</h2>
+                    <p class="mt-2 text-gray-600">Your latest reflections and thoughts</p>
+                    
+                    {% if recent_entries %}
+                    <div class="mt-6 space-y-6">
+                        {% for entry in recent_entries %}
+                        <div class="journal-card bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl" data-aos="fade-up">
+                            <div class="p-6">
+                                <div class="flex items-center justify-between">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if entry.mood == 'excellent' %}bg-green-100 text-green-800{% elif entry.mood == 'good' %}bg-blue-100 text-blue-800{% elif entry.mood == 'neutral' %}bg-gray-100 text-gray-800{% elif entry.mood == 'bad' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ entry.get_mood_display }}
+                                    </span>
+                                    <span class="text-sm text-gray-500">{{ entry.date|date:"F j, Y" }}</span>
+                                </div>
+                                <a href="{% url 'view_journal_entry' entry.id %}" class="mt-2 block">
+                                    <h3 class="text-xl font-semibold text-gray-900 hover:text-blue-600 transition-colors duration-200">
+                                        {{ entry.title|default:"Journal Entry" }}
+                                    </h3>
+                                    <p class="mt-3 text-base text-gray-500 line-clamp-3">
+                                        {{ entry.content|truncatechars:200 }}
+                                    </p>
+                                </a>
+                                <div class="mt-4 flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        {% if entry.energy_level %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                            Energy: {{ entry.get_energy_level_display }}
+                                        </span>
+                                        {% endif %}
+                                        {% if entry.stress_level %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-pink-100 text-pink-800">
+                                            Stress: {{ entry.get_stress_level_display }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex space-x-2">
+                                        <a href="{% url 'edit_journal_entry' entry.id %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                            Edit
+                                        </a>
+                                        <a href="{% url 'delete_journal_entry' entry.id %}" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                            Delete
+                                        </a>
+                                    </div>
+                                </div>
+                                {% if entry.tags %}
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <div class="flex flex-wrap gap-2">
+                                        {% for tag in entry.get_tags_list %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                            {{ tag }}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-8">
+                        <a href="{% url 'journal_search' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            View All Entries
+                            <svg class="ml-2 -mr-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="mt-8 text-center py-12 bg-gray-50 rounded-lg" data-aos="fade-up">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <h3 class="mt-2 text-lg font-medium text-gray-900">No entries yet</h3>
+                        <p class="mt-1 text-sm text-gray-500">Get started by creating your first journal entry.</p>
+                        <div class="mt-6">
+                            <a href="{% url 'new_journal_entry' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                New Entry
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Journal Prompt & Quick Actions -->
+                <div class="mt-12 lg:mt-0">
+                    <!-- Journal Prompt -->
+                    <div class="prompt-card rounded-lg p-6" data-aos="fade-left">
+                        <h3 class="text-lg font-medium text-blue-800">Today's Journal Prompt</h3>
+                        {% if prompt %}
+                        <div class="mt-4">
+                            <p class="text-gray-700">{{ prompt.text }}</p>
+                            <div class="mt-4">
+                                <a href="{% url 'new_journal_entry' %}?prompt_id={{ prompt.id }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Use This Prompt
+                                </a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="mt-4">
+                            <p class="text-gray-700">No prompt available today.</p>
+                            <div class="mt-4">
+                                <button id="random-prompt-btn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Get Random Prompt
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="mt-8 bg-white rounded-lg shadow-md p-6" data-aos="fade-left" data-aos-delay="100">
+                        <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                        <div class="mt-4 space-y-4">
+                            <a href="{% url 'journal_analysis' %}" class="group flex items-center p-3 rounded-md hover:bg-blue-50 transition-colors duration-200">
+                                <div class="flex-shrink-0 bg-blue-100 rounded-md p-2 text-blue-600 group-hover:bg-blue-200 transition-colors duration-200">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">View Analysis</p>
+                                    <p class="text-sm text-gray-500">See trends and insights</p>
+                                </div>
+                            </a>
+                            <a href="{% url 'journal_calendar' %}" class="group flex items-center p-3 rounded-md hover:bg-blue-50 transition-colors duration-200">
+                                <div class="flex-shrink-0 bg-blue-100 rounded-md p-2 text-blue-600 group-hover:bg-blue-200 transition-colors duration-200">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Calendar View</p>
+                                    <p class="text-sm text-gray-500">Browse entries by date</p>
+                                </div>
+                            </a>
+                            <a href="{% url 'journal_search' %}" class="group flex items-center p-3 rounded-md hover:bg-blue-50 transition-colors duration-200">
+                                <div class="flex-shrink-0 bg-blue-100 rounded-md p-2 text-blue-600 group-hover:bg-blue-200 transition-colors duration-200">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Search Entries</p>
+                                    <p class="text-sm text-gray-500">Find specific entries</p>
+                                </div>
+                            </a>
+                            <a href="{% url 'export_journal_entries' %}" class="group flex items-center p-3 rounded-md hover:bg-blue-50 transition-colors duration-200">
+                                <div class="flex-shrink-0 bg-blue-100 rounded-md p-2 text-blue-600 group-hover:bg-blue-200 transition-colors duration-200">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Export Entries</p>
+                                    <p class="text-sm text-gray-500">Download your journal data</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Mood Stats -->
+                    <div class="mt-8 bg-white rounded-lg shadow-md p-6" data-aos="fade-left" data-aos-delay="200">
+                        <h3 class="text-lg font-medium text-gray-900">Mood Overview</h3>
+                        <div class="mt-4">
+                            <div class="grid grid-cols-1 gap-4">
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-900 flex items-center">
+                                            <span class="mood-indicator mood-excellent"></span>
+                                            Excellent
+                                        </span>
+                                        <span class="text-sm text-gray-500">25%</span>
+                                    </div>
+                                    <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 25%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-900 flex items-center">
+                                            <span class="mood-indicator mood-good"></span>
+                                            Good
+                                        </span>
+                                        <span class="text-sm text-gray-500">40%</span>
+                                    </div>
+                                    <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: 40%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-900 flex items-center">
+                                            <span class="mood-indicator mood-neutral"></span>
+                                            Neutral
+                                        </span>
+                                        <span class="text-sm text-gray-500">15%</span>
+                                    </div>
+                                    <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-gray-500 h-2 rounded-full" style="width: 15%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-900 flex items-center">
+                                            <span class="mood-indicator mood-bad"></span>
+                                            Bad
+                                        </span>
+                                        <span class="text-sm text-gray-500">12%</span>
+                                    </div>
+                                    <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 12%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-900 flex items-center">
+                                            <span class="mood-indicator mood-terrible"></span>
+                                            Terrible
+                                        </span>
+                                        <span class="text-sm text-gray-500">8%</span>
+                                    </div>
+                                    <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-red-500 h-2 rounded-full" style="width: 8%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Random prompt functionality
+        const randomPromptBtn = document.getElementById('random-prompt-btn');
+        if (randomPromptBtn) {
+            randomPromptBtn.addEventListener('click', function() {
+                fetch("{% url 'random_prompt' %}", {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Create a prompt card
+                        const promptCard = document.querySelector('.prompt-card');
+                        promptCard.innerHTML = `
+                            <h3 class="text-lg font-medium text-blue-800">Today's Journal Prompt</h3>
+                            <div class="mt-4">
+                                <p class="text-gray-700">${data.prompt}</p>
+                                <div class="mt-4">
+                                    <a href="{% url 'new_journal_entry' %}?prompt_id=${data.id}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Use This Prompt
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        alert(data.message || 'Failed to get a random prompt');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block title %}Assessment Not Available{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 animate-fade-in">
+    <div class="max-w-2xl mx-auto text-center">
+        <!-- Icon -->
+        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-amber-100 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+        </div>
+
+        <!-- Heading -->
+        <h1 class="text-2xl font-bold text-gray-800 mb-2">Assessment Retake Not Available</h1>
+        <p class="text-gray-600 mb-6">
+            This assessment cannot be retaken yet. You must wait 
+            <span class="font-semibold">{{ days_to_wait }} more day{{ days_to_wait|pluralize }}</span> 
+            before taking it again.
+        </p>
+
+        <!-- Assessment Info -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6 text-left">
+            <div class="flex items-center mb-3">
+                <h2 class="text-lg font-medium text-gray-800">{{ assessment.title }}</h2>
+                <span class="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                    Completed
+                </span>
+            </div>
+            <p class="text-gray-600 mb-2">{{ assessment.description }}</p>
+            <div class="flex items-center text-sm text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Last completed on {{ available_date|date:"M j, Y" }}
+            </div>
+        </div>
+
+        <!-- Countdown -->
+        <div class="bg-amber-50 rounded-lg p-4 mb-6">
+            <div class="flex flex-col items-center">
+                <h3 class="text-sm font-medium text-amber-800 mb-2">Next Available Date</h3>
+                <div class="text-2xl font-bold text-amber-600 mb-1">
+                    {{ available_date|date:"F j, Y" }}
+                </div>
+                <p class="text-sm text-amber-700">
+                    {{ days_to_wait }} day{{ days_to_wait|pluralize }} remaining
+                </p>
+            </div>
+        </div>
+
+        <!-- Previous Results -->
+        {% if previous_responses %}
+            <div class="border-t border-gray-200 pt-4 mt-4 text-left">
+                <h3 class="text-lg font-medium text-gray-800 mb-2">Your Previous Results</h3>
+                <div class="space-y-3">
+                    {% for response in previous_responses %}
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <div>
+                                <p class="text-sm font-medium text-gray-800">
+                                    Completed on {{ response.completed_at|date:"M j, Y" }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    Took {{ response.completion_time_seconds|div:60|floatformat:0 }} minutes
+                                </p>
+                            </div>
+                            <a href="{% url 'view_results' response.id %}" class="text-sm text-indigo-600 hover:text-indigo-800">
+                                View Results
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="mt-6">
+            <a href="{% url 'assessments' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700">
+                Back to Assessments
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

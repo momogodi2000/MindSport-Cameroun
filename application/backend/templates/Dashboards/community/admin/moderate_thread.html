@@ -1,0 +1,452 @@
+{% extends 'Dashboards/Layout/admin_base.html' %}
+{% load static %}
+
+{% block title %}Moderate Thread: {{ thread.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.min.css" />
+<style>
+  .thread-container {
+    perspective: 1000px;
+  }
+  .thread-card {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+  }
+  .thread-card:hover {
+    transform: translateY(-8px) rotateX(2deg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  }
+  .action-button {
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+  }
+  .action-button:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  }
+  .comment-card {
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+  }
+  .comment-card:hover {
+    transform: translateY(-3px) rotateX(1deg);
+  }
+  .user-avatar {
+    transition: all 0.3s ease;
+  }
+  .user-avatar:hover {
+    transform: scale(1.1) rotate(5deg);
+  }
+  @keyframes float {
+    0% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
+  }
+  .floating-icon {
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  .pulse-warning {
+    animation: pulse 2s infinite;
+  }
+  .status-badge {
+    transition: all 0.3s ease;
+  }
+  .status-badge:hover {
+    transform: scale(1.05);
+  }
+  .bg-gradient-radial {
+    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+  }
+  .content-fade-in {
+    animation: fadeIn 0.6s ease forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .breadcrumb-item {
+    transition: all 0.2s ease;
+  }
+  .breadcrumb-item:hover {
+    transform: translateY(-1px);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+  <!-- Breadcrumb -->
+  <div class="container mx-auto px-4 pt-6">
+    <nav class="flex" aria-label="Breadcrumb">
+      <ol class="flex items-center space-x-4">
+        <li>
+          <div>
+            <a href="{% url 'CommunityAdminDashboard' %}" class="breadcrumb-item text-gray-500 hover:text-blue-600 flex items-center">
+              <svg class="h-5 w-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+              </svg>
+              <span class="sr-only">Dashboard</span>
+            </a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="h-5 w-5 flex-shrink-0 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <a href="{% url 'forum_moderation' %}" class="breadcrumb-item ml-4 text-gray-500 hover:text-blue-600">Forum Moderation</a>
+          </div>
+        </li>
+        <li>
+          <div class="flex items-center">
+            <svg class="h-5 w-5 flex-shrink-0 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+            </svg>
+            <span class="ml-4 text-gray-700 font-medium truncate max-w-xs">{{ thread.title|truncatechars:30 }}</span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- Thread Content -->
+  <div class="container mx-auto px-4 py-6">
+    <div class="thread-container">
+      <!-- Thread Header -->
+      <div class="bg-white shadow-xl rounded-lg overflow-hidden mb-8 thread-card content-fade-in">
+        <div class="relative">
+          <!-- Status Badges -->
+          <div class="absolute right-4 top-4 flex flex-wrap gap-2 justify-end">
+            {% if thread.reports > 0 %}
+              <span class="status-badge inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 pulse-warning"
+                    data-tippy-content="{{ thread.reports }} report{{ thread.reports|pluralize }}">
+                <svg class="mr-1.5 h-2 w-2 text-red-400" fill="currentColor" viewBox="0 0 8 8">
+                  <circle cx="4" cy="4" r="3" />
+                </svg>
+                {{ thread.reports }} Report{{ thread.reports|pluralize }}
+              </span>
+            {% endif %}
+            
+            {% if thread.is_locked %}
+              <span class="status-badge inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
+                    data-tippy-content="Locked thread">
+                <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                </svg>
+                Locked
+              </span>
+            {% endif %}
+            
+            {% if thread.is_pinned %}
+              <span class="status-badge inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
+                    data-tippy-content="Pinned thread">
+                <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                </svg>
+                Pinned
+              </span>
+            {% endif %}
+            
+            {% if not thread.is_active %}
+              <span class="status-badge inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800"
+                    data-tippy-content="Inactive thread">
+                <svg class="mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                </svg>
+                Inactive
+              </span>
+            {% endif %}
+          </div>
+          
+          <!-- Thread Content -->
+          <div class="p-8 pb-4">
+            <div class="flex items-start">
+              <div class="mr-4">
+                <div class="user-avatar h-12 w-12 rounded-full bg-gradient-to-r from-blue-500 to-teal-400 flex items-center justify-center text-white text-xl font-bold shadow-lg floating-icon">
+                  {{ thread.author.get_username.0|upper }}
+                </div>
+              </div>
+              <div class="flex-1">
+                <h1 class="text-2xl font-bold text-gray-900 mb-1">{{ thread.title }}</h1>
+                <p class="text-sm text-gray-500 mb-4">
+                  Posted by <a href="#" class="font-medium text-gray-700 hover:text-blue-600 hover:underline">{{ thread.author.get_username }}</a>
+                  on <time datetime="{{ thread.created_at|date:'c' }}">{{ thread.created_at|date:"F j, Y" }}</time>
+                  in <a href="#" class="font-medium text-blue-600 hover:underline">{{ thread.category.name }}</a>
+                </p>
+                
+                <div class="prose max-w-none text-gray-700">
+                  {{ thread.content|linebreaks }}
+                </div>
+                
+                <div class="mt-6 flex flex-wrap items-center gap-4 text-gray-500 text-sm">
+                  <span class="flex items-center">
+                    <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    {{ thread.view_count }} view{{ thread.view_count|pluralize }}
+                  </span>
+                  <span class="flex items-center">
+                    <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                    </svg>
+                    {{ thread.comment_count }} comment{{ thread.comment_count|pluralize }}
+                  </span>
+                  {% if thread.last_activity %}
+                  <span class="flex items-center">
+                    <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                    </svg>
+                    Last activity: {{ thread.last_activity|date:"M j, Y" }}
+                  </span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Moderation Actions -->
+          <div class="bg-gray-50 p-6 flex flex-wrap gap-3 border-t border-gray-200">
+            <form method="POST" class="inline-block">
+              {% csrf_token %}
+              {% if thread.is_locked %}
+                <button type="submit" name="action" value="unlock" 
+                        class="action-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md flex items-center"
+                        data-tippy-content="Unlock this thread to allow new comments">
+                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                  </svg>
+                  Unlock Thread
+                </button>
+              {% else %}
+                <button type="submit" name="action" value="lock" 
+                        class="action-button bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md shadow-md flex items-center"
+                        data-tippy-content="Lock this thread to prevent new comments">
+                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                  </svg>
+                  Lock Thread
+                </button>
+              {% endif %}
+            </form>
+            
+            <form method="POST" class="inline-block">
+              {% csrf_token %}
+              {% if thread.is_pinned %}
+                <button type="submit" name="action" value="unpin" 
+                        class="action-button bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md flex items-center"
+                        data-tippy-content="Unpin this thread from the top of the forum">
+                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Unpin Thread
+                </button>
+              {% else %}
+                <button type="submit" name="action" value="pin" 
+                        class="action-button bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md shadow-md flex items-center"
+                        data-tippy-content="Pin this thread to the top of the forum">
+                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
+                  </svg>
+                  Pin Thread
+                </button>
+              {% endif %}
+            </form>
+            
+            <form method="POST" class="inline-block">
+              {% csrf_token %}
+              {% if thread.is_active %}
+                <button type="submit" name="action" value="deactivate" 
+                        class="action-button bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-md shadow-md flex items-center"
+                        data-tippy-content="Deactivate this thread (will be hidden from public view)">
+                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                  </svg>
+                  Deactivate Thread
+                </button>
+              {% else %}
+                <button type="submit" name="action" value="activate" 
+                        class="action-button bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md flex items-center"
+                        data-tippy-content="Activate this thread (will be visible to the public)">
+                  <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Activate Thread
+                </button>
+              {% endif %}
+            </form>
+            
+            <form method="POST" class="inline-block">
+              {% csrf_token %}
+              <button type="submit" name="action" value="delete" 
+                      class="action-button bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md shadow-md flex items-center"
+                      onclick="return confirm('Are you sure you want to permanently delete this thread and all its comments? This action cannot be undone.')"
+                      data-tippy-content="Permanently delete this thread">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete Thread
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Comments Section -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden content-fade-in" style="animation-delay: 0.2s">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h2 class="text-lg font-medium text-gray-900">Comments ({{ thread.comment_count }})</h2>
+          <div class="flex items-center text-sm text-gray-500">
+            <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+            </svg>
+            Sorted by: <span class="font-medium ml-1">Newest First</span>
+          </div>
+        </div>
+        
+        <div class="divide-y divide-gray-200">
+          {% for comment in thread.comments.all %}
+            <div class="p-6 comment-card {% if not comment.is_active %}bg-red-50{% else %}bg-white{% endif %}"
+                 style="animation-delay: {{ forloop.counter|divisibleby:2|yesno:'0.3s,0.4s' }}">
+              <div class="flex space-x-3">
+                <div class="flex-shrink-0">
+                  <div class="user-avatar h-10 w-10 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 flex items-center justify-center text-white text-sm font-medium shadow-md">
+                    {{ comment.author.get_username.0|upper }}{{ comment.author.get_username.1|upper }}
+                  </div>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-medium text-gray-900 truncate">
+                      <a href="#" class="hover:text-blue-600 hover:underline">{{ comment.author.get_username }}</a>
+                    </h3>
+                    <p class="text-sm text-gray-500 whitespace-nowrap ml-2">
+                      <time datetime="{{ comment.created_at|date:'c' }}">{{ comment.created_at|date:"M j, Y, g:i a" }}</time>
+                    </p>
+                  </div>
+                  <div class="mt-1 text-sm text-gray-700">
+                    {{ comment.content|linebreaks }}
+                  </div>
+                  
+                  <!-- Comment Actions -->
+                  <div class="mt-3 flex justify-end">
+                    <form method="POST" action="{% url 'moderate_thread' comment.id %}" class="flex space-x-2">
+                      {% csrf_token %}
+                      {% if comment.is_active %}
+                        <button type="submit" name="action" value="deactivate_comment" 
+                                class="action-button inline-flex items-center px-3 py-1 border border-red-300 text-xs font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
+                                data-tippy-content="Hide this comment from public view">
+                          <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                          </svg>
+                          Hide Comment
+                        </button>
+                      {% else %}
+                        <button type="submit" name="action" value="activate_comment" 
+                                class="action-button inline-flex items-center px-3 py-1 border border-green-300 text-xs font-medium rounded-md text-green-700 bg-white hover:bg-green-50"
+                                data-tippy-content="Show this comment to the public">
+                          <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          Show Comment
+                        </button>
+                      {% endif %}
+                      <button type="submit" name="action" value="delete_comment" 
+                              class="action-button inline-flex items-center px-3 py-1 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                              onclick="return confirm('Are you sure you want to delete this comment? This action cannot be undone.')"
+                              data-tippy-content="Permanently delete this comment">
+                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="p-8 text-center">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+              </svg>
+              <h3 class="mt-2 text-sm font-medium text-gray-900">No comments</h3>
+              <p class="mt-1 text-sm text-gray-500">This thread doesn't have any comments yet.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+<script>
+  // Initialize animation library
+  AOS.init({
+    duration: 800,
+    easing: 'ease-out-cubic',
+    once: true
+  });
+
+  // Initialize tooltips
+  tippy('[data-tippy-content]', {
+    placement: 'top',
+    animation: 'scale',
+    theme: 'light',
+  });
+
+  // GSAP animations
+  document.addEventListener('DOMContentLoaded', function() {
+    // Animate thread card
+    gsap.from(".thread-card", {
+      duration: 0.8,
+      y: 30,
+      opacity: 0,
+      ease: "back.out(1.2)",
+    });
+    
+    // Animate comment cards with stagger
+    gsap.from(".comment-card", {
+      duration: 0.6,
+      y: 20,
+      opacity: 0,
+      stagger: 0.1,
+      ease: "power2.out",
+      delay: 0.3
+    });
+    
+    // Animate action buttons with elastic effect
+    gsap.from(".action-button", {
+      duration: 0.8,
+      scale: 0.8,
+      opacity: 0,
+      stagger: 0.1,
+      ease: "elastic.out(1, 0.5)",
+      delay: 0.5
+    });
+    
+    // Highlight reported threads
+    if (document.querySelector('.pulse-warning')) {
+      gsap.to('.pulse-warning', {
+        scale: 1.05,
+        repeat: -1,
+        yoyo: true,
+        duration: 1,
+        ease: "power1.inOut"
+      });
+    }
+  });
+</script>
+{% endblock %}

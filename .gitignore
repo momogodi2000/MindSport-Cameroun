@@ -1,0 +1,9 @@
+venv
+env
+.env
+
+application/.env
+venv/
+*.env
+.env
+application/.env

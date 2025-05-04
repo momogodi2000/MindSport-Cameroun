@@ -1,0 +1,739 @@
+{% extends 'Dashboards/Layout/psychologist_base.html' %}
+{% load static %}
+{% block title %}Settings | Mental Health Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Account Settings</h1>
+                <p class="mt-1 text-sm text-gray-500">Manage your profile, preferences, and account security</p>
+            </div>
+            <div class="hidden sm:flex items-center space-x-2">
+                <span class="text-sm text-gray-500">Last updated: {% now "F j, Y" %}</span>
+                <div class="h-2 w-2 rounded-full bg-green-500"></div>
+            </div>
+        </div>
+
+        <!-- Settings Navigation and Content -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="md:flex">
+                <!-- Navigation Sidebar -->
+                <div class="md:w-1/4 bg-gray-50 md:border-r border-gray-200">
+                    <nav class="p-4 md:p-6 md:sticky md:top-0">
+                        <ul class="space-y-1">
+                            <li>
+                                <button id="nav-profile" class="w-full flex items-center px-3 py-2 text-left text-sm rounded-lg font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
+                                    Profile Information
+                                </button>
+                            </li>
+                            <li>
+                                <button id="nav-professional" class="w-full flex items-center px-3 py-2 text-left text-sm rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                                    </svg>
+                                    Professional Details
+                                </button>
+                            </li>
+                            <li>
+                                <button id="nav-availability" class="w-full flex items-center px-3 py-2 text-left text-sm rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    Availability
+                                </button>
+                            </li>
+                            <li>
+                                <button id="nav-security" class="w-full flex items-center px-3 py-2 text-left text-sm rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                    Security
+                                </button>
+                            </li>
+                            <li>
+                                <button id="nav-notifications" class="w-full flex items-center px-3 py-2 text-left text-sm rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                    </svg>
+                                    Notifications
+                                </button>
+                            </li>
+                            <li>
+                                <button id="nav-billing" class="w-full flex items-center px-3 py-2 text-left text-sm rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                    </svg>
+                                    Billing & Payments
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Settings Content -->
+                <div class="md:w-3/4 p-4 md:p-8">
+                    <!-- Profile Section -->
+                    <div id="section-profile" class="settings-section">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900">Profile Information</h2>
+                                <p class="text-sm text-gray-500">Update your personal details and public profile</p>
+                            </div>
+                            <button type="submit" form="profile-form" class="mt-2 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Save Changes
+                            </button>
+                        </div>
+
+                        <form id="profile-form" class="space-y-6">
+                            <!-- Profile Photo -->
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <div class="flex flex-col md:flex-row md:items-center gap-4">
+                                    <div class="flex-shrink-0 relative group">
+                                        <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-md">
+                                            <img src="{% static 'images/default-avatar.png' %}" alt="Profile Photo" class="w-full h-full object-cover" id="profile-preview">
+                                        </div>
+                                        <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                            <label for="profile-upload" class="text-white text-xs font-medium cursor-pointer">
+                                                Change
+                                            </label>
+                                        </div>
+                                        <input type="file" id="profile-upload" class="hidden" accept="image/*">
+                                    </div>
+
+                                    <div class="flex-grow">
+                                        <h3 class="text-sm font-medium text-gray-700">Profile Photo</h3>
+                                        <p class="text-xs text-gray-500 mt-1">Upload a professional photo for your profile. This will be visible to athletes.</p>
+                                        <div class="mt-2 flex items-center space-x-2">
+                                            <button type="button" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Basic Info -->
+                            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                <div class="sm:col-span-3">
+                                    <label for="first-name" class="block text-sm font-medium text-gray-700">First name</label>
+                                    <div class="mt-1">
+                                        <input type="text" name="first-name" id="first-name" autocomplete="given-name" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" value="{{ user.first_name }}">
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-3">
+                                    <label for="last-name" class="block text-sm font-medium text-gray-700">Last name</label>
+                                    <div class="mt-1">
+                                        <input type="text" name="last-name" id="last-name" autocomplete="family-name" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" value="{{ user.last_name }}">
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-6">
+                                    <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                                    <div class="mt-1">
+                                        <input id="email" name="email" type="email" autocomplete="email" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" value="{{ user.email }}">
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-6">
+                                    <label for="phone" class="block text-sm font-medium text-gray-700">Phone number</label>
+                                    <div class="mt-1">
+                                        <input type="text" name="phone" id="phone" autocomplete="tel" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" value="{{ professional.phone }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="about" class="block text-sm font-medium text-gray-700">About</label>
+                                <div class="mt-1">
+                                    <textarea id="about" name="about" rows="3" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ professional.about }}</textarea>
+                                </div>
+                                <p class="mt-2 text-sm text-gray-500">Brief description for your profile. This will be displayed on your public profile.</p>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Professional Details Section -->
+                    <div id="section-professional" class="settings-section hidden">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900">Professional Details</h2>
+                                <p class="text-sm text-gray-500">Update your professional information and credentials</p>
+                            </div>
+                            <button type="submit" form="professional-form" class="mt-2 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Save Changes
+                            </button>
+                        </div>
+
+                        <form id="professional-form" class="space-y-6">
+                            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                <div class="sm:col-span-3">
+                                    <label for="specialization" class="block text-sm font-medium text-gray-700">Specialization</label>
+                                    <div class="mt-1">
+                                        <select id="specialization" name="specialization" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                            <option {% if professional.specialization == "Clinical Psychology" %}selected{% endif %}>Clinical Psychology</option>
+                                            <option {% if professional.specialization == "Sports Psychology" %}selected{% endif %}>Sports Psychology</option>
+                                            <option {% if professional.specialization == "Cognitive Behavioral Therapy" %}selected{% endif %}>Cognitive Behavioral Therapy</option>
+                                            <option {% if professional.specialization == "Performance Psychology" %}selected{% endif %}>Performance Psychology</option>
+                                            <option {% if professional.specialization == "Other" %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-3">
+                                    <label for="experience" class="block text-sm font-medium text-gray-700">Years of Experience</label>
+                                    <div class="mt-1">
+                                        <input type="number" name="experience" id="experience" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" value="{{ professional.experience_years }}">
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-6">
+                                    <label for="qualifications" class="block text-sm font-medium text-gray-700">Qualifications & Certifications</label>
+                                    <div class="mt-1">
+                                        <textarea id="qualifications" name="qualifications" rows="3" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ professional.qualifications }}</textarea>
+                                    </div>
+                                    <p class="mt-2 text-sm text-gray-500">List your degrees, certifications and qualifications relevant to athletes' mental health.</p>
+                                </div>
+
+                                <div class="sm:col-span-6">
+                                    <label class="block text-sm font-medium text-gray-700">Verification Documents</label>
+                                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                                        <div class="space-y-1 text-center">
+                                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <div class="flex text-sm text-gray-600">
+                                                <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                                    <span>Upload files</span>
+                                                    <input id="file-upload" name="file-upload" type="file" class="sr-only" multiple>
+                                                </label>
+                                                <p class="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p class="text-xs text-gray-500">
+                                                Upload your professional licenses, certificates or diplomas (PDF, JPG, PNG)
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Expertise Areas -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Areas of Expertise</label>
+                                <p class="mt-1 text-sm text-gray-500">Select the areas you specialize in working with athletes</p>
+                                <div class="mt-2 grid grid-cols-1 gap-y-2 sm:grid-cols-2 gap-x-4">
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="expertise-anxiety" name="expertise[]" value="anxiety" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="expertise-anxiety" class="font-medium text-gray-700">Anxiety & Stress Management</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="expertise-performance" name="expertise[]" value="performance" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="expertise-performance" class="font-medium text-gray-700">Performance Enhancement</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="expertise-depression" name="expertise[]" value="depression" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="expertise-depression" class="font-medium text-gray-700">Depression & Mood Disorders</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="expertise-injury" name="expertise[]" value="injury" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="expertise-injury" class="font-medium text-gray-700">Injury Recovery</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="expertise-motivation" name="expertise[]" value="motivation" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="expertise-motivation" class="font-medium text-gray-700">Motivation & Goal Setting</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="expertise-trauma" name="expertise[]" value="trauma" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="expertise-trauma" class="font-medium text-gray-700">Trauma & PTSD</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Sports Specialization -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Sports Specialization</label>
+                                <p class="mt-1 text-sm text-gray-500">Select the combat sports you specialize in working with</p>
+                                <div class="mt-2 grid grid-cols-1 gap-y-2 sm:grid-cols-2 gap-x-4">
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="sport-boxing" name="sports[]" value="boxing" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="sport-boxing" class="font-medium text-gray-700">Boxing</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="sport-wrestling" name="sports[]" value="wrestling" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="sport-wrestling" class="font-medium text-gray-700">Wrestling</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="sport-judo" name="sports[]" value="judo" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="sport-judo" class="font-medium text-gray-700">Judo</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="sport-karate" name="sports[]" value="karate" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="sport-karate" class="font-medium text-gray-700">Karate</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="sport-mma" name="sports[]" value="mma" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="sport-mma" class="font-medium text-gray-700">Mixed Martial Arts</label>
+                                        </div>
+                                    </div>
+                                    <div class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input id="sport-other" name="sports[]" value="other" type="checkbox" class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded">
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="sport-other" class="font-medium text-gray-700">Other Combat Sports</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Availability Section -->
+                    <div id="section-availability" class="settings-section hidden">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900">Availability Settings</h2>
+                                <p class="text-sm text-gray-500">Set your available hours for consultations</p>
+                            </div>
+                            <button type="submit" form="availability-form" class="mt-2 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Save Changes
+                            </button>
+                        </div>
+
+                        <form id="availability-form" class="space-y-6">
+                            <!-- Session Duration -->
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h3 class="text-sm font-medium text-gray-700 mb-3">Session Duration</h3>
+                                <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                                    <div>
+                                        <label class="flex items-center justify-center h-full p-4 border rounded-lg cursor-pointer hover:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500">
+                                            <input type="radio" name="duration" value="30" class="sr-only" checked>
+                                            <span class="text-sm font-medium text-gray-900">30 minutes</span>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="flex items-center justify-center h-full p-4 border rounded-lg cursor-pointer hover:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500">
+                                            <input type="radio" name="duration" value="45" class="sr-only">
+                                            <span class="text-sm font-medium text-gray-900">45 minutes</span>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="flex items-center justify-center h-full p-4 border rounded-lg cursor-pointer hover:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500">
+                                            <input type="radio" name="duration" value="60" class="sr-only">
+                                            <span class="text-sm font-medium text-gray-900">60 minutes</span>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="flex items-center justify-center h-full p-4 border rounded-lg cursor-pointer hover:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500">
+                                            <input type="radio" name="duration" value="90" class="sr-only">
+                                            <span class="text-sm font-medium text-gray-900">90 minutes</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Weekly Availability -->
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-3">Weekly Availability</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-gray-200">
+                                        <thead class="bg-gray-50">
+                                            <tr>
+                                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
+                                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available</th>
+                                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Time</th>
+                                                <th scope="col" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End Time</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="bg-white divide-y divide-gray-200">
+                                            {% for day in days %}
+                                            <tr>
+                                                <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ day.name }}</td>
+                                                <td class="px-3 py-3 whitespace-nowrap">
+                                                    <input type="checkbox" name="{{ day.id }}_available" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" {% if day.available %}checked{% endif %}>
+                                                </td>
+                                                <td class="px-3 py-3 whitespace-nowrap">
+                                                    <select name="{{ day.id }}_start" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                        {% for time in times %}
+                                                        <option value="{{ time }}" {% if time == day.start %}selected{% endif %}>{{ time }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </td>
+                                                <td class="px-3 py-3 whitespace-nowrap">
+                                                    <select name="{{ day.id }}_end" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                                        {% for time in times %}
+                                                        <option value="{{ time }}" {% if time == day.end %}selected{% endif %}>{{ time }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Time Off -->
+                            <div>
+                                <h3 class="text-sm font-medium text-gray-700 mb-3">Time Off / Unavailable Dates</h3>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                        <div class="flex-grow">
+                                            <label for="time-off-date" class="block text-xs font-medium text-gray-700">Add Unavailable Date</label>
+                                            <input type="date" id="time-off-date" name="time-off-date" class="mt-1 shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                                        </div>
+                                        <div class="flex-shrink-0">
+                                            <button type="button" id="add-time-off" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                Add Date
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="time-off-list" class="mt-4 space-y-2">
+                                        {% for date in unavailable_dates %}
+                                        <div class="flex items-center justify-between bg-white p-2 rounded border">
+                                            <span class="text-sm text-gray-700">{{ date|date:"F j, Y" }}</span>
+                                            <button type="button" class="text-red-500 hover:text-red-700">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security Section -->
+                    <div id="section-security" class="settings-section hidden">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900">Security Settings</h2>
+                                <p class="text-sm text-gray-500">Manage your account security and password</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <!-- Change Password -->
+                            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                                <div class="px-4 py-5 sm:px-6">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Change Password</h3>
+                                </div>
+                                <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+                                    <form id="password-form" class="sm:divide-y sm:divide-gray-200">
+                                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                            <label for="current-password" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Current Password</label>
+                                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                                <input type="password" name="current-password" id="current-password" class="block max-w-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md w-full">
+                                            </div>
+                                        </div>
+                                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                            <label for="new-password" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">New Password</label>
+                                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                                <input type="password" name="new-password" id="new-password" class="block max-w-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md w-full">
+                                                <p class="mt-2 text-sm text-gray-500">Must be at least 8 characters long</p>
+                                            </div>
+                                        </div>
+                                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                            <label for="confirm-password" class="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Confirm Password</label>
+                                            <div class="mt-1 sm:mt-0 sm:col-span-2">
+                                                <input type="password" name="confirm-password" id="confirm-password" class="block max-w-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md w-full">
+                                            </div>
+                                        </div>
+                                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                            <div class="sm:col-start-2 sm:col-span-2">
+                                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    Update Password
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Two-Factor Authentication -->
+                            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                                <div class="px-4 py-5 sm:px-6">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Two-Factor Authentication</h3>
+                                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Add an extra layer of security to your account</p>
+                                </div>
+                                <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+                                    <div class="sm:divide-y sm:divide-gray-200">
+                                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                            <div class="sm:col-span-2">
+                                                <p class="text-sm font-medium text-gray-900">Status: <span class="font-normal text-gray-700">{% if two_factor_enabled %}Enabled{% else %}Disabled{% endif %}</span></p>
+                                                <p class="mt-1 text-sm text-gray-500">Two-factor authentication adds an additional layer of security to your account by requiring more than just a password to log in.</p>
+                                            </div>
+                                            <div class="mt-4 sm:mt-0 sm:flex sm:justify-end">
+                                                {% if two_factor_enabled %}
+                                                <button type="button" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    Disable 2FA
+                                                </button>
+                                                {% else %}
+                                                <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    Enable 2FA
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Active Sessions -->
+                            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                                <div class="px-4 py-5 sm:px-6">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900">Active Sessions</h3>
+                                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Manage your active login sessions</p>
+                                </div>
+                                <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+                                    <div class="sm:divide-y sm:divide-gray-200">
+                                        {% for session in active_sessions %}
+                                        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+                                            <div class="sm:col-span-2">
+                                                <p class="text-sm font-medium text-gray-900">{{ session.device }} <span class="font-normal text-gray-700">({{ session.browser }})</span></p>
+                                                <p class="mt-1 text-sm text-gray-500">{{ session.ip_address }} - {{ session.location }}</p>
+                                                <p class="mt-1 text-sm text-gray-500">Last active: {{ session.last_activity|timesince }} ago</p>
+                                            </div>
+                                            <div class="mt-4 sm:mt-0 sm:flex sm:justify-end">
+                                                {% if session.current %}
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    Current Session
+                                                </span>
+                                                {% else %}
+                                                <button type="button" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    Revoke Access
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2FA Setup Modal -->
+<div id="twoFactorModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-lg font-semibold text-gray-800">Set Up Two-Factor Authentication</h3>
+            <button id="closeTwoFactorModal" class="text-gray-400 hover:text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="p-6">
+            <div class="text-center mb-6">
+                <p class="text-sm text-gray-600 mb-4">Scan this QR code with your authenticator app:</p>
+                <div class="flex justify-center">
+                    <img src="{% static 'images/qr-placeholder.png' %}" alt="QR Code" class="w-48 h-48 border border-gray-200">
+                </div>
+                <p class="mt-4 text-sm text-gray-600">Or enter this code manually:</p>
+                <p class="font-mono text-lg font-bold text-gray-800 mt-1">JBSWY3DPEHPK3PXP</p>
+            </div>
+            
+            <div class="mb-6">
+                <label for="verification-code" class="block text-sm font-medium text-gray-700 mb-1">Verification Code</label>
+                <input type="text" id="verification-code" name="verification-code" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md" placeholder="Enter 6-digit code">
+            </div>
+            
+            <div class="flex justify-end space-x-3">
+                <button id="cancel2FA" class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Cancel
+                </button>
+                <button id="verify2FA" class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Verify & Enable
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Navigation between settings sections
+    const navButtons = document.querySelectorAll('[id^="nav-"]');
+    const sections = document.querySelectorAll('.settings-section');
+    
+    navButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active state from all buttons
+            navButtons.forEach(btn => {
+                btn.classList.remove('bg-blue-50', 'text-blue-700', 'hover:bg-blue-100');
+                btn.classList.add('text-gray-700', 'hover:bg-gray-100');
+            });
+            
+            // Add active state to clicked button
+            this.classList.remove('text-gray-700', 'hover:bg-gray-100');
+            this.classList.add('bg-blue-50', 'text-blue-700', 'hover:bg-blue-100');
+            
+            // Hide all sections
+            sections.forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show corresponding section
+            const sectionId = 'section-' + this.id.split('-')[1];
+            document.getElementById(sectionId).classList.remove('hidden');
+        });
+    });
+    
+    // Profile image upload preview
+    const profileUpload = document.getElementById('profile-upload');
+    const profilePreview = document.getElementById('profile-preview');
+    
+    profileUpload.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                profilePreview.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Time off date addition
+    const addTimeOffBtn = document.getElementById('add-time-off');
+    const timeOffDate = document.getElementById('time-off-date');
+    const timeOffList = document.getElementById('time-off-list');
+    
+    addTimeOffBtn.addEventListener('click', function() {
+        if (timeOffDate.value) {
+            const date = new Date(timeOffDate.value);
+            const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const dateElement = document.createElement('div');
+            dateElement.className = 'flex items-center justify-between bg-white p-2 rounded border';
+            dateElement.innerHTML = `
+                <span class="text-sm text-gray-700">${formattedDate}</span>
+                <button type="button" class="text-red-500 hover:text-red-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            `;
+            
+            timeOffList.appendChild(dateElement);
+            timeOffDate.value = '';
+            
+            // Add event listener to remove button
+            dateElement.querySelector('button').addEventListener('click', function() {
+                dateElement.remove();
+            });
+        }
+    });
+    
+    // 2FA Modal Toggle
+    const twoFactorModal = document.getElementById('twoFactorModal');
+    const closeTwoFactorModal = document.getElementById('closeTwoFactorModal');
+    const cancel2FA = document.getElementById('cancel2FA');
+    const verify2FA = document.getElementById('verify2FA');
+    const enable2FABtn = document.querySelector('[id^="enable-2fa"]');
+    
+    if (enable2FABtn) {
+        enable2FABtn.addEventListener('click', function() {
+            twoFactorModal.classList.remove('hidden');
+        });
+    }
+    
+    closeTwoFactorModal.addEventListener('click', function() {
+        twoFactorModal.classList.add('hidden');
+    });
+    
+    cancel2FA.addEventListener('click', function() {
+        twoFactorModal.classList.add('hidden');
+    });
+    
+    verify2FA.addEventListener('click', function() {
+        const code = document.getElementById('verification-code').value;
+        if (code && code.length === 6) {
+            // Here you would typically verify the code with the server
+            alert('Two-factor authentication has been enabled successfully!');
+            twoFactorModal.classList.add('hidden');
+        } else {
+            alert('Please enter a valid 6-digit verification code.');
+        }
+    });
+    
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === twoFactorModal) {
+            twoFactorModal.classList.add('hidden');
+        }
+    });
+    
+    // Form submissions
+    const forms = ['profile-form', 'professional-form', 'availability-form', 'password-form'];
+    forms.forEach(formId => {
+        const form = document.getElementById(formId);
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Here you would typically submit the form data to the server
+                alert('Changes saved successfully!');
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

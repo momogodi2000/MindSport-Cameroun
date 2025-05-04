@@ -1,0 +1,261 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+    <!-- Group Header -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{% url 'community:support_group_list' %}" class="text-gray-400 hover:text-gray-500">
+                            <svg class="flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="sr-only">Support Groups</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <a href="{{ group.get_absolute_url }}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ group.name }}</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="ml-4 text-sm font-medium text-gray-500">Manage</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Manage Group</h1>
+                <div class="mt-2 flex items-center space-x-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{% if group.status == 'scheduled' %}blue-100 text-blue-800{% elif group.status == 'ongoing' %}green-100 text-green-800{% else %}gray-100 text-gray-800{% endif %}">
+                        {{ group.get_status_display }}
+                    </span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{% if group.privacy == 'public' %}green-100 text-green-800{% else %}purple-100 text-purple-800{% endif %}">
+                        {{ group.get_privacy_display }}
+                    </span>
+                    {% if group.sport %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ group.get_sport_display }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="{{ group.get_absolute_url }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    View Group
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Management Tabs -->
+    <div class="border-b border-gray-200 mb-6">
+        <nav class="-mb-px flex space-x-8">
+            <a href="#" class="border-indigo-500 text-indigo-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Group Settings
+            </a>
+            <a href="#" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Participants
+            </a>
+            <a href="#" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Communications
+            </a>
+        </nav>
+    </div>
+
+    <!-- Group Status Update -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900">Update Group Status</h3>
+            <div class="mt-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_status">
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                        {% for status in status_choices %}
+                        <div class="relative flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="status_{{ status.0 }}" name="status" type="radio" value="{{ status.0 }}" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" {% if group.status == status.0 %}checked{% endif %}>
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="status_{{ status.0 }}" class="font-medium text-gray-700">{{ status.1 }}</label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meeting Details -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900">Meeting Details</h3>
+            <div class="mt-4">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="share_details">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="meeting_link" class="block text-sm font-medium text-gray-700">Meeting Link</label>
+                            <div class="mt-1">
+                                <input type="url" name="meeting_link" id="meeting_link" value="{{ group.meeting_link|default:'' }}" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="meeting_password" class="block text-sm font-medium text-gray-700">Meeting Password (Optional)</label>
+                            <div class="mt-1">
+                                <input type="text" name="meeting_password" id="meeting_password" value="{{ group.meeting_password|default:'' }}" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Save & Share Details
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Participants Management -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Manage Participants</h2>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                {% if participants %}
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Participant
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for participant in participants %}
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 h-10 w-10">
+                                            <img class="h-10 w-10 rounded-full" src="{{ participant.user.profile_image.url|default:'/static/images/default-profile.jpg' }}" alt="">
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ participant.user.get_full_name|default:participant.user.username }}
+                                            </div>
+                                            <div class="text-sm text-gray-500">
+                                                {{ participant.user.email }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-{% if participant.status == 'registered' %}blue-100 text-blue-800{% elif participant.status == 'confirmed' %}green-100 text-green-800{% elif participant.status == 'attended' %}purple-100 text-purple-800{% else %}gray-100 text-gray-800{% endif %}">
+                                        {{ participant.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <form method="post" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_participant">
+                                        <input type="hidden" name="relation_id" value="{{ participant.id }}">
+                                        <input type="hidden" name="status" value="confirmed">
+                                        <button type="submit" class="text-indigo-600 hover:text-indigo-900 mr-3">Confirm</button>
+                                    </form>
+                                    <form method="post" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="update_participant">
+                                        <input type="hidden" name="relation_id" value="{{ participant.id }}">
+                                        <input type="hidden" name="status" value="canceled">
+                                        <button type="submit" class="text-red-600 hover:text-red-900">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <h3 class="mt-2 text-lg font-medium text-gray-900">No participants yet</h3>
+                    <p class="mt-1 text-sm text-gray-500">Participants will appear here once they register.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Pairing (for mentor-mentee groups) -->
+    {% if group.is_mentorship_group %}
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Pair Participants</h2>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="pair">
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        <div>
+                            <label for="mentor_id" class="block text-sm font-medium text-gray-700">Mentor</label>
+                            <select id="mentor_id" name="mentor_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                {% for mentor in mentors %}
+                                <option value="{{ mentor.id }}">{{ mentor.user.get_full_name|default:mentor.user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="mentee_id" class="block text-sm font-medium text-gray-700">Mentee</label>
+                            <select id="mentee_id" name="mentee_id" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                {% for mentee in mentees %}
+                                <option value="{{ mentee.id }}">{{ mentee.user.get_full_name|default:mentee.user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Create Pair
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Floating decorative elements -->
+<div class="fixed bottom-0 right-0 w-64 h-64 bg-indigo-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float"></div>
+<div class="fixed top-1/3 left-0 w-48 h-48 bg-blue-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float-delay"></div>
+{% endblock %}

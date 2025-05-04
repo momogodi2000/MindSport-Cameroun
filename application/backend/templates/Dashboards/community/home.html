@@ -1,0 +1,440 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-6 lg:px-8">
+    <!-- Hero Section with 3D Animation -->
+    <div class="relative bg-gradient-to-r from-blue-600 to-indigo-800 rounded-xl overflow-hidden">
+        <div class="absolute inset-0 z-0">
+            <div class="absolute inset-0 bg-[url('{% static 'images/community-pattern.svg' %}')] opacity-10"></div>
+            <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-600 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
+        </div>
+        <div class="relative z-10 px-6 py-12 sm:py-16 lg:px-8 lg:py-20">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                    Welcome to the Athlete Community
+                </h1>
+                <p class="mt-6 text-xl text-indigo-100">
+                    Connect, share, and grow with fellow athletes and professionals in your sport.
+                </p>
+                <div class="mt-10 flex justify-center space-x-4">
+                    <a href="{% url 'category_list' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-indigo-700 bg-white hover:bg-indigo-50 transition-all duration-300 transform hover:scale-105">
+                        Explore Forum
+                    </a>
+                    <a href="{% url 'mentorship_programs_list' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-500 bg-opacity-60 hover:bg-opacity-70 transition-all duration-300 transform hover:scale-105">
+                        Find a Mentor
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats with Animation -->
+    <div class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-xl transition-shadow duration-300">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Active Threads</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ recent_threads.count }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-xl transition-shadow duration-300">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Mentors Available</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ mentorship_programs.count }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-xl transition-shadow duration-300">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Success Stories</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ success_stories.count }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-xl transition-shadow duration-300">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Support Groups</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900">{{ support_groups.count }}</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forum Categories Section -->
+    <div class="mt-12">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Forum Categories</h2>
+            <a href="{% url 'category_list' %}" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                View All
+                <svg class="ml-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {% for category in categories %}
+            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-xl transition-shadow duration-300 group">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-md p-3 group-hover:rotate-6 transition-transform duration-300">
+                            {% if category.icon %}
+                            <i class="{{ category.icon }} text-white"></i>
+                            {% else %}
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            {% endif %}
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <h3 class="text-lg font-medium text-gray-900">{{ category.name }}</h3>
+                            <p class="mt-1 text-sm text-gray-500 truncate">{{ category.description }}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center">
+                        <span class="text-sm text-gray-500">
+                            {{ category.thread_count }} thread{{ category.thread_count|pluralize }}
+                        </span>
+                        <a href="{{ category.get_absolute_url }}" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105">
+                            View
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Recent Threads Section -->
+    <div class="mt-12">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Recent Forum Activity</h2>
+            <a href="{% url 'category_list' %}" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                View All
+                <svg class="ml-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <ul class="divide-y divide-gray-200">
+                {% for thread in recent_threads %}
+                <li class="hover:bg-gray-50 transition-colors duration-150">
+                    <a href="{% url 'thread_detail' category_slug=thread.category.slug thread_slug=thread.slug %}" class="block px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="flex-shrink-0">
+                                    <img class="h-10 w-10 rounded-full" src="{{ thread.author.profile.image.url|default:'/static/images/default-profile.jpg' }}" alt="{{ thread.author.get_full_name }}">
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-medium text-indigo-600 truncate">
+                                        {{ thread.author.get_full_name|default:thread.author.username }}
+                                    </p>
+                                    <p class="text-sm text-gray-500 truncate">
+                                        in {{ thread.category.name }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="ml-2 flex-shrink-0 flex">
+                                <p class="text-xs text-gray-500">
+                                    {{ thread.created_at|timesince }} ago
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <h3 class="text-lg font-medium text-gray-900">{{ thread.title }}</h3>
+                            <p class="mt-1 text-sm text-gray-600 line-clamp-2">
+                                {{ thread.content|striptags|truncatewords:20 }}
+                            </p>
+                        </div>
+                        <div class="mt-3 flex justify-between">
+                            <div class="flex space-x-2">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ thread.comment_count }} repl{{ thread.comment_count|pluralize:"y,ies" }}
+                                </span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {{ thread.view_count }} view{{ thread.view_count|pluralize }}
+                                </span>
+                                {% if thread.is_pinned %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    Pinned
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div>
+                                {% if thread.is_locked %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    Locked
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Mentorship Programs Section -->
+    <div class="mt-12">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Mentorship Programs</h2>
+            <a href="{% url 'mentorship_programs_list' %}" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                View All
+                <svg class="ml-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {% for program in mentorship_programs %}
+            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-xl transition-shadow duration-300">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-md p-3">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <h3 class="text-lg font-medium text-gray-900">{{ program.name }}</h3>
+                            <p class="mt-1 text-sm text-gray-500">
+                                {{ program.start_date|date:"M d, Y" }} - 
+                                {% if program.end_date %}{{ program.end_date|date:"M d, Y" }}{% else %}Ongoing{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-600 line-clamp-3">
+                            {{ program.description|truncatewords:20 }}
+                        </p>
+                    </div>
+                    <div class="mt-5 flex justify-between items-center">
+                        <div class="flex space-x-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                {{ program.relationships.count }} relationship{{ program.relationships.count|pluralize }}
+                            </span>
+                        </div>
+                        <a href="{% url 'mentorship_program_detail' pk=program.pk %}" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Success Stories Section -->
+    <div class="mt-12">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Inspiring Success Stories</h2>
+            <a href="{% url 'success_story_list' %}" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                View All
+                <svg class="ml-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {% for story in success_stories %}
+            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-xl transition-shadow duration-300 group">
+                {% if story.featured_image %}
+                <div class="h-48 overflow-hidden">
+                    <img class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500" src="{{ story.featured_image.url }}" alt="{{ story.title }}">
+                </div>
+                {% endif %}
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <img class="h-10 w-10 rounded-full" src="{% if story.is_anonymous %}{% static 'images/anonymous-user.jpg' %}{% else %}{{ story.author.profile.image.url|default:'/static/images/default-profile.jpg' }}{% endif %}" alt="">
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">
+                                {% if story.is_anonymous %}Anonymous{% else %}{{ story.author.get_full_name|default:story.author.username }}{% endif %}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ story.created_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="text-lg font-medium text-gray-900">{{ story.title }}</h3>
+                        <p class="mt-2 text-sm text-gray-600 line-clamp-3">
+                            {{ story.content|striptags|truncatewords:20 }}
+                        </p>
+                    </div>
+                    <div class="mt-5 flex justify-between items-center">
+                        <span class="text-xs text-gray-500">
+                            {{ story.view_count }} views
+                        </span>
+                        <a href="{{ story.get_absolute_url }}" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105">
+                            Read Story
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Support Groups Section -->
+    <div class="mt-12">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Support Groups</h2>
+            <a href="{% url 'support_groups_list' %}" class="text-indigo-600 hover:text-indigo-800 font-medium flex items-center">
+                View All
+                <svg class="ml-1 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <ul class="divide-y divide-gray-200">
+                {% for group in support_groups %}
+                <li class="hover:bg-gray-50 transition-colors duration-150">
+                    <a href="{% url 'support_group_detail' pk=group.pk %}" class="block px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0 bg-indigo-100 rounded-md p-3">
+                                    <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">{{ group.name }}</h3>
+                                    <p class="text-sm text-gray-500">
+                                        {{ group.frequency|title }} meetings
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="ml-2 flex-shrink-0 flex flex-col items-end">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    {{ group.current_participant_count }}/{{ group.max_participants }} spots
+                                </span>
+                                <span class="mt-1 text-xs text-gray-500">
+                                    {% if group.is_active %}Active{% else %}Inactive{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <p class="text-sm text-gray-600 line-clamp-2">
+                                {{ group.description|truncatewords:20 }}
+                            </p>
+                        </div>
+                        <div class="mt-3 flex justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <img class="h-8 w-8 rounded-full" src="{{ group.facilitator.profile.image.url|default:'/static/images/default-profile.jpg' }}" alt="{{ group.facilitator.get_full_name }}">
+                                </div>
+                                <div class="ml-2">
+                                    <p class="text-sm font-medium text-gray-900">
+                                        {{ group.facilitator.get_full_name|default:group.facilitator.username }}
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        Facilitator
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                {% if request.user in group.participants.all %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Member
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    Join
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 3D Floating Elements for Visual Appeal -->
+<div class="fixed bottom-0 right-0 w-64 h-64 bg-indigo-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float"></div>
+<div class="fixed top-1/4 left-0 w-48 h-48 bg-blue-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float-delay"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Simple animation for cards on scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fadeInUp');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.bg-white').forEach(card => {
+            observer.observe(card);
+        });
+    });
+</script>
+{% endblock %}

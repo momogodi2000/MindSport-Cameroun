@@ -1,0 +1,180 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block head %}
+<title>Anonymous Questions - Athlete Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
+    .question-card {
+        transition: all 0.3s ease;
+        transform-style: preserve-3d;
+    }
+    .question-card:hover {
+        transform: translateY(-5px) rotateX(5deg);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .category-badge {
+        transition: all 0.2s ease;
+    }
+    .category-badge:hover {
+        transform: scale(1.05);
+    }
+    .floating-btn {
+        animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="text-center mb-12 animate__animated animate__fadeIn">
+        <h1 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">
+                Ask Anonymously
+            </span>
+        </h1>
+        <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+            Get answers to your sensitive questions without revealing your identity. Our community of professionals and peers are here to help.
+        </p>
+    </div>
+
+    <!-- Categories Filter -->
+    <div class="mb-8 animate__animated animate__fadeInUp">
+        <div class="flex flex-wrap justify-center gap-3">
+            <a href="{% url 'community:question_list' %}" 
+               class="category-badge px-4 py-2 rounded-full text-sm font-medium {% if not request.GET.category %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200{% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">
+                All Categories
+            </a>
+            {% for category in categories %}
+            <a href="{% url 'community:question_list' %}?category={{ category.slug }}" 
+               class="category-badge px-4 py-2 rounded-full text-sm font-medium {% if request.GET.category == category.slug %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200{% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600{% endif %}">
+                {{ category.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        {% for question in questions %}
+        <div class="question-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 animate__animated animate__fadeInUp" style="animation-delay: {{ forloop.counter0|divisibleby:3|yesno:'0,0.1s,0.2s' }}">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <span class="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full uppercase font-semibold tracking-wide">
+                        {{ question.get_sport_display|default:"General" }}
+                    </span>
+                    <span class="ml-auto text-sm text-gray-500 dark:text-gray-400">
+                        {{ question.created_at|timesince }} ago
+                    </span>
+                </div>
+                <a href="{% url 'community:question_detail' pk=question.pk %}" class="block text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 mb-2">
+                    {{ question.title }}
+                </a>
+                <p class="text-gray-600 dark:text-gray-300 mb-4 line-clamp-3">
+                    {{ question.content|truncatewords:20 }}
+                </p>
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium {% if question.status == 'answered' %}text-green-600 dark:text-green-400{% else %}text-yellow-600 dark:text-yellow-400{% endif %}">
+                        {{ question.get_status_display }}
+                    </span>
+                    <a href="{% url 'community:question_detail' pk=question.pk %}" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                        Read more →
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12 animate__animated animate__fadeIn">
+            <div class="mx-auto w-24 h-24 mb-4 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No questions found</h3>
+            <p class="text-gray-600 dark:text-gray-400">Be the first to ask a question in this category!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="flex justify-center mt-8 animate__animated animate__fadeIn">
+        <nav class="inline-flex rounded-md shadow">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                Previous
+            </a>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <a href="?page={{ num }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-500 text-white text-sm font-medium">
+                {{ num }}
+            </a>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="inline-flex items-center px-4 py-2 border border-gray-300 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                {{ num }}
+            </a>
+            {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}" class="inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                Next
+            </a>
+            {% endif %}
+        </nav>
+    </div>
+    {% endif %}
+
+    <!-- Floating Action Button -->
+    <a href="{% url 'community:question_create' %}" class="fixed bottom-8 right-8 floating-btn inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform transition hover:scale-110">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+        Ask Question
+    </a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 3D tilt effect for question cards
+    document.querySelectorAll('.question-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+            card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg) translateY(-5px)`;
+        });
+
+        card.addEventListener('mouseenter', () => {
+            card.style.transition = 'all 0.1s ease';
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'translateY(0) rotateX(0) rotateY(0)';
+            card.style.transition = 'all 0.5s ease';
+        });
+    });
+
+    // Animate elements when they come into view
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate__fadeInUp');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.question-card').forEach(card => {
+        observer.observe(card);
+    });
+</script>
+{% endblock %}

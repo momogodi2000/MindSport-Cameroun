@@ -1,0 +1,556 @@
+{% extends 'Dashboards/Layout/admin_base.html' %}
+{% load static %}
+
+{% block title %}Support Group: {{ group.name }} | Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<style>
+  .card {
+    @apply bg-white rounded-lg shadow-lg p-6 mb-6 transition-all duration-300 hover:shadow-xl;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  .btn-primary {
+    @apply bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-300;
+  }
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors duration-300;
+  }
+  .btn-danger {
+    @apply bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-300;
+  }
+  .btn-success {
+    @apply bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-300;
+  }
+  .badge {
+    @apply inline-block px-2 py-1 text-xs font-semibold rounded-full;
+  }
+  .badge-primary {
+    @apply bg-indigo-100 text-indigo-800;
+  }
+  .badge-success {
+    @apply bg-green-100 text-green-800;
+  }
+  .badge-warning {
+    @apply bg-yellow-100 text-yellow-800;
+  }
+  .badge-danger {
+    @apply bg-red-100 text-red-800;
+  }
+  .tab-active {
+    @apply border-b-2 border-indigo-600 text-indigo-600;
+  }
+  .icon-3d {
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+    transition: all 0.3s ease;
+  }
+  .icon-3d:hover {
+    transform: scale(1.1) rotate(5deg);
+  }
+  .rotate-hover:hover {
+    animation: pulse 1s;
+  }
+  .participant-card {
+    transition: all 0.3s ease;
+  }
+  .participant-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="py-6">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Header with 3D effect -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-6 animate__animated animate__fadeIn">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center">
+          <div class="bg-indigo-100 p-3 rounded-full mr-4 icon-3d float-animation">
+            <i class="fas fa-users fa-2x text-indigo-600"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">{{ group.name }}</h1>
+            <p class="text-gray-600">{{ group.description|truncatechars:100 }}</p>
+          </div>
+        </div>
+        <div class="flex space-x-2">
+          <form method="POST" class="inline">
+            {% csrf_token %}
+            {% if group.is_active %}
+            <input type="hidden" name="action" value="deactivate">
+            <button type="submit" class="btn-danger flex items-center">
+              <i class="fas fa-pause mr-2"></i> Deactivate
+            </button>
+            {% else %}
+            <input type="hidden" name="action" value="activate">
+            <button type="submit" class="btn-success flex items-center">
+              <i class="fas fa-play mr-2"></i> Activate
+            </button>
+            {% endif %}
+          </form>
+          <a href="{% url 'support_group_admin' %}" class="btn-secondary flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Groups
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <!-- Status -->
+      <div class="card flex items-center justify-between animate__animated animate__fadeInUp">
+        <div>
+          <p class="text-sm text-gray-600">Status</p>
+          <p class="text-xl font-semibold">
+            {% if group.is_active %}
+            <span class="text-green-600">Active</span>
+            {% else %}
+            <span class="text-red-600">Inactive</span>
+            {% endif %}
+          </p>
+        </div>
+        <div class="icon-3d {% if group.is_active %}text-green-500{% else %}text-red-500{% endif %}">
+          <i class="fas {% if group.is_active %}fa-check-circle{% else %}fa-times-circle{% endif %} fa-2x"></i>
+        </div>
+      </div>
+      
+      <!-- Participants -->
+      <div class="card flex items-center justify-between animate__animated animate__fadeInUp" style="animation-delay: 0.1s;">
+        <div>
+          <p class="text-sm text-gray-600">Participants</p>
+          <p class="text-xl font-semibold">{{ participants|length }} / {{ group.max_participants }}</p>
+        </div>
+        <div class="icon-3d text-blue-500">
+          <i class="fas fa-user-friends fa-2x"></i>
+        </div>
+      </div>
+      
+      <!-- Upcoming Sessions -->
+      <div class="card flex items-center justify-between animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+        <div>
+          <p class="text-sm text-gray-600">Upcoming Sessions</p>
+          <p class="text-xl font-semibold">{{ upcoming_sessions|length }}</p>
+        </div>
+        <div class="icon-3d text-purple-500">
+          <i class="fas fa-calendar-alt fa-2x"></i>
+        </div>
+      </div>
+      
+      <!-- Past Sessions -->
+      <div class="card flex items-center justify-between animate__animated animate__fadeInUp" style="animation-delay: 0.3s;">
+        <div>
+          <p class="text-sm text-gray-600">Past Sessions</p>
+          <p class="text-xl font-semibold">{{ past_sessions|length }}</p>
+        </div>
+        <div class="icon-3d text-gray-500">
+          <i class="fas fa-history fa-2x"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs navigation -->
+    <div class="border-b border-gray-200 mb-6">
+      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="supportGroupTabs" role="tablist">
+        <li class="mr-2" role="presentation">
+          <button class="inline-block p-4 tab-active" id="details-tab" data-tabs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="true">Group Details</button>
+        </li>
+        <li class="mr-2" role="presentation">
+          <button class="inline-block p-4 hover:text-gray-600 hover:border-gray-300" id="participants-tab" data-tabs-target="#participants" type="button" role="tab" aria-controls="participants" aria-selected="false">Participants</button>
+        </li>
+        <li class="mr-2" role="presentation">
+          <button class="inline-block p-4 hover:text-gray-600 hover:border-gray-300" id="upcoming-tab" data-tabs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="false">Upcoming Sessions</button>
+        </li>
+        <li class="mr-2" role="presentation">
+          <button class="inline-block p-4 hover:text-gray-600 hover:border-gray-300" id="past-tab" data-tabs-target="#past" type="button" role="tab" aria-controls="past" aria-selected="false">Past Sessions</button>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Tab contents -->
+    <div id="supportGroupTabContent">
+      <!-- Details Tab -->
+      <div class="block" id="details" role="tabpanel" aria-labelledby="details-tab">
+        <div class="card animate__animated animate__fadeIn">
+          <h2 class="text-xl font-bold mb-4 flex items-center">
+            <i class="fas fa-info-circle mr-2 text-indigo-600 icon-3d"></i>
+            Group Information
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <p class="text-gray-600 mb-2">Facilitator</p>
+              <p class="font-semibold flex items-center">
+                <i class="fas fa-user-tie mr-2 text-indigo-500"></i>
+                {{ group.facilitator.get_full_name|default:group.facilitator.username }}
+              </p>
+            </div>
+            <div>
+              <p class="text-gray-600 mb-2">Frequency</p>
+              <p class="font-semibold flex items-center">
+                <i class="fas fa-calendar-week mr-2 text-indigo-500"></i>
+                {{ group.get_frequency_display }}
+              </p>
+            </div>
+            <div>
+              <p class="text-gray-600 mb-2">Created On</p>
+              <p class="font-semibold flex items-center">
+                <i class="fas fa-clock mr-2 text-indigo-500"></i>
+                {{ group.created_at|date:"F j, Y" }}
+              </p>
+            </div>
+            <div>
+              <p class="text-gray-600 mb-2">Last Updated</p>
+              <p class="font-semibold flex items-center">
+                <i class="fas fa-edit mr-2 text-indigo-500"></i>
+                {{ group.updated_at|date:"F j, Y" }}
+              </p>
+            </div>
+          </div>
+          
+          <div class="mt-6">
+            <h3 class="text-lg font-semibold mb-2">Description</h3>
+            <div class="bg-gray-50 p-4 rounded-md">
+              {{ group.description|linebreaks }}
+            </div>
+          </div>
+          
+          {% if group.notes %}
+          <div class="mt-6">
+            <h3 class="text-lg font-semibold mb-2">Additional Notes</h3>
+            <div class="bg-gray-50 p-4 rounded-md">
+              {{ group.notes|linebreaks }}
+            </div>
+          </div>
+          {% endif %}
+          
+          <div class="mt-6">
+            <h3 class="text-lg font-semibold mb-2">Meeting Information</h3>
+            <div class="bg-gray-50 p-4 rounded-md">
+              {% if group.meeting_link %}
+              <p><strong>Meeting Link:</strong> <a href="{{ group.meeting_link }}" target="_blank" class="text-indigo-600 hover:underline">{{ group.meeting_link }}</a></p>
+              {% else %}
+              <p><strong>Meeting Link:</strong> <span class="text-gray-500">Not provided</span></p>
+              {% endif %}
+              
+              {% if group.meeting_password %}
+              <p><strong>Meeting Password:</strong> {{ group.meeting_password }}</p>
+              {% else %}
+              <p><strong>Meeting Password:</strong> <span class="text-gray-500">Not provided</span></p>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="mt-6 flex justify-end">
+            <a href="#" class="btn-primary mr-2">
+              <i class="fas fa-edit mr-1"></i> Edit Group
+            </a>
+            <button class="btn-danger">
+              <i class="fas fa-trash-alt mr-1"></i> Delete Group
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Participants Tab -->
+      <div class="hidden" id="participants" role="tabpanel" aria-labelledby="participants-tab">
+        <div class="card animate__animated animate__fadeIn">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold flex items-center">
+              <i class="fas fa-users mr-2 text-indigo-600 icon-3d"></i>
+              Participants ({{ participants|length }})
+            </h2>
+            <a href="#" class="btn-primary">
+              <i class="fas fa-user-plus mr-1"></i> Add Participant
+            </a>
+          </div>
+          
+          {% if participants %}
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Left</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for participant in participants %}
+                <tr class="participant-card hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                        <span class="text-indigo-600 font-bold">{{ participant.user.get_full_name|default:participant.user.username|slice:":1" }}</span>
+                      </div>
+                      <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900">{{ participant.user.get_full_name|default:participant.user.username }}</div>
+                        <div class="text-sm text-gray-500">{{ participant.user.email }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    {% if participant.status == 'approved' %}
+                    <span class="badge badge-success">Approved</span>
+                    {% elif participant.status == 'pending' %}
+                    <span class="badge badge-warning">Pending</span>
+                    {% elif participant.status == 'declined' %}
+                    <span class="badge badge-danger">Declined</span>
+                    {% elif participant.status == 'left' %}
+                    <span class="badge badge-primary">Left Group</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ participant.joined_at|date:"M d, Y" }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ participant.left_at|date:"M d, Y"|default:"-" }}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-500">
+                    {{ participant.notes|truncatechars:30|default:"-" }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3"><i class="fas fa-edit"></i></a>
+                    <a href="#" class="text-red-600 hover:text-red-900"><i class="fas fa-trash-alt"></i></a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="bg-gray-50 p-8 text-center rounded-lg">
+            <div class="icon-3d text-gray-400 mb-3">
+              <i class="fas fa-users fa-3x"></i>
+            </div>
+            <p class="text-gray-500 mb-4">No participants have joined this group yet.</p>
+            <a href="#" class="btn-primary">
+              <i class="fas fa-user-plus mr-1"></i> Add Participant
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Upcoming Sessions Tab -->
+      <div class="hidden" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+        <div class="card animate__animated animate__fadeIn">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold flex items-center">
+              <i class="fas fa-calendar-alt mr-2 text-indigo-600 icon-3d"></i>
+              Upcoming Sessions ({{ upcoming_sessions|length }})
+            </h2>
+            <a href="#" class="btn-primary">
+              <i class="fas fa-plus mr-1"></i> Schedule Session
+            </a>
+          </div>
+          
+          {% if upcoming_sessions %}
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for session in upcoming_sessions %}
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
+              <div class="bg-indigo-50 px-4 py-2 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                  <h3 class="font-semibold text-indigo-700">{{ session.title }}</h3>
+                  <div class="float-animation">
+                    <i class="fas fa-video text-indigo-500"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4">
+                <p class="text-sm text-gray-600 mb-4">{{ session.description|default:"No description provided."|truncatechars:100 }}</p>
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                  <div>
+                    <p class="text-xs text-gray-500">Start Time</p>
+                    <p class="text-sm font-medium">{{ session.start_time|date:"M d, Y - h:i A" }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-gray-500">End Time</p>
+                    <p class="text-sm font-medium">{{ session.end_time|date:"M d, Y - h:i A" }}</p>
+                  </div>
+                </div>
+                <div class="flex justify-end space-x-2">
+                  <a href="#" class="btn-secondary text-sm py-1 px-3">
+                    <i class="fas fa-edit mr-1"></i> Edit
+                  </a>
+                  <a href="#" class="btn-primary text-sm py-1 px-3">
+                    <i class="fas fa-info-circle mr-1"></i> Details
+                  </a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="bg-gray-50 p-8 text-center rounded-lg">
+            <div class="icon-3d text-gray-400 mb-3">
+              <i class="fas fa-calendar-alt fa-3x"></i>
+            </div>
+            <p class="text-gray-500 mb-4">No upcoming sessions scheduled for this group.</p>
+            <a href="#" class="btn-primary">
+              <i class="fas fa-plus mr-1"></i> Schedule Session
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Past Sessions Tab -->
+      <div class="hidden" id="past" role="tabpanel" aria-labelledby="past-tab">
+        <div class="card animate__animated animate__fadeIn">
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold flex items-center">
+              <i class="fas fa-history mr-2 text-indigo-600 icon-3d"></i>
+              Past Sessions ({{ past_sessions|length }})
+            </h2>
+          </div>
+          
+          {% if past_sessions %}
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for session in past_sessions %}
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-gray-900">{{ session.title }}</div>
+                    <div class="text-sm text-gray-500">{{ session.description|truncatechars:50|default:"-" }}</div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {{ session.start_time|date:"M d, Y - h:i A" }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {% with duration=session.end_time|timeuntil:session.start_time %}
+                    {{ duration }}
+                    {% endwith %}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    {% if session.is_completed %}
+                    <span class="badge badge-success">Completed</span>
+                    {% else %}
+                    <span class="badge badge-warning">Pending Review</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-2"><i class="fas fa-eye"></i> View</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900"><i class="fas fa-download"></i> Report</a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="bg-gray-50 p-8 text-center rounded-lg">
+            <div class="icon-3d text-gray-400 mb-3">
+              <i class="fas fa-history fa-3x"></i>
+            </div>
+            <p class="text-gray-500">No past sessions for this group.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+<script>
+  // Tab functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('[data-tabs-target]');
+    const tabContents = document.querySelectorAll('[role="tabpanel"]');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = document.querySelector(tab.dataset.tabsTarget);
+        
+        tabContents.forEach(tabContent => {
+          tabContent.classList.add('hidden');
+        });
+        
+        tabs.forEach(t => {
+          t.classList.remove('tab-active');
+        });
+        
+        tab.classList.add('tab-active');
+        target.classList.remove('hidden');
+        
+        // Animation for content
+        gsap.fromTo(target, {
+          opacity: 0,
+          y: 10
+        }, {
+          opacity: 1,
+          y: 0,
+          duration: 0.4
+        });
+      });
+    });
+    
+    // 3D animation effects
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+      card.addEventListener('mousemove', function(e) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = (y - centerY) / 20;
+        const rotateY = (centerX - x) / 20;
+        
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+      });
+    });
+    
+    // GSAP animations
+    gsap.fromTo(".icon-3d", {
+      scale: 0.8,
+      rotation: -10
+    }, {
+      scale: 1,
+      rotation: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: "back.out(1.7)"
+    });
+  });
+</script>
+{% endblock %}

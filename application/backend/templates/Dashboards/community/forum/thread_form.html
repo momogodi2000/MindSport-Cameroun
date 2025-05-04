@@ -1,0 +1,144 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-6 lg:px-8 max-w-3xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{% url 'community_home' %}" class="text-gray-400 hover:text-gray-500">
+                            <svg class="flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            <span class="sr-only">Community</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <a href="{% url 'category_list' %}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">Categories</a>
+                    </div>
+                </li>
+                {% if category %}
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <a href="{{ category.get_absolute_url }}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ category.name }}</a>
+                    </div>
+                </li>
+                {% endif %}
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="ml-4 text-sm font-medium text-gray-500">New Thread</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <h1 class="text-3xl font-bold text-gray-900">Create New Thread</h1>
+        <p class="mt-2 text-sm text-gray-600">
+            {% if category %}
+            Start a new discussion in the {{ category.name }} category.
+            {% else %}
+            Start a new discussion in the community.
+            {% endif %}
+        </p>
+    </div>
+
+    <!-- Thread Form -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+            <form method="post">
+                {% csrf_token %}
+                <div class="space-y-6">
+                    {% if form.non_field_errors %}
+                    <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                {% for error in form.non_field_errors %}
+                                <p class="text-sm text-red-700">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700">Thread Title</label>
+                        <div class="mt-1">
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.title.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">Be specific with your title to attract relevant responses.</p>
+                    </div>
+
+                    {% if not category %}
+                    <div>
+                        <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700">Category</label>
+                        <div class="mt-1">
+                            {{ form.category }}
+                            {% if form.category.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.category.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div>
+                        <label for="{{ form.content.id_for_label }}" class="block text-sm font-medium text-gray-700">Content</label>
+                        <div class="mt-1">
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                            <p class="mt-2 text-sm text-red-600">{{ form.content.errors.as_text }}</p>
+                            {% endif %}
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">Write a detailed post to get the best responses.</p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input id="is_anonymous" name="is_anonymous" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                        <label for="is_anonymous" class="ml-2 block text-sm text-gray-700">Post anonymously (your username will not be shown)</label>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        {% if category %}
+                        <a href="{{ category.get_absolute_url }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancel
+                        </a>
+                        {% else %}
+                        <a href="{% url 'category_list' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Cancel
+                        </a>
+                        {% endif %}
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105">
+                            Post Thread
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Floating decorative elements -->
+<div class="fixed bottom-0 right-0 w-64 h-64 bg-indigo-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float"></div>
+<div class="fixed top-1/3 left-0 w-48 h-48 bg-blue-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float-delay"></div>
+{% endblock %}

@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mental Health Platform for Athletes{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef5ff',
+                            100: '#d9eaff',
+                            200: '#bbd8ff',
+                            300: '#8ac0ff',
+                            400: '#569eff',
+                            500: '#2978ff',
+                            600: '#105ef7',
+                            700: '#0c4ae3',
+                            800: '#123db8',
+                            900: '#153891',
+                        },
+                        secondary: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(-45deg, #2978ff, #105ef7, #0c4ae3, #2978ff);
+            background-size: 400% 400%;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gradient-to-br from-primary-50 via-white to-primary-100 font-sans flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-xl relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-700/20 to-primary-900/30"></div>
+        
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center relative z-10">
+            <div class="flex items-center space-x-3">
+                <!-- Mobile Menu Toggle -->
+                <button id="mobile-menu-toggle" class="block md:hidden p-2 rounded-full hover:bg-primary-700/30 transition-all">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                
+                <div class="relative">
+                    <img src="{% static 'images/logo.png' %}" alt="Logo" class="h-14 w-14 rounded-full bg-white p-1 shadow-lg">
+                </div>
+                <h1 class="text-2xl font-bold hidden md:block font-display tracking-wide">
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-white to-primary-100">Athlete</span><span class="font-light bg-clip-text text-transparent bg-gradient-to-r from-white to-primary-100">Mind</span>
+                </h1>
+            </div>
+            
+            <div class="flex items-center space-x-5">
+                <div class="relative">
+                    <button class="p-2.5 rounded-full hover:bg-primary-500/30 transition-all duration-300">
+                        <i class="fas fa-bell text-xl text-white"></i>
+                        <span class="absolute top-0 right-0 h-5 w-5 bg-accent-500 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    </button>
+                </div>
+                
+                <div class="flex items-center space-x-3 group cursor-pointer">
+                    <div class="relative">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="Profile" class="h-11 w-11 rounded-full border-2 border-white shadow-md object-cover">
+                        {% else %}
+                            <img src="{% static 'images/profile.jpg' %}" alt="Profile" class="h-11 w-11 rounded-full border-2 border-white shadow-md object-cover">
+                        {% endif %}
+                        <span class="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-400 ring-2 ring-white"></span>
+                    </div>
+                    <div class="hidden md:block">
+                        <p class="font-medium text-white">{{ user.get_full_name }}</p>
+                        <p class="text-xs text-primary-200">{{ user.get_user_type_display }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed md:static left-0 top-0 h-full md:h-auto w-64 -translate-x-full md:translate-x-0 bg-white/90 backdrop-blur-md shadow-xl transition-transform duration-300 md:transition-none flex flex-col z-30">
+            <nav class="flex-1 py-6">
+                <ul class="space-y-2 nav-links">
+                    <li class="px-3">
+                        <a href="{% url 'athlete_dashboard' %}" class="flex items-center space-x-3 {% if active_page == 'dashboard' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'dashboard' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
+                                <i class="fas fa-home text-lg {% if active_page == 'dashboard' %}text-white{% else %}text-primary-500{% endif %}"></i>
+                            </div>
+                            <span class="text-sm">Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="px-3">
+                        <a href="{% url 'appointments' %}" class="flex items-center space-x-3 {% if active_page == 'appointments' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'appointments' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
+                                <i class="fas fa-calendar-alt text-lg {% if active_page == 'appointments' %}text-white{% else %}text-primary-500{% endif %}"></i>
+                            </div>
+                            <span class="text-sm">Appointments</span>
+                        </a>
+                    </li>
+                    <li class="px-3">
+                        <a href="{% url 'Assessments' %}" class="flex items-center space-x-3 {% if active_page == 'assessments' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'assessments' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
+                                <i class="fas fa-clipboard-check text-lg {% if active_page == 'assessments' %}text-white{% else %}text-primary-500{% endif %}"></i>
+                            </div>
+                            <span class="text-sm">Mental Assessments</span>
+                        </a>
+                    </li>
+                    <li class="px-3">
+                        <a href="{% url 'WellnessResources' %}" class="flex items-center space-x-3 {% if active_page == 'resources' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'resources' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
+                                <i class="fas fa-book-open text-lg {% if active_page == 'resources' %}text-white{% else %}text-primary-500{% endif %}"></i>
+                            </div>
+                            <span class="text-sm">Wellness Resources</span>
+                        </a>
+                    </li>
+                    <li class="px-3">
+                        <a href="{% url 'journal_home' %}" class="flex items-center space-x-3 {% if active_page == 'community' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'community' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
+                                <i class="fas fa-users text-lg {% if active_page == 'community' %}text-white{% else %}text-primary-500{% endif %}"></i>
+                            </div>
+                            <span class="text-sm">Journaling</span>
+                        </a>
+                    </li>
+                    <li class="px-3">
+                        <a href="{% url 'community_home' %}" class="flex items-center space-x-3 {% if active_page == 'community' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'community' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
+                                <i class="fas fa-users text-lg {% if active_page == 'community' %}text-white{% else %}text-primary-500{% endif %}"></i>
+                            </div>
+                            <span class="text-sm">Athlete Community</span>
+                        </a>
+                    </li>
+                    <li class="px-3">
+                        <a href="{% url 'ProgressTracker' %}" class="flex items-center space-x-3 {% if active_page == 'progress' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'progress' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
+                                <i class="fas fa-chart-line text-lg {% if active_page == 'progress' %}text-white{% else %}text-primary-500{% endif %}"></i>
+                            </div>
+                            <span class="text-sm">Progress Tracker</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="p-4 border-t border-secondary-100">
+                <a href="#" class="flex items-center space-x-3 text-secondary-600 hover:text-primary-700 p-2 rounded-lg transition-all duration-300">
+                    <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-secondary-100/50">
+                        <i class="fas fa-cog text-lg text-secondary-500"></i>
+                    </div>
+                    <span class="text-sm">Settings</span>
+                </a>
+                
+                <a href="{% url 'logout' %}" class="flex items-center space-x-3 text-secondary-600 hover:text-red-600 p-2 rounded-lg transition-all duration-300 mt-2">
+                    <div class="w-10 h-10 flex items-center justify-center rounded-lg bg-red-100/50">
+                        <i class="fas fa-sign-out-alt text-lg text-red-500"></i>
+                    </div>
+                    <span class="text-sm">Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 md:ml-64 transition-all duration-300">
+            <div class="container mx-auto px-4 py-6">
+                <!-- Page Header -->
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+                    <div>
+                        <h1 class="text-2xl font-bold text-secondary-800">{% block page_title %}Dashboard{% endblock %}</h1>
+                        <p class="text-secondary-500 mt-1">{% block page_subtitle %}Welcome back, {{ user.first_name }}!{% endblock %}</p>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                    <div class="{% if message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %} p-4 rounded-lg mb-2 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                            {% elif message.tags == 'error' %}
+                            <i class="fas fa-exclamation-circle"></i>
+                            {% else %}
+                            <i class="fas fa-info-circle"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                        <button class="close-btn ml-4 text-lg opacity-70 hover:opacity-100">&times;</button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Main Content Block -->
+                {% block content %}
+                <!-- Default content goes here -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-secondary-800 mb-4">Welcome to AthleteMind</h2>
+                    <p class="text-secondary-600">Your mental wellness dashboard will appear here.</p>
+                </div>
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+        
+        // Close flash messages
+        document.querySelectorAll('.close-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.target.closest('.alert').remove();
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

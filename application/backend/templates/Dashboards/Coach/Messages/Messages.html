@@ -1,0 +1,522 @@
+{% extends 'Dashboards/Layout/coach_base.html' %}
+{% load static %}
+
+{% block title %}Messages | Mental Health Platform{% endblock %}
+{% block header_title %}Your Messages{% endblock %}
+
+{% block content %}
+<div class="w-full h-full flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg shadow-lg overflow-hidden">
+    <!-- Header with search and filters -->
+    <div class="p-4 bg-white border-b border-gray-200 flex flex-col md:flex-row items-center justify-between">
+        <h1 class="text-2xl font-bold text-indigo-800 mb-4 md:mb-0">
+            <span class="inline-flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+                Athlete Communications
+            </span>
+        </h1>
+        <div class="flex space-x-2">
+            <div class="relative">
+                <input type="text" placeholder="Search messages..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="relative">
+                <select class="pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none">
+                    <option>All Messages</option>
+                    <option>Unread</option>
+                    <option>Flagged</option>
+                    <option>Archived</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main content area with conversation list and messages -->
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <!-- Conversation list -->
+        <div class="w-full md:w-1/3 bg-white border-r border-gray-200 overflow-y-auto" id="conversation-list">
+            <!-- Active conversations -->
+            <div class="py-2">
+                <h2 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Active Conversations</h2>
+                
+                <!-- Conversation item - unread -->
+                <div class="conversation-item px-4 py-3 flex items-center hover:bg-indigo-50 cursor-pointer border-l-4 border-indigo-500 transform transition-transform duration-300 hover:scale-[1.01]" onclick="selectConversation(1)">
+                    <div class="relative mr-3">
+                        <img src="{% static 'images/avatars/athlete1.jpg' %}" alt="Athlete" class="h-12 w-12 rounded-full object-cover border-2 border-indigo-300">
+                        <span class="absolute bottom-0 right-0 bg-green-500 rounded-full h-3 w-3 border-2 border-white"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline">
+                            <h3 class="text-sm font-medium text-gray-900 truncate">Delphine Mebara</h3>
+                            <span class="text-xs text-gray-500">10:42 AM</span>
+                        </div>
+                        <div class="flex items-center">
+                            <p class="text-sm text-gray-600 truncate pr-1">Thank you for your support in yesterday's session...</p>
+                            <span class="ml-auto flex-shrink-0 bg-indigo-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">2</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conversation item - selected -->
+                <div class="conversation-item px-4 py-3 flex items-center bg-indigo-100 cursor-pointer transform transition-transform duration-300 hover:scale-[1.01]" id="selected-conversation" onclick="selectConversation(2)">
+                    <div class="relative mr-3">
+                        <img src="{% static 'images/avatars/athlete2.jpg' %}" alt="Athlete" class="h-12 w-12 rounded-full object-cover border-2 border-indigo-300">
+                        <span class="absolute bottom-0 right-0 bg-green-500 rounded-full h-3 w-3 border-2 border-white"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline">
+                            <h3 class="text-sm font-medium text-gray-900 truncate">Joseph Kameni</h3>
+                            <span class="text-xs text-gray-500">Yesterday</span>
+                        </div>
+                        <p class="text-sm text-gray-600 truncate">I've been practicing the mindfulness techniques...</p>
+                    </div>
+                </div>
+                
+                <!-- Conversation item - normal -->
+                <div class="conversation-item px-4 py-3 flex items-center hover:bg-indigo-50 cursor-pointer transform transition-transform duration-300 hover:scale-[1.01]" onclick="selectConversation(3)">
+                    <div class="relative mr-3">
+                        <img src="{% static 'images/avatars/athlete3.jpg' %}" alt="Athlete" class="h-12 w-12 rounded-full object-cover border-2 border-indigo-100">
+                        <span class="absolute bottom-0 right-0 bg-gray-300 rounded-full h-3 w-3 border-2 border-white"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline">
+                            <h3 class="text-sm font-medium text-gray-900 truncate">Marie Tchoupo</h3>
+                            <span class="text-xs text-gray-500">Apr 20</span>
+                        </div>
+                        <p class="text-sm text-gray-600 truncate">Following up on our last session, I wanted to...</p>
+                    </div>
+                </div>
+                
+                <!-- Conversation item - normal -->
+                <div class="conversation-item px-4 py-3 flex items-center hover:bg-indigo-50 cursor-pointer transform transition-transform duration-300 hover:scale-[1.01]" onclick="selectConversation(4)">
+                    <div class="relative mr-3">
+                        <img src="{% static 'images/avatars/athlete4.jpg' %}" alt="Athlete" class="h-12 w-12 rounded-full object-cover border-2 border-indigo-100">
+                        <span class="absolute bottom-0 right-0 bg-gray-300 rounded-full h-3 w-3 border-2 border-white"></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline">
+                            <h3 class="text-sm font-medium text-gray-900 truncate">Pascal Nkoulou</h3>
+                            <span class="text-xs text-gray-500">Apr 18</span>
+                        </div>
+                        <p class="text-sm text-gray-600 truncate">The competition is coming up next week and I'm feeling...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scheduled appointments -->
+            <div class="py-2 mt-4">
+                <h2 class="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Upcoming Sessions</h2>
+                
+                <div class="px-4 py-3 hover:bg-indigo-50 cursor-pointer transform transition-transform duration-300 hover:scale-[1.01]">
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-500 mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <h3 class="text-sm font-medium text-gray-900">Delphine Mebara</h3>
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Today</span>
+                            </div>
+                            <p class="text-sm text-gray-600">3:00 PM - 4:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="px-4 py-3 hover:bg-indigo-50 cursor-pointer transform transition-transform duration-300 hover:scale-[1.01]">
+                    <div class="flex items-center">
+                        <div class="h-10 w-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-500 mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <h3 class="text-sm font-medium text-gray-900">Joseph Kameni</h3>
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">Tomorrow</span>
+                            </div>
+                            <p class="text-sm text-gray-600">10:00 AM - 11:00 AM</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Message content -->
+        <div class="flex-1 flex flex-col bg-gray-50 overflow-hidden" id="message-content">
+            <!-- Message header -->
+            <div class="px-6 py-4 bg-white border-b border-gray-200 flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="relative mr-4">
+                        <img src="{% static 'images/avatars/athlete2.jpg' %}" alt="Joseph Kameni" class="h-12 w-12 rounded-full object-cover border-2 border-indigo-300">
+                        <span class="absolute bottom-0 right-0 bg-green-500 rounded-full h-3 w-3 border-2 border-white"></span>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-medium text-gray-900">Joseph Kameni</h2>
+                        <div class="flex items-center text-sm text-gray-500">
+                            <span class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                                Boxing - Professional
+                            </span>
+                            <span class="mx-2">•</span>
+                            <span>Last session: Apr 18, 2025</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex space-x-2">
+                    <button class="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="View athlete profile">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                    </button>
+                    <button class="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="Video call">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                    </button>
+                    <button class="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500" title="More options">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Message history -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="message-history">
+                <!-- Date separator -->
+                <div class="flex items-center justify-center">
+                    <span class="bg-gray-200 text-gray-600 text-xs font-medium px-3 py-1 rounded-full">April 20, 2025</span>
+                </div>
+                
+                <!-- Message - received -->
+                <div class="flex items-end">
+                    <div class="flex flex-col space-y-2 text-sm max-w-xs mx-2 order-2 items-start">
+                        <div class="px-4 py-2 rounded-lg bg-white shadow-sm border border-gray-200 text-gray-800 animate-fade-in">
+                            <p>Hello Dr. Nnomo, I've been practicing the mindfulness techniques you suggested, but I still feel very anxious before sparring sessions.</p>
+                        </div>
+                        <div class="px-4 py-2 rounded-lg bg-white shadow-sm border border-gray-200 text-gray-800 animate-fade-in">
+                            <p>Do you have any additional exercises I could try?</p>
+                        </div>
+                    </div>
+                    <img src="{% static 'images/avatars/athlete2.jpg' %}" alt="Joseph Kameni" class="w-8 h-8 rounded-full order-1 object-cover">
+                    <span class="text-xs text-gray-500 ml-2 order-3">10:24 AM</span>
+                </div>
+                
+                <!-- Message - sent -->
+                <div class="flex items-end justify-end">
+                    <span class="text-xs text-gray-500 mr-2">10:42 AM</span>
+                    <div class="flex flex-col space-y-2 text-sm max-w-xs mx-2 order-1 items-end">
+                        <div class="px-4 py-2 rounded-lg bg-indigo-100 text-indigo-800 shadow-sm animate-fade-in">
+                            <p>Hi Joseph, I'm glad to hear you've been practicing. Anxiety before sparring is very common, even among experienced fighters.</p>
+                        </div>
+                        <div class="px-4 py-2 rounded-lg bg-indigo-100 text-indigo-800 shadow-sm animate-fade-in">
+                            <p>In addition to mindfulness, you might try a technique called "progressive muscle relaxation" before your sessions. It involves tensing and then releasing each muscle group.</p>
+                        </div>
+                        <div class="px-4 py-2 rounded-lg bg-indigo-100 text-indigo-800 shadow-sm animate-fade-in">
+                            <p>Would you like me to send you a guided audio recording for this exercise?</p>
+                        </div>
+                    </div>
+                    <img src="{% static 'images/avatars/psychologist.jpg' %}" alt="Dr. Nnomo" class="w-8 h-8 rounded-full order-2 object-cover">
+                </div>
+                
+                <!-- Date separator -->
+                <div class="flex items-center justify-center">
+                    <span class="bg-gray-200 text-gray-600 text-xs font-medium px-3 py-1 rounded-full">Yesterday</span>
+                </div>
+                
+                <!-- Message - received -->
+                <div class="flex items-end">
+                    <div class="flex flex-col space-y-2 text-sm max-w-xs mx-2 order-2 items-start">
+                        <div class="px-4 py-2 rounded-lg bg-white shadow-sm border border-gray-200 text-gray-800 animate-fade-in">
+                            <p>Yes, that audio recording would be very helpful! I've also been trying to visualize successful sparring sessions, but sometimes negative thoughts intrude.</p>
+                        </div>
+                    </div>
+                    <img src="{% static 'images/avatars/athlete2.jpg' %}" alt="Joseph Kameni" class="w-8 h-8 rounded-full order-1 object-cover">
+                    <span class="text-xs text-gray-500 ml-2 order-3">3:15 PM</span>
+                </div>
+                
+                <!-- Message - sent with attachment -->
+                <div class="flex items-end justify-end">
+                    <span class="text-xs text-gray-500 mr-2">4:30 PM</span>
+                    <div class="flex flex-col space-y-2 text-sm max-w-xs mx-2 order-1 items-end">
+                        <div class="px-4 py-2 rounded-lg bg-indigo-100 text-indigo-800 shadow-sm animate-fade-in">
+                            <p>Here's the audio recording I mentioned. Listen to it before your sparring sessions, ideally in a quiet place where you won't be disturbed.</p>
+                        </div>
+                        <div class="px-4 py-3 rounded-lg bg-indigo-50 shadow-sm border border-indigo-200 animate-fade-in">
+                            <div class="flex items-center">
+                                <div class="h-10 w-10 rounded bg-indigo-200 flex items-center justify-center text-indigo-500 mr-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-medium text-indigo-700">Progressive Muscle Relaxation.mp3</h4>
+                                    <p class="text-xs text-indigo-500">15:42 • 12.4 MB</p>
+                                </div>
+                                <button class="ml-4 flex-shrink-0 text-indigo-600 hover:text-indigo-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="px-4 py-2 rounded-lg bg-indigo-100 text-indigo-800 shadow-sm animate-fade-in">
+                            <p>Regarding the intrusive negative thoughts, that's completely normal. Instead of trying to eliminate them, acknowledge them briefly and then gently redirect your focus back to your positive visualization.</p>
+                        </div>
+                    </div>
+                    <img src="{% static 'images/avatars/psychologist.jpg' %}" alt="Dr. Nnomo" class="w-8 h-8 rounded-full order-2 object-cover">
+                </div>
+                
+                <!-- Message - received -->
+                <div class="flex items-end">
+                    <div class="flex flex-col space-y-2 text-sm max-w-xs mx-2 order-2 items-start">
+                        <div class="px-4 py-2 rounded-lg bg-white shadow-sm border border-gray-200 text-gray-800 animate-fade-in">
+                            <p>Thank you so much! I'll try it out tonight and let you know how it goes. Looking forward to our session tomorrow.</p>
+                        </div>
+                    </div>
+                    <img src="{% static 'images/avatars/athlete2.jpg' %}" alt="Joseph Kameni" class="w-8 h-8 rounded-full order-1 object-cover">
+                    <span class="text-xs text-gray-500 ml-2 order-3">5:08 PM</span>
+                </div>
+                
+                <!-- Typing indicator -->
+                <div class="flex items-end" id="typing-indicator">
+                    <div class="flex flex-col space-y-2 text-sm max-w-xs mx-2 order-2 items-start">
+                        <div class="px-4 py-3 rounded-lg bg-white shadow-sm border border-gray-200 flex items-center">
+                            <div class="dot-typing"></div>
+                        </div>
+                    </div>
+                    <img src="{% static 'images/avatars/athlete2.jpg' %}" alt="Joseph Kameni" class="w-8 h-8 rounded-full order-1 object-cover">
+                </div>
+            </div>
+            
+            <!-- Message input -->
+            <div class="px-4 py-3 bg-white border-t border-gray-200">
+                <form class="flex items-end">
+                    <button type="button" class="inline-flex items-center justify-center rounded-full h-10 w-10 text-gray-600 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 mr-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                    </button>
+                    <div class="flex-1 relative">
+                        <textarea placeholder="Type your message..." rows="1" class="block w-full border border-gray-300 rounded-lg py-2 px-4 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none overflow-hidden"></textarea>
+                        <div class="absolute right-2 bottom-2">
+                            <button type="button" class="inline-flex items-center justify-center rounded-full h-8 w-8 text-gray-600 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-lg px-4 py-2 ml-2 bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 transform hover:scale-105">
+                        <span class="sr-only">Send</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Psychology tools panel (hidden by default) -->
+            <div class="hidden bg-white border-t border-gray-200 p-4 space-y-4" id="tools-panel">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-medium text-gray-900">Psychology Tools</h3>
+                    <button class="text-gray-500 hover:text-gray-700" onclick="toggleToolsPanel()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Tool card -->
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
+                        <div class="flex items-center mb-3">
+                            <div class="h-10 w-10 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-sm font-medium text-indigo-800">Assessment Forms</h4>
+                        </div>
+                        <p class="text-xs text-indigo-700 mb-2">Send standardized assessment forms to track progress</p>
+                        <button class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Send Form →</button>
+                    </div>
+                    
+                    <!-- Tool card -->
+                    <div class="bg-green-50 border border-green-100 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
+                        <div class="flex items-center mb-3">
+                            <div class="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center text-green-600 mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                            </div>
+                            <h4 class="text-sm font-medium text-green-800">Exercise Templates</h4>
+                        </div>
+                        <p class="text-xs text-green-700 mb-2">Share guided exercises and templates</p>
+                        <button class="text-xs text-green-600 hover:text-green-800 font-medium">Share Exercise →</button>
+                    </div>
+                    
+                    <!-- Tool card -->
+                    <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
+                        <div class="flex items-center mb-3">
+                            <div class="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <h4 class="text-sm font-medium text-blue-800">Schedule Session</h4>
+                        </div>
+                        <p class="text-xs text-blue-700 mb-2">Quickly schedule your next session</p>
+                        <button class="text-xs text-blue-600 hover:text-blue-800 font-medium">Schedule Now →</button>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <h4 class="text-sm font-medium text-gray-700">Recent Resources Shared</h4>
+                    <div class="flex space-x-2 overflow-x-auto pb-2">
+                        <div class="flex-shrink-0 w-40 bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow duration-300">
+                            <div class="h-8 w-8 rounded bg-red-100 flex items-center justify-center text-red-500 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
+                            <h5 class="text-xs font-medium text-gray-900 truncate">Sports Psychology Guide</h5>
+                            <p class="text-xs text-gray-500">PDF • Shared April 18</p>
+                        </div>
+                        <div class="flex-shrink-0 w-40 bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow duration-300">
+                            <div class="h-8 w-8 rounded bg-indigo-100 flex items-center justify-center text-indigo-500 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                                </svg>
+                            </div>
+                            <h5 class="text-xs font-medium text-gray-900 truncate">Meditation Audio</h5>
+                            <p class="text-xs text-gray-500">MP3 • Shared Yesterday</p>
+                        </div>
+                        <div class="flex-shrink-0 w-40 bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow duration-300">
+                            <div class="h-8 w-8 rounded bg-green-100 flex items-center justify-center text-green-500 mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h5 class="text-xs font-medium text-gray-900 truncate">Anxiety Assessment</h5>
+                            <p class="text-xs text-gray-500">Form • Completed April 15</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for interaction -->
+<script>
+    // Toggle Psychology Tools Panel
+    function toggleToolsPanel() {
+        const toolsPanel = document.getElementById('tools-panel');
+        toolsPanel.classList.toggle('hidden');
+    }
+    
+    // Handle conversation selection
+    function selectConversation(id) {
+        // Remove selected class from all conversations
+        const conversations = document.querySelectorAll('.conversation-item');
+        conversations.forEach(item => {
+            item.classList.remove('bg-indigo-100');
+            item.classList.add('hover:bg-indigo-50');
+        });
+        
+        // Add selected class to clicked conversation
+        event.currentTarget.classList.add('bg-indigo-100');
+        event.currentTarget.classList.remove('hover:bg-indigo-50');
+        
+        // Show typing indicator temporarily
+        const typingIndicator = document.getElementById('typing-indicator');
+        typingIndicator.style.display = 'flex';
+        
+        // Hide typing indicator after 2 seconds
+        setTimeout(() => {
+            typingIndicator.style.display = 'none';
+        }, 2000);
+    }
+    
+    // Auto-resize textarea as user types
+    const textarea = document.querySelector('textarea');
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+        
+        // Limit max height
+        if (this.scrollHeight > 150) {
+            this.style.height = '150px';
+            this.style.overflowY = 'auto';
+        }
+    });
+    
+    // Add animation for new messages
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add fade-in animation class
+        const style = document.createElement('style');
+        style.textContent = `
+            .animate-fade-in {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            
+            .dot-typing {
+                position: relative;
+                left: -9999px;
+                width: 8px;
+                height: 8px;
+                border-radius: 5px;
+                background-color: #6366F1;
+                color: #6366F1;
+                box-shadow: 9984px 0 0 0 #6366F1, 9999px 0 0 0 #6366F1, 10014px 0 0 0 #6366F1;
+                animation: dotTyping 1.5s infinite linear;
+            }
+
+            @keyframes dotTyping {
+                0% {
+                    box-shadow: 9984px 0 0 0 #6366F1, 9999px 0 0 0 #6366F1, 10014px 0 0 0 #6366F1;
+                }
+                16.667% {
+                    box-shadow: 9984px -10px 0 0 #6366F1, 9999px 0 0 0 #6366F1, 10014px 0 0 0 #6366F1;
+                }
+                33.333% {
+                    box-shadow: 9984px 0 0 0 #6366F1, 9999px 0 0 0 #6366F1, 10014px 0 0 0 #6366F1;
+                }
+                50% {
+                    box-shadow: 9984px 0 0 0 #6366F1, 9999px -10px 0 0 #6366F1, 10014px 0 0 0 #6366F1;
+                }
+                66.667% {
+                    box-shadow: 9984px 0 0 0 #6366F1, 9999px 0 0 0 #6366F1, 10014px 0 0 0 #6366F1;
+                }
+                83.333% {
+                    box-shadow: 9984px 0 0 0 #6366F1, 9999px 0 0 0 #6366F1, 10014px -10px 0 0 #6366F1;
+                }
+                100% {
+                    box-shadow: 9984px 0 0 0 #6366F1, 9999px 0 0 0 #6366F1, 10014px 0 0 0 #6366F1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+{% endblock %}

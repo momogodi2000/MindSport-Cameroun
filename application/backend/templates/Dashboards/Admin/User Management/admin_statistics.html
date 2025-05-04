@@ -1,0 +1,362 @@
+{% extends "Dashboards/Layout/admin_base.html" %}
+{% load static %}
+
+{% block title %}User Statistics Dashboard{% endblock %}
+
+{% block page_title %}User Statistics Dashboard{% endblock %}
+
+{% block current_page %}Statistics{% endblock %}
+
+{% block breadcrumbs %}
+<div class="flex items-center text-sm text-gray-500 mb-4">
+    <a href="{% url 'admin_dashboard' %}" class="hover:text-primary-600">Dashboard</a>
+    <i class="fas fa-chevron-right mx-2 text-xs"></i>
+    <span class="text-gray-700">User Statistics</span>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6 mb-6 animate-fade-in">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-primary-700">
+            <i class="fas fa-chart-line mr-2"></i>User Statistics Overview
+        </h2>
+        <div class="flex space-x-2">
+            <a href="{% url 'admin_export_users' %}" class="bg-green-50 text-green-700 px-3 py-2 rounded-md flex items-center hover:bg-green-100 transition-colors">
+                <i class="fas fa-download mr-2"></i>Export Data
+            </a>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Total Users Card -->
+        <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1">
+            <div class="p-5 text-white">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm opacity-75">Total Users</p>
+                        <h3 class="text-3xl font-bold">{{ statistics.total_users }}</h3>
+                    </div>
+                    <div class="bg-white bg-opacity-30 p-3 rounded-full">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-sm">
+                    <span class="bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                        New today: {{ statistics.new_users_today }}
+                    </span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Athletes Card -->
+        <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1">
+            <div class="p-5 text-white">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm opacity-75">Athletes</p>
+                        <h3 class="text-3xl font-bold">{{ statistics.athlete_count }}</h3>
+                    </div>
+                    <div class="bg-white bg-opacity-30 p-3 rounded-full">
+                        <i class="fas fa-running text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm bg-white bg-opacity-20 px-2 py-1 rounded-full inline-block">
+                    {{ statistics.athlete_count|floatformat:1 }}% of all users
+                </div>
+            </div>
+        </div>
+        
+        <!-- Professionals Card -->
+        <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1">
+            <div class="p-5 text-white">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <p class="text-sm opacity-75">Professionals</p>
+                        <h3 class="text-3xl font-bold">{{ statistics.professional_count }}</h3>
+                    </div>
+                    <div class="bg-white bg-opacity-30 p-3 rounded-full">
+                        <i class="fas fa-user-tie text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                    <span class="bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                        Verified: {{ statistics.verified_professionals }}
+                    </span>
+                    <span class="bg-white bg-opacity-20 px-2 py-1 rounded-full">
+                        Unverified: {{ statistics.unverified_professionals }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Growth Chart -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-8 border border-gray-100">
+        <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+            <i class="fas fa-chart-line mr-2 text-primary-600"></i>
+            User Growth (Last 12 Months)
+        </h4>
+        <div class="h-80">
+            <canvas id="userGrowthChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Two Column Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Sport Distribution -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+            <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                <i class="fas fa-dumbbell mr-2 text-primary-600"></i>
+                Sport Distribution
+            </h4>
+            <div class="h-80">
+                <canvas id="sportDistributionChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Account Status -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+            <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                <i class="fas fa-user-check mr-2 text-primary-600"></i>
+                Account Status
+            </h4>
+            <div class="h-80">
+                <canvas id="accountStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Statistics Table -->
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+        <h4 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+            <i class="fas fa-table mr-2 text-primary-600"></i>
+            Detailed Statistics
+        </h4>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">New Users</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ statistics.new_users_30_days }} (30 days)<br>
+                            {{ statistics.new_users_7_days }} (7 days)<br>
+                            {{ statistics.new_users_today }} (today)
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Growth rate: {{ statistics.new_users_30_days|floatformat:1 }}% monthly
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Account Status</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Active: {{ statistics.active_count }}<br>
+                            Pending: {{ statistics.pending_count }}<br>
+                            Blocked: {{ statistics.blocked_count }}<br>
+                            Suspended: {{ statistics.suspended_count }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ statistics.active_count|floatformat:1 }}% active
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Payment Status</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Paid: {{ statistics.payment_paid_count }}<br>
+                            Pending: {{ statistics.payment_pending_count }}<br>
+                            Failed: {{ statistics.payment_failed_count }}<br>
+                            Expired: {{ statistics.payment_expired_count }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ statistics.payment_paid_count|floatformat:1 }}% paid
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize charts
+        initializeCharts();
+        
+        function initializeCharts() {
+            // User Growth Chart
+            const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+            const userGrowthChart = new Chart(userGrowthCtx, {
+                type: 'line',
+                data: {
+                    labels: JSON.parse('{{ user_growth_months|safe }}'),
+                    datasets: [{
+                        label: 'New Users',
+                        data: JSON.parse('{{ user_growth_data|safe }}'),
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Sport Distribution Chart
+            const sportDistributionCtx = document.getElementById('sportDistributionChart').getContext('2d');
+            const sportDistributionChart = new Chart(sportDistributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Boxing', 'Wrestling', 'Judo', 'Karate', 'Taekwondo', 'MMA', 'Other'],
+                    datasets: [{
+                        data: [
+                            {{ statistics.boxing_count }}, 
+                            {{ statistics.wrestling_count }}, 
+                            {{ statistics.judo_count }}, 
+                            {{ statistics.karate_count }}, 
+                            {{ statistics.taekwondo_count }}, 
+                            {{ statistics.mma_count }}, 
+                            {{ statistics.other_sport_count }}
+                        ],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(153, 102, 255, 0.8)',
+                            'rgba(255, 159, 64, 0.8)',
+                            'rgba(199, 199, 199, 0.8)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Account Status Chart
+            const accountStatusCtx = document.getElementById('accountStatusChart').getContext('2d');
+            const accountStatusChart = new Chart(accountStatusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Active', 'Pending', 'Blocked', 'Suspended'],
+                    datasets: [{
+                        data: [
+                            {{ statistics.active_count }}, 
+                            {{ statistics.pending_count }}, 
+                            {{ statistics.blocked_count }}, 
+                            {{ statistics.suspended_count }}
+                        ],
+                        backgroundColor: [
+                            'rgba(34, 197, 94, 0.8)',
+                            'rgba(249, 115, 22, 0.8)',
+                            'rgba(239, 68, 68, 0.8)',
+                            'rgba(156, 163, 175, 0.8)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.parsed || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

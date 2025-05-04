@@ -1,0 +1,211 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block title %}Mental Health Progress{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 animate-fade-in">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-indigo-800 mb-2">Your Mental Health Progress</h1>
+        <p class="text-gray-600">Track your mental well-being over time and see your improvement</p>
+    </div>
+
+    <!-- Time Period Selector -->
+    <div class="bg-white rounded-lg shadow-lg p-4 mb-6">
+        <div class="flex justify-between items-center">
+            <div class="flex space-x-2">
+                <button class="px-3 py-1 text-sm rounded-md bg-indigo-100 text-indigo-800">3M</button>
+                <button class="px-3 py-1 text-sm rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200">6M</button>
+                <button class="px-3 py-1 text-sm rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200">1Y</button>
+                <button class="px-3 py-1 text-sm rounded-md bg-gray-100 text-gray-800 hover:bg-gray-200">All</button>
+            </div>
+            <div class="relative">
+                <button class="flex items-center text-gray-600 hover:text-gray-800">
+                    <span class="mr-1">Export Data</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chart -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Mental Wellness Trends</h2>
+        <div class="h-80">
+            <canvas id="progressChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Assessment History -->
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Assessment History</h2>
+        {% if responses %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assessment</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for response in responses %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ response.completed_at|date:"M j, Y" }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{ response.assessment.title }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if response.scores.overall %}
+                                        <div class="flex items-center">
+                                            <div class="w-16 bg-gray-200 rounded-full h-2.5">
+                                                <div class="bg-{% if response.scores.overall.score >= 70 %}green{% elif response.scores.overall.score >= 40 %}yellow{% else %}red{% endif %}-500 h-2.5 rounded-full" 
+                                                    style="width: {{ response.scores.overall.score }}%"></div>
+                                            </div>
+                                            <span class="ml-2 text-sm text-gray-700">{{ response.scores.overall.score|floatformat:0 }}%</span>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-sm text-gray-500">Not scored</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                        {% if response.status == 'completed' %}bg-blue-100 text-blue-800
+                                        {% else %}bg-green-100 text-green-800{% endif %}">
+                                        {{ response.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="{% url 'view_results' response.id %}" class="text-indigo-600 hover:text-indigo-900">View</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination would go here -->
+        {% else %}
+            <p class="text-gray-500">You haven't completed any assessments yet.</p>
+        {% endif %}
+    </div>
+
+    <!-- Metric Tracking -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Tracked Metrics</h2>
+        {% if metrics %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for metric in metrics %}
+                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <h3 class="font-medium text-gray-800 mb-2">{{ metric.metric.name }}</h3>
+                        <div class="flex items-end mb-2">
+                            <span class="text-3xl font-bold text-indigo-600 mr-2">{{ metric.value }}</span>
+                            <span class="text-sm text-gray-500 mb-1">/ {{ metric.metric.max_value }}</span>
+                        </div>
+                        <p class="text-sm text-gray-500 mb-3">Tracked on {{ metric.date|date:"M j, Y" }}</p>
+                        {% if metric.notes %}
+                            <div class="bg-gray-50 p-3 rounded-lg">
+                                <p class="text-sm text-gray-600">{{ metric.notes }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500">No metrics tracked yet.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Progress Chart
+    const progressCtx = document.getElementById('progressChart').getContext('2d');
+    const progressChart = new Chart(progressCtx, {
+        type: 'line',
+        data: {
+            labels: [
+                {% for response in responses reversed %}
+                    "{{ response.completed_at|date:'M j' }}"{% if not forloop.last %},{% endif %}
+                {% endfor %}
+            ],
+            datasets: [
+                {
+                    label: 'Overall Score',
+                    data: [
+                        {% for response in responses reversed %}
+                            {{ response.scores.overall.score|default:"0" }}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    borderColor: '#6366F1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Stress',
+                    data: [
+                        {% for response in responses reversed %}
+                            {{ response.scores.Stress.score|default:"0" }}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.3,
+                    fill: false
+                },
+                {
+                    label: 'Anxiety',
+                    data: [
+                        {% for response in responses reversed %}
+                            {{ response.scores.Anxiety.score|default:"0" }}{% if not forloop.last %},{% endif %}
+                        {% endfor %}
+                    ],
+                    borderColor: '#8B5CF6',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                    tension: 0.3,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 0,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(226, 232, 240, 0.5)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

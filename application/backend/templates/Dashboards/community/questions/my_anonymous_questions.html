@@ -1,0 +1,248 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block head %}
+<title>{{ question.title }} - Athlete Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
+    .answer-card {
+        transform-style: preserve-3d;
+        perspective: 1000px;
+    }
+    .answer-content {
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+    }
+    .floating-action {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+        70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(79, 70, 229, 0); }
+        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+    }
+    .highlight-new {
+        animation: highlight 3s ease-out;
+    }
+    @keyframes highlight {
+        0% { background-color: rgba(199, 210, 254, 0.5); }
+        100% { background-color: transparent; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Question Header -->
+    <div class="mb-8 animate__animated animate__fadeIn">
+        <div class="flex items-center mb-4">
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-{% if question.status == 'answered' %}green-100 text-green-800{% elif question.status == 'pending' %}yellow-100 text-yellow-800{% else %}blue-100 text-blue-800{% endif %} dark:bg-opacity-20">
+                {{ question.get_status_display }}
+            </span>
+            <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">
+                Asked {{ question.created_at|timesince }} ago
+            </span>
+            {% if question.sport %}
+            <span class="ml-auto inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                {{ question.get_sport_display }}
+            </span>
+            {% endif %}
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            {{ question.title }}
+        </h1>
+        
+        {% if question.category %}
+        <div class="flex items-center mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+            <span class="text-gray-600 dark:text-gray-300">
+                Posted in {{ question.category.name }}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Question Content -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8 animate__animated animate__fadeInUp">
+        <div class="prose dark:prose-invert max-w-none">
+            {{ question.content|linebreaks }}
+        </div>
+    </div>
+
+    <!-- Answer Section -->
+    {% if question.status == 'answered' %}
+    <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center animate__animated animate__fadeIn">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">
+                Professional Answer
+            </span>
+        </h2>
+        
+        <div class="answer-card bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-700 dark:to-gray-800 rounded-xl shadow-lg overflow-hidden transform transition-all duration-500 hover:shadow-xl animate__animated animate__fadeInUp">
+            <div class="p-6 answer-content">
+                <div class="flex items-center mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center text-white font-bold">
+                            {% if question.answered_by %}
+                                {{ question.answered_by.first_name|first }}{{ question.answered_by.last_name|first }}
+                            {% else %}
+                                A
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="ml-4">
+                        <div class="text-sm font-medium text-gray-900 dark:text-white">
+                            {% if question.answered_by %}
+                                {{ question.answered_by.get_full_name }}
+                            {% else %}
+                                Anonymous Professional
+                            {% endif %}
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                            Answered {{ question.answered_at|timesince }} ago
+                        </div>
+                    </div>
+                    <div class="ml-auto">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            Verified
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="prose dark:prose-invert max-w-none">
+                    {{ question.answer|linebreaks }}
+                </div>
+                
+                {% if question.answered_by and question.answered_by.specialist_profile %}
+                <div class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-2">About the Professional</h4>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">
+                        {{ question.answered_by.specialist_profile.bio|truncatewords:30 }}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% elif question.status == 'pending' %}
+    <div class="bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-20 rounded-xl p-6 mb-12 text-center animate__animated animate__fadeIn">
+        <div class="mx-auto w-16 h-16 text-yellow-400 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+        </div>
+        <h3 class="text-lg font-medium text-yellow-800 dark:text-yellow-200 mb-2">Pending Approval</h3>
+        <p class="text-yellow-600 dark:text-yellow-300">
+            Your question is awaiting approval by our moderation team. It will be visible to professionals once approved.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Similar Questions -->
+    {% if similar_questions %}
+    <div class="mb-12 animate__animated animate__fadeIn">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Similar Questions</h2>
+        <div class="grid grid-cols-1 gap-4">
+            {% for similar in similar_questions %}
+            <a href="{% url 'community:question_detail' pk=similar.pk %}" class="block bg-white dark:bg-gray-800 rounded-lg shadow p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                <h3 class="font-medium text-gray-900 dark:text-white">{{ similar.title }}</h3>
+                <div class="flex items-center mt-2">
+                    <span class="text-sm {% if similar.status == 'answered' %}text-green-600 dark:text-green-400{% else %}text-yellow-600 dark:text-yellow-400{% endif %}">
+                        {{ similar.get_status_display }}
+                    </span>
+                    <span class="mx-2 text-gray-400">•</span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ similar.created_at|timesince }} ago
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions for Moderators -->
+    {% if request.user.is_staff %}
+    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-8 animate__animated animate__fadeIn">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Moderator Actions</h3>
+        <form method="post" action="{% url 'community:question_moderate' pk=question.pk %}">
+            {% csrf_token %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="action" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Action</label>
+                    <select id="action" name="action" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
+                        <option value="approve">Approve Question</option>
+                        <option value="reject">Reject Question</option>
+                        {% if question.status == 'approved' %}
+                        <option value="answer">Answer Question</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div>
+                    <label for="answer" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Answer (if applicable)</label>
+                    <textarea id="answer" name="answer" rows="3" class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:text-white rounded-md" placeholder="Enter professional answer...">{{ question.answer }}</textarea>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Submit Action
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Back to Questions Link -->
+    <div class="text-center animate__animated animate__fadeIn">
+        <a href="{% url 'community:question_list' %}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to All Questions
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 3D effect for answer card
+    const answerCard = document.querySelector('.answer-card');
+    if (answerCard) {
+        answerCard.addEventListener('mousemove', (e) => {
+            const xAxis = (window.innerWidth / 2 - e.pageX) / 20;
+            const yAxis = (window.innerHeight / 2 - e.pageY) / 20;
+            answerCard.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+        });
+
+        answerCard.addEventListener('mouseenter', () => {
+            answerCard.style.transition = 'all 0.1s ease';
+        });
+
+        answerCard.addEventListener('mouseleave', () => {
+            answerCard.style.transform = 'rotateY(0) rotateX(0)';
+            answerCard.style.transition = 'all 0.5s ease';
+        });
+    }
+
+    // Highlight new content if just answered
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('answered')) {
+        document.querySelector('.answer-card').classList.add('highlight-new');
+    }
+
+    // Smooth scroll to answer if URL has hash
+    if (window.location.hash === '#answer') {
+        document.querySelector('.answer-card').scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'center'
+        });
+    }
+</script>
+{% endblock %}

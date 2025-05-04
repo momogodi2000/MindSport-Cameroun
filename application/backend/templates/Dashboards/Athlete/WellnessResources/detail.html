@@ -1,0 +1,398 @@
+<!-- resource_detail.html -->
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<style>
+    .rating-star {
+        transition: all 0.2s ease;
+    }
+    .rating-star:hover {
+        transform: scale(1.2);
+    }
+    .rating-star.active {
+        transform: scale(1.1);
+    }
+    .resource-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+    }
+    .resource-content iframe {
+        width: 100%;
+        min-height: 400px;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+    }
+    .related-resource-card {
+        transition: all 0.3s ease;
+    }
+    .related-resource-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <!-- Resource Header -->
+    <div class="relative bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
+                <div class="pt-10 sm:pt-16 lg:pt-8 lg:pb-14 lg:overflow-hidden">
+                    <div class="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
+                        <div class="sm:text-center lg:text-left">
+                            <div class="flex items-center">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    {{ resource.get_content_type_display }}
+                                </span>
+                                <span class="ml-2 text-sm text-gray-500">
+                                    {{ resource.category.name }}
+                                </span>
+                            </div>
+                            <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl mt-2">
+                                <span class="block">{{ resource.title }}</span>
+                            </h1>
+                            <div class="mt-4 flex items-center">
+                                <div class="flex items-center">
+                                    {% if avg_rating %}
+                                    {% for i in "12345" %}
+                                    <svg class="h-5 w-5 {% if forloop.counter <= avg_rating %}text-yellow-400{% else %}text-gray-300{% endif %}" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                    {% endfor %}
+                                    <span class="ml-1 text-sm text-gray-600">
+                                        {{ avg_rating|floatformat:1 }} ({{ resource.ratings.count }} ratings)
+                                    </span>
+                                    {% else %}
+                                    <span class="text-sm text-gray-600">Not rated yet</span>
+                                    {% endif %}
+                                </div>
+                                <span class="mx-2 text-gray-300">•</span>
+                                <span class="text-sm text-gray-600">{{ resource.view_count }} views</span>
+                            </div>
+                            <div class="mt-5 sm:mt-8 sm:flex sm:justify-start">
+                                <div class="rounded-md shadow mr-4">
+                                    <button id="save-resource-btn" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md {% if is_saved %}text-white bg-blue-600 hover:bg-blue-700{% else %}text-blue-700 bg-blue-100 hover:bg-blue-200{% endif %} md:py-4 md:text-lg md:px-10 transition-all duration-300 transform hover:scale-105">
+                                        {% if is_saved %}
+                                        <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path fill-rule="evenodd" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" clip-rule="evenodd" />
+                                        </svg>
+                                        Saved
+                                        {% else %}
+                                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                        </svg>
+                                        Save
+                                        {% endif %}
+                                    </button>
+                                </div>
+                                {% if resource.external_url %}
+                                <div class="rounded-md shadow">
+                                    <a href="{{ resource.external_url }}" target="_blank" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg md:px-10 transition-all duration-300 transform hover:scale-105">
+                                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                        Visit Resource
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+            {% if resource.thumbnail %}
+            <img class="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full" src="{{ resource.thumbnail.url }}" alt="{{ resource.title }}">
+            {% else %}
+            <div class="h-56 w-full bg-gradient-to-r from-blue-400 to-indigo-600 flex items-center justify-center sm:h-72 md:h-96 lg:w-full lg:h-full">
+                <svg class="h-32 w-32 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                </svg>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Resource Content -->
+    <div class="py-12 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+                <div class="lg:col-span-2">
+                    <div class="prose prose-blue max-w-none resource-content" data-aos="fade-up">
+                        {% if resource.content_type == 'video' and resource.external_url %}
+                        <div class="aspect-w-16 aspect-h-9">
+                            <iframe src="{{ resource.external_url }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                        {% elif resource.content_type == 'audio' and resource.external_url %}
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <audio controls class="w-full">
+                                <source src="{{ resource.external_url }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        </div>
+                        {% elif resource.content_type == 'pdf' and resource.file %}
+                        <div class="bg-gray-100 p-4 rounded-lg">
+                            <a href="{{ resource.file.url }}" target="_blank" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700">
+                                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                Download PDF
+                            </a>
+                        </div>
+                        {% endif %}
+                        
+                        {{ resource.content|safe }}
+                    </div>
+
+                    <!-- Rating Section -->
+                    <div class="mt-12 pt-8 border-t border-gray-200" data-aos="fade-up">
+                        <h2 class="text-2xl font-bold text-gray-900">Rate this resource</h2>
+                        <p class="mt-2 text-gray-600">Share your experience to help others</p>
+                        
+                        <div class="mt-4">
+                            <div class="flex items-center">
+                                {% for i in "12345" %}
+                                <button class="rating-star p-1 {% if user_rating and forloop.counter <= user_rating.rating %}text-yellow-400 active{% else %}text-gray-300{% endif %}" 
+                                        data-rating="{{ forloop.counter }}">
+                                    <svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                </button>
+                                {% endfor %}
+                                <span class="ml-2 text-sm text-gray-600">
+                                    {% if user_rating %}
+                                    You rated this {{ user_rating.rating }} star{{ user_rating.rating|pluralize }}
+                                    {% else %}
+                                    Not rated yet
+                                    {% endif %}
+                                </span>
+                            </div>
+                            
+                            <form id="rating-form" class="mt-4">
+                                <div class="mt-4">
+                                    <label for="feedback" class="block text-sm font-medium text-gray-700">Feedback (optional)</label>
+                                    <textarea id="feedback" name="feedback" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">{% if user_rating %}{{ user_rating.feedback }}{% endif %}</textarea>
+                                </div>
+                                <div class="mt-4">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                        Submit Rating
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="mt-12 lg:mt-0" data-aos="fade-left">
+                    <div class="bg-blue-50 rounded-lg p-6">
+                        <h3 class="text-lg font-medium text-blue-800">About this resource</h3>
+                        <div class="mt-4 space-y-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Category</p>
+                                <p class="mt-1 text-sm text-gray-900">{{ resource.category.name }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Type</p>
+                                <p class="mt-1 text-sm text-gray-900">{{ resource.get_content_type_display }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Published</p>
+                                <p class="mt-1 text-sm text-gray-900">{{ resource.created_at|date:"F j, Y" }}</p>
+                            </div>
+                            {% if resource.tags %}
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Tags</p>
+                                <div class="mt-1 flex flex-wrap gap-2">
+                                    {% for tag in resource.get_tags_list %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ tag }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Related Resources -->
+                    {% if related_resources %}
+                    <div class="mt-8">
+                        <h3 class="text-lg font-medium text-gray-900">Related Resources</h3>
+                        <div class="mt-4 space-y-4">
+                            {% for related in related_resources %}
+                            <a href="{% url 'resource_detail' related.slug %}" class="related-resource-card block bg-white rounded-lg shadow p-4 hover:bg-blue-50 transition-colors duration-200">
+                                <div class="flex items-start">
+                                    {% if related.thumbnail %}
+                                    <div class="flex-shrink-0 h-16 w-16 overflow-hidden rounded-md">
+                                        <img class="h-full w-full object-cover" src="{{ related.thumbnail.url }}" alt="{{ related.title }}">
+                                    </div>
+                                    {% else %}
+                                    <div class="flex-shrink-0 h-16 w-16 bg-gradient-to-r from-blue-400 to-indigo-600 rounded-md flex items-center justify-center">
+                                        <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                                        </svg>
+                                    </div>
+                                    {% endif %}
+                                    <div class="ml-4">
+                                        <h4 class="text-sm font-medium text-gray-900">{{ related.title }}</h4>
+                                        <div class="mt-1 flex items-center">
+                                            <svg class="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                            </svg>
+                                            <span class="ml-1 text-xs text-gray-600">
+                                                {% if related.ratings.all %}
+                                                {{ related.ratings.all.0.avg_rating|default:"0"|floatformat:1 }} ({{ related.ratings.all.count }})
+                                                {% else %}
+                                                Not rated
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Save resource functionality
+        const saveBtn = document.getElementById('save-resource-btn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const isSaved = this.classList.contains('bg-blue-600');
+                
+                fetch("{% url 'save_resource' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `resource_id={{ resource.id }}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Toggle the saved state
+                        if (isSaved) {
+                            this.classList.remove('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                            this.classList.add('bg-blue-100', 'text-blue-700', 'hover:bg-blue-200');
+                            this.innerHTML = `
+                                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                                Save
+                            `;
+                        } else {
+                            this.classList.remove('bg-blue-100', 'text-blue-700', 'hover:bg-blue-200');
+                            this.classList.add('bg-blue-600', 'text-white', 'hover:bg-blue-700');
+                            this.innerHTML = `
+                                <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" clip-rule="evenodd" />
+                                </svg>
+                                Saved
+                            `;
+                        }
+                        
+                        // Add animation
+                        this.classList.add('animate-pulse');
+                        setTimeout(() => {
+                            this.classList.remove('animate-pulse');
+                        }, 500);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        }
+
+        // Rating functionality
+        const ratingStars = document.querySelectorAll('.rating-star');
+        const ratingForm = document.getElementById('rating-form');
+        let selectedRating = {% if user_rating %}{{ user_rating.rating }}{% else %}0{% endif %};
+
+        ratingStars.forEach(star => {
+            star.addEventListener('click', function(e) {
+                e.preventDefault();
+                const rating = parseInt(this.getAttribute('data-rating'));
+                selectedRating = rating;
+                
+                // Update star display
+                ratingStars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.add('text-yellow-400', 'active');
+                        s.classList.remove('text-gray-300');
+                    } else {
+                        s.classList.remove('text-yellow-400', 'active');
+                        s.classList.add('text-gray-300');
+                    }
+                });
+            });
+        });
+
+        if (ratingForm) {
+            ratingForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const feedback = document.getElementById('feedback').value;
+                
+                fetch("{% url 'rate_resource' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `resource_id={{ resource.id }}&rating=${selectedRating}&feedback=${encodeURIComponent(feedback)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Show success message
+                        const submitBtn = ratingForm.querySelector('button[type="submit"]');
+                        submitBtn.innerHTML = 'Rating Submitted!';
+                        submitBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                        submitBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                        
+                        setTimeout(() => {
+                            submitBtn.innerHTML = 'Submit Rating';
+                            submitBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                            submitBtn.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                        }, 2000);
+                        
+                        // Update rating display
+                        const ratingText = document.querySelector('.rating-star + span');
+                        if (ratingText) {
+                            ratingText.textContent = `You rated this ${selectedRating} star${selectedRating !== 1 ? 's' : ''}`;
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        }
+    });
+</script>
+{% endblock %}

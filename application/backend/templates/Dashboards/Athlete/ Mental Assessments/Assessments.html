@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Assessments</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.10.5/cdn.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.150.1/three.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-blue-100 min-h-screen">
+
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block title %}Mental Health Assessments{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 relative" x-data="{ activeTab: 'available' }">
+    <!-- 3D Background Animation -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <canvas id="background-canvas" class="opacity-20"></canvas>
+    </div>
+
+    <!-- Page Header with Animation -->
+    <div class="mb-10 transform transition-all duration-700 ease-out" id="page-header">
+        <h1 class="text-4xl font-bold text-indigo-800 mb-3 tracking-tight">Mental Health Assessments</h1>
+        <div class="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+            <p class="text-gray-600 max-w-2xl">Complete assessments to track your mental well-being and receive personalized recommendations</p>
+            <div class="flex-grow"></div>
+            <a href="{% url 'athlete_progress' %}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1h-12a1 1 0 01-1-1V3zm2 0v12h12V3H5z" clip-rule="evenodd" />
+                    <path fill-rule="evenodd" d="M19 7H5V5h14v2zm0 4H5V9h14v2zm0 4H5v-2h14v2z" clip-rule="evenodd" />
+                </svg>
+                View My Progress
+            </a>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <nav class="flex border-b border-gray-200 mb-8" aria-label="Tabs">
+        <button
+            @click="activeTab = 'available'"
+            :class="{'border-indigo-500 text-indigo-600': activeTab === 'available', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'available'}"
+            class="py-4 px-6 font-medium text-sm border-b-2 transition-all duration-200 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z" />
+            </svg>
+            Available Assessments
+        </button>
+        <button
+            @click="activeTab = 'assigned'"
+            :class="{'border-indigo-500 text-indigo-600': activeTab === 'assigned', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'assigned'}"
+            class="py-4 px-6 font-medium text-sm border-b-2 transition-all duration-200 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+            </svg>
+            Assigned to You
+            {% if assigned_assessments %}
+            <span class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                {{ assigned_assessments|length }}
+            </span>
+            {% endif %}
+        </button>
+        <button
+            @click="activeTab = 'completed'"
+            :class="{'border-indigo-500 text-indigo-600': activeTab === 'completed', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'completed'}"
+            class="py-4 px-6 font-medium text-sm border-b-2 transition-all duration-200 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Completed
+            {% if completed_assessments %}
+            <span class="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                {{ completed_assessments|length }}
+            </span>
+            {% endif %}
+        </button>
+    </nav>
+
+    <!-- Tab Content -->
+    <div class="mt-2">
+        <!-- Available Assessments Tab -->
+        <div x-show="activeTab === 'available'" class="transition-all duration-500 ease-in-out"
+             x-transition:enter="opacity-0 transform translate-x-4"
+             x-transition:enter-start="opacity-0 transform translate-x-4"
+             x-transition:enter-end="opacity-100 transform translate-x-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="available-assessments">
+                {% if public_assessments %}
+                    {% for assessment in public_assessments %}
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 assessment-card">
+                            <div class="h-3 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+                            <div class="p-6">
+                                <div class="flex items-start justify-between">
+                                    <h3 class="font-bold text-lg text-gray-800 mb-2">{{ assessment.title }}</h3>
+                                    <span class="text-xs font-medium px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+                                        {{ assessment.category.name|default:"General" }}
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4">{{ assessment.description|truncatechars:120 }}</p>
+                                <div class="flex items-center justify-between mt-4">
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {{ assessment.estimated_time_minutes }} minutes
+                                    </div>
+                                    <a href="{% url 'assessment_detail' assessment.id %}" class="inline-flex items-center px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors duration-200">
+                                        View Details
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-span-full flex flex-col items-center justify-center p-10 bg-white rounded-xl shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p class="text-gray-500 text-center">No public assessments available at this time.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Assigned Assessments Tab -->
+        <div x-show="activeTab === 'assigned'" class="transition-all duration-500 ease-in-out"
+             x-transition:enter="opacity-0 transform translate-x-4"
+             x-transition:enter-start="opacity-0 transform translate-x-4"
+             x-transition:enter-end="opacity-100 transform translate-x-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="assigned-assessments">
+                {% if assigned_assessments %}
+                    {% for assessment in assigned_assessments %}
+                        {% with assignment=assessment.assignedassessment_set.first %}
+                        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 assessment-card">
+                            <div class="h-3 bg-gradient-to-r from-amber-500 to-red-500"></div>
+                            <div class="p-6">
+                                <div class="flex items-start justify-between">
+                                    <h3 class="font-bold text-lg text-gray-800 mb-2">{{ assessment.title }}</h3>
+                                    <span class="text-xs font-medium px-2 py-1 rounded-full bg-amber-100 text-amber-800">
+                                        Assigned
+                                    </span>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-4">{{ assessment.description|truncatechars:100 }}</p>
+
+                                {% if assignment.instructions %}
+                                <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                    <p class="text-sm text-gray-600"><span class="font-medium">Instructions:</span> {{ assignment.instructions|truncatechars:150 }}</p>
+                                </div>
+                                {% endif %}
+
+                                <div class="flex flex-col space-y-2">
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        {{ assessment.estimated_time_minutes }} minutes
+                                    </div>
+                                    {% if assignment.assigned_by %}
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        Assigned by: {{ assignment.assigned_by.get_full_name|default:assignment.assigned_by.username }}
+                                    </div>
+                                    {% endif %}
+                                    {% if assignment.due_date %}
+                                    <div class="flex items-center text-sm {% if assignment.due_date|date:'Ymd' < now|date:'Ymd' %}text-red-600 font-medium{% else %}text-amber-600{% endif %}">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        Due {{ assignment.due_date|date:"M j, Y" }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mt-4">
+                                    <a href="{% url 'start_assessment' assessment.id %}" class="inline-flex items-center justify-center w-full px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors duration-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                                        </svg>
+                                        Start Assessment
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                {% else %}
+                    <div class="col-span-full flex flex-col items-center justify-center p-10 bg-white rounded-xl shadow-md">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        <p class="text-gray-500 text-center">You don't have any assigned assessments.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Completed Assessments Tab -->
+        <div x-show="activeTab === 'completed'" class="transition-all duration-500 ease-in-out"
+             x-transition:enter="opacity-0 transform translate-x-4"
+             x-transition:enter-start="opacity-0 transform translate-x-4"
+             x-transition:enter-end="opacity-100 transform translate-x-0">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden" id="completed-assessments">
+                {% if completed_assessments %}
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assessment</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                {% for assessment in completed_assessments %}
+                                    {% with response=assessment.responses.first %}
+                                        <tr class="hover:bg-gray-50 transition-colors duration-200 assessment-row">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                {{ response.completed_at|date:"M j, Y" }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                {{ assessment.title }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ assessment.category.name|default:"General" }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                {% if response.status == 'completed' %}
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Completed</span>
+                                                {% else %}
+                                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Reviewed</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <a href="{% url 'view_results' response.id %}" class="inline-flex items-center text-indigo-600 hover:text-indigo-900">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                        <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    View Results
+                                                </a>
+                                                {% if assessment.allow_retake %}
+                                                <a href="{% url 'start_assessment' assessment.id %}" class="inline-flex items-center ml-3 text-amber-600 hover:text-amber-900">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                                                    </svg>
+                                                    Retake
+                                                </a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endwith %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-6 border-t border-gray-200 bg-gray-50">
+                        <div class="flex flex-col sm:flex-row items-center justify-between">
+                            <p class="text-sm text-gray-600 mb-4 sm:mb-0">
+                                Track your progress over time to see how your mental wellness is changing.
+                            </p>
+                            <a href="{% url 'athlete_progress' %}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 3a1 1 0 000 2h10a1 1 0 100-2H3zm0 4a1 1 0 000 2h6a1 1 0 100-2H3zm0 4a1 1 0 100 2h8a1 1 0 100-2H3z" clip-rule="evenodd" />
+                                </svg>
+                                View Full Progress Report
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="flex flex-col items-center justify-center py-16">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-gray-500 text-center mb-6">You haven't completed any assessments yet.</p>
+                        <button @click="activeTab = 'available'" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700 transition-colors duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                            </svg>
+                            Take Your First Assessment
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Background 3D animation with Three.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup
+    const canvas = document.getElementById('background-canvas');
+    const renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        alpha: true,
+        antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 30;
+    
+    // Create particles
+    const particlesGeometry = new THREE.BufferGeometry();
+    const particlesCount = 1000;
+    
+    const posArray = new Float32Array(particlesCount * 3);
+    const colorArray = new Float32Array(particlesCount * 3);
+    
+    for(let i = 0; i < particlesCount * 3; i += 3) {
+        // Position
+        posArray[i] = (Math.random() - 0.5) * 100;
+        posArray[i+1] = (Math.random() - 0.5) * 100;
+        posArray[i+2] = (Math.random() - 0.5) * 100;
+        
+        // Color
+        colorArray[i] = 0.5 + Math.random() * 0.5; // R
+        colorArray[i+1] = 0.5 + Math.random() * 0.5; // G
+        colorArray[i+2] = 0.8 + Math.random() * 0.2; // B
+    }
+    
+    particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+    particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+    
+    const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.2,
+        transparent: true,
+        opacity: 0.8,
+        vertexColors: true,
+    });
+    
+    const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+    scene.add(particlesMesh);
+    
+    // Animation
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        particlesMesh.rotation.x += 0.0003;
+        particlesMesh.rotation.y += 0.0005;
+        
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+});
+
+// Page load animations with GSAP
+gsap.from("#page-header", {
+    duration: 0.8,
+    y: -20,
+    opacity: 0,
+    ease: "power2.out"
+});
+
+gsap.from(".assessment-card", {
+    duration: 0.6,
+    y: 20,
+    opacity: 0,
+    stagger: 0.1,
+    delay: 0.3,
+    ease: "back.out"
+});
+
+// Tab change animations
+document.addEventListener('alpine:init', () => {
+    Alpine.data('tabSwitcher', () => ({
+        activeTab: 'available',
+        
+        init() {
+            this.$watch('activeTab', (newTab, oldTab) => {
+                if (newTab !== oldTab) {
+                    const tabContent = this.$el.querySelector(`[x-show="activeTab === '${newTab}'"]`);
+                    gsap.from(tabContent, {
+                        duration: 0.4,
+                        x: 20,
+                        opacity: 0,
+                        ease: "power2.out"
+                    });
+                }
+            });
+        }
+    }));
+});
+
+// Hover effects for assessment cards
+document.querySelectorAll('.assessment-card').forEach(card => {
+    card.addEventListener('mouseenter', () => {
+        gsap.to(card, {
+            duration: 0.3,
+            scale: 1.02,
+            ease: "power2.out"
+        });
+    });
+    
+    card.addEventListener('mouseleave', () => {
+        gsap.to(card, {
+            duration: 0.3,
+            scale: 1,
+            ease: "power2.out"
+        });
+    });
+});
+
+// Row hover effects for completed assessments table
+document.querySelectorAll('.assessment-row').forEach(row => {
+    row.addEventListener('mouseenter', () => {
+        gsap.to(row, {
+            duration: 0.2,
+            backgroundColor: "#f9fafb",
+            ease: "power2.out"
+        });
+    });
+    
+    row.addEventListener('mouseleave', () => {
+        gsap.to(row, {
+            duration: 0.2,
+            backgroundColor: "#ffffff",
+            ease: "power2.out"
+        });
+    });
+});
+</script>
+
+{% endblock %}

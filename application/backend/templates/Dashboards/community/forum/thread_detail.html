@@ -1,0 +1,411 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-6 lg:px-8">
+    <!-- Thread Header -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{% url 'community_home' %}" class="text-gray-400 hover:text-gray-500">
+                            <svg class="flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            <span class="sr-only">Community</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <a href="{% url 'category_list' %}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">Categories</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <a href="{{ thread.category.get_absolute_url }}" class="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">{{ thread.category.name }}</a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="ml-4 text-sm font-medium text-gray-500">{{ thread.title|truncatewords:5 }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ thread.title }}</h1>
+                <div class="mt-2 flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <img class="h-8 w-8 rounded-full" src="{% if thread.is_anonymous %}{% static 'images/anonymous-user.jpg' %}{% else %}{{ thread.author.profile.image.url|default:'/static/images/default-profile.jpg' }}{% endif %}" alt="">
+                        </div>
+                        <div class="ml-2">
+                            <p class="text-sm font-medium text-gray-900">
+                                {% if thread.is_anonymous %}Anonymous{% else %}{{ thread.author.get_full_name|default:thread.author.username }}{% endif %}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ thread.created_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {{ thread.comment_count }} repl{{ thread.comment_count|pluralize:"y,ies" }}
+                        </span>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            {{ thread.view_count }} view{{ thread.view_count|pluralize }}
+                        </span>
+                        {% if thread.is_pinned %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            Pinned
+                        </span>
+                        {% endif %}
+                        {% if thread.is_locked %}
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Locked
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if request.user.is_staff or request.user == thread.author %}
+            <div class="relative inline-block text-left">
+                <div>
+                    <button type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="thread-actions-button" aria-expanded="false" aria-haspopup="true">
+                        Actions
+                        <svg class="-mr-1 ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="thread-actions-button" tabindex="-1">
+                    <div class="py-1" role="none">
+                        {% if thread.is_pinned %}
+                        <form method="post" action="{% url 'thread_pin_toggle' category_slug=thread.category.slug thread_slug=thread.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full text-left">Unpin Thread</button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'thread_pin_toggle' category_slug=thread.category.slug thread_slug=thread.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full text-left">Pin Thread</button>
+                        </form>
+                        {% endif %}
+                        {% if thread.is_locked %}
+                        <form method="post" action="{% url 'thread_lock_toggle' category_slug=thread.category.slug thread_slug=thread.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full text-left">Unlock Thread</button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'thread_lock_toggle' category_slug=thread.category.slug thread_slug=thread.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">
+                            {% csrf_token %}
+                            <button type="submit" class="w-full text-left">Lock Thread</button>
+                        </form>
+                        {% endif %}
+                        {% if request.user.is_staff %}
+                        <form method="post" action="{% url 'thread_detail' category_slug=thread.category.slug thread_slug=thread.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="delete">
+                            <button type="submit" class="w-full text-left text-red-600">Delete Thread</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Thread Content -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="prose max-w-none">
+                {{ thread.content|linebreaks }}
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    {% if request.user == thread.author %}
+                    <a href="{% url 'thread_create' %}" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <svg class="-ml-1 mr-1 h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="text-sm text-gray-500">
+                    {% if thread.updated_at > thread.created_at %}
+                    Last updated {{ thread.updated_at|timesince }} ago
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Replies Section -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Replies ({{ thread.comments.count }})</h2>
+        {% if thread.comments.exists %}
+        <div class="space-y-6">
+            {% for comment in thread.comments.all %}
+            <div id="comment-{{ comment.id }}" class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="flex-shrink-0">
+                                <img class="h-10 w-10 rounded-full" src="{{ comment.author.profile.image.url|default:'/static/images/default-profile.jpg' }}" alt="">
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">
+                                    {{ comment.author.get_full_name|default:comment.author.username }}
+                                </p>
+                                <p class="text-sm text-gray-500">
+                                    {{ comment.created_at|date:"M d, Y" }}
+                                </p>
+                            </div>
+                        </div>
+                        {% if request.user.is_staff or request.user == comment.author %}
+                        <div class="relative inline-block text-left">
+                            <div>
+                                <button type="button" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-2 py-1 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="comment-menu-{{ comment.id }}-button" aria-expanded="false" aria-haspopup="true">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="comment-menu-{{ comment.id }}-button" tabindex="-1">
+                                <div class="py-1" role="none">
+                                    {% if request.user == comment.author %}
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">Edit</a>
+                                    {% endif %}
+                                    <form method="post" action="{% url 'thread_comment' category_slug=thread.category.slug thread_slug=thread.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="submit" class="w-full text-left text-red-600">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="prose max-w-none">
+                        {{ comment.content|linebreaks }}
+                    </div>
+                    <div class="mt-6 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <button type="button" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700" onclick="document.getElementById('reply-form-{{ comment.id }}').classList.toggle('hidden')">
+                                <svg class="-ml-1 mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                </svg>
+                                Reply
+                            </button>
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            {% if comment.updated_at > comment.created_at %}
+                            Last updated {{ comment.updated_at|timesince }} ago
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Reply Form (hidden by default) -->
+                    <div id="reply-form-{{ comment.id }}" class="mt-4 hidden">
+                        <form method="post" action="{% url 'thread_comment' category_slug=thread.category.slug thread_slug=thread.slug %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="reply-content-{{ comment.id }}" class="block text-sm font-medium text-gray-700">Your Reply</label>
+                                    <div class="mt-1">
+                                        <textarea id="reply-content-{{ comment.id }}" name="content" rows="4" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" required></textarea>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end">
+                                    <button type="button" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-2" onclick="document.getElementById('reply-form-{{ comment.id }}').classList.add('hidden')">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                        Post Reply
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- Nested Replies -->
+                    {% if comment.replies.exists %}
+                    <div class="mt-4 pl-4 border-l-2 border-gray-200 space-y-4">
+                        {% for reply in comment.replies.all %}
+                        <div id="comment-{{ reply.id }}" class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex-shrink-0">
+                                        <img class="h-8 w-8 rounded-full" src="{{ reply.author.profile.image.url|default:'/static/images/default-profile.jpg' }}" alt="">
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ reply.author.get_full_name|default:reply.author.username }}
+                                        </p>
+                                        <p class="text-xs text-gray-500">
+                                            {{ reply.created_at|date:"M d, Y" }}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% if request.user.is_staff or request.user == reply.author %}
+                                <div class="relative inline-block text-left">
+                                    <div>
+                                        <button type="button" class="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-1 py-0.5 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="reply-menu-{{ reply.id }}-button" aria-expanded="false" aria-haspopup="true">
+                                            <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="reply-menu-{{ reply.id }}-button" tabindex="-1">
+                                        <div class="py-1" role="none">
+                                            {% if request.user == reply.author %}
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">Edit</a>
+                                            {% endif %}
+                                            <form method="post" action="{% url 'thread_comment' category_slug=thread.category.slug thread_slug=thread.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="comment_id" value="{{ reply.id }}">
+                                                <input type="hidden" name="action" value="delete">
+                                                <button type="submit" class="w-full text-left text-red-600">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="prose prose-sm max-w-none">
+                                {{ reply.content|linebreaks }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-12 sm:px-6 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 class="mt-2 text-lg font-medium text-gray-900">No replies yet</h3>
+                <p class="mt-1 text-sm text-gray-500">Be the first to reply to this thread.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Reply Form -->
+    {% if not thread.is_locked %}
+    <div class="mt-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Post a Reply</h2>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <form method="post" action="{% url 'thread_comment' category_slug=thread.category.slug thread_slug=thread.slug %}">
+                    {% csrf_token %}
+                    <div class="space-y-4">
+                        <div>
+                            <label for="content" class="block text-sm font-medium text-gray-700">Your Reply</label>
+                            <div class="mt-1">
+                                <textarea id="content" name="content" rows="8" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" required></textarea>
+                            </div>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105">
+                                Post Reply
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="mt-8 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-yellow-700">
+                    This thread is locked and no longer accepting new replies.
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Floating decorative elements -->
+<div class="fixed bottom-0 right-0 w-64 h-64 bg-indigo-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float"></div>
+<div class="fixed top-1/3 left-0 w-48 h-48 bg-blue-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float-delay"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle thread actions menu
+    document.getElementById('thread-actions-button').addEventListener('click', function() {
+        const menu = this.nextElementSibling;
+        menu.classList.toggle('hidden');
+    });
+
+    // Toggle comment menus
+    document.querySelectorAll('[id^="comment-menu-"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const menu = this.nextElementSibling;
+            menu.classList.toggle('hidden');
+        });
+    });
+
+    // Toggle reply menus
+    document.querySelectorAll('[id^="reply-menu-"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const menu = this.nextElementSibling;
+            menu.classList.toggle('hidden');
+        });
+    });
+
+    // Close all menus when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('[aria-haspopup="true"]')) {
+            document.querySelectorAll('[role="menu"]').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        }
+    });
+
+    // Smooth scroll to anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

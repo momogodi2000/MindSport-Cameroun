@@ -1,0 +1,529 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block title %}Results: {{ response.assessment.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<style>
+  .score-card {
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+  }
+  
+  .score-card:hover {
+    transform: translateY(-10px) rotateX(5deg);
+  }
+  
+  .recommendation-card {
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  
+  .recommendation-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .progress-bar {
+    transition: width 1s ease-in-out;
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 40px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+  
+  .fade-in-up {
+    animation: fadeInUp 0.6s ease forwards;
+  }
+  
+  .animate-delay-1 {
+    animation-delay: 0.1s;
+  }
+  
+  .animate-delay-2 {
+    animation-delay: 0.2s;
+  }
+  
+  .animate-delay-3 {
+    animation-delay: 0.3s;
+  }
+  
+  .animate-delay-4 {
+    animation-delay: 0.4s;
+  }
+  
+  .animate-delay-5 {
+    animation-delay: 0.5s;
+  }
+  
+  .scale-in {
+    animation: scaleIn 0.5s ease forwards;
+  }
+  
+  @keyframes scaleIn {
+    from {
+      transform: scale(0.9);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .floating {
+    animation: floating 3s ease-in-out infinite;
+  }
+  
+  @keyframes floating {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  .radar-chart-container {
+    perspective: 1000px;
+  }
+  
+  .radar-chart {
+    transition: transform 0.5s ease;
+    transform-style: preserve-3d;
+  }
+  
+  .radar-chart:hover {
+    transform: rotateY(10deg);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800">
+  <div class="container mx-auto px-4 py-8">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-start mb-8 fade-in-up">
+      <div>
+        <h1 class="text-3xl font-bold text-indigo-800 dark:text-indigo-300 mb-2">{{ response.assessment.title }}</h1>
+        <p class="text-gray-600 dark:text-gray-300">
+          <span class="inline-flex items-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            Completed on: {{ response.completed_at|date:"F d, Y" }}
+          </span>
+        </p>
+        {% if response.assessment.description %}
+        <p class="mt-2 text-gray-600 dark:text-gray-300 max-w-2xl">{{ response.assessment.description }}</p>
+        {% endif %}
+      </div>
+      <div class="mt-4 md:mt-0">
+        <div class="flex space-x-2">
+          {% if response.status == 'reviewed' %}
+          <span class="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-sm font-medium flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Reviewed by Professional
+          </span>
+          {% else %}
+          <span class="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-sm font-medium flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Preliminary Results
+          </span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl mb-8 overflow-hidden scale-in">
+      <div class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-90"></div>
+        <div class="relative z-10 p-6">
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold text-white mb-2">Assessment Summary</h2>
+              <p class="text-indigo-100">Here's an overview of your assessment results</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+              <div class="text-white flex items-center">
+                <span class="text-4xl font-bold">{{ response.overall_score|floatformat:1 }}</span>
+                <span class="ml-2 text-sm opacity-75">/ 100</span>
+              </div>
+              <p class="text-indigo-100 text-sm">Overall Score</p>
+            </div>
+          </div>
+        </div>
+        <div class="absolute bottom-0 right-0 transform translate-x-6 translate-y-6">
+          <svg class="w-32 h-32 text-white opacity-10" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        {% if response.status == 'reviewed' and review %}
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            Professional Insight
+          </h3>
+          <div class="bg-indigo-50 dark:bg-gray-700 rounded-lg p-4">
+            <p class="text-gray-700 dark:text-gray-300">{{ review.comments }}</p>
+            {% if review.recommendations %}
+            <div class="mt-4">
+              <h4 class="font-medium text-gray-800 dark:text-gray-200">Recommendations:</h4>
+              <p class="text-gray-700 dark:text-gray-300">{{ review.recommendations }}</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div>
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+            Key Metrics
+          </h3>
+          
+          <div id="radar-chart-container" class="radar-chart-container mb-8 flex justify-center">
+            <canvas id="radarChart" class="radar-chart w-full max-w-md"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Scores Section -->
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6 fade-in-up animate-delay-1">Detailed Scores</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+      {% for score in scores %}
+      <div class="score-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden fade-in-up animate-delay-{{ forloop.counter|add:'1' }}">
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">{{ score.scale_name }}</h3>
+            <div class="flex items-center">
+              <span class="text-3xl font-bold {% if score.score_value >= 75 %}text-green-600 dark:text-green-400{% elif score.score_value >= 50 %}text-yellow-500 dark:text-yellow-400{% else %}text-red-500 dark:text-red-400{% endif %}">
+                {{ score.score_value|floatformat:1 }}
+              </span>
+              <span class="text-sm text-gray-500 dark:text-gray-400 ml-1">/100</span>
+            </div>
+          </div>
+          
+          <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-4">
+            <div class="progress-bar h-2.5 rounded-full {% if score.score_value >= 75 %}bg-green-600{% elif score.score_value >= 50 %}bg-yellow-500{% else %}bg-red-500{% endif %}" style="width: 0%"></div>
+          </div>
+          
+          <p class="text-gray-600 dark:text-gray-300 text-sm">{{ score.description }}</p>
+          
+          {% if score.interpretation %}
+          <div class="mt-4 p-3 bg-indigo-50 dark:bg-gray-700 rounded-lg">
+            <h4 class="text-sm font-medium text-indigo-800 dark:text-indigo-300 mb-1">Interpretation:</h4>
+            <p class="text-sm text-gray-700 dark:text-gray-300">{{ score.interpretation }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Recommendations Section -->
+    {% if recommendations %}
+    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-6 fade-in-up animate-delay-4">Recommendations</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 fade-in-up animate-delay-5">
+      {% for recommendation in recommendations %}
+      <div class="recommendation-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6">
+          <div class="flex items-start">
+            <div class="flex-shrink-0 mr-4">
+              <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-1">{{ recommendation.specialist.name }}</h3>
+              <p class="text-gray-600 dark:text-gray-300 text-sm mb-3">{{ recommendation.specialist.specialization }}</p>
+              <p class="text-gray-600 dark:text-gray-300 text-sm">{{ recommendation.reason }}</p>
+              {% if recommendation.specialist.contact_info %}
+              <div class="mt-4">
+                <a href="mailto:{{ recommendation.specialist.contact_info }}" class="inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 transition-colors">
+                  <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                  Contact
+                </a>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Actions Section -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 fade-in-up animate-delay-5">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Next Steps</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="{% url 'athlete_progress' %}" class="flex items-center p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg hover:bg-indigo-100 dark:hover:bg-gray-600 transition-colors">
+          <div class="flex-shrink-0 mr-3">
+            <div class="w-10 h-10 bg-indigo-500 dark:bg-indigo-600 rounded-full flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-800 dark:text-gray-100">View Progress</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Track improvements over time</p>
+          </div>
+        </a>
+        
+        <a href="{% url 'Assessments' %}" class="flex items-center p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg hover:bg-indigo-100 dark:hover:bg-gray-600 transition-colors">
+          <div class="flex-shrink-0 mr-3">
+            <div class="w-10 h-10 bg-indigo-500 dark:bg-indigo-600 rounded-full flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+              </svg>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-800 dark:text-gray-100">More Assessments</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Explore other assessments</p>
+          </div>
+        </a>
+        
+        <a href="#" onclick="window.print(); return false;" class="flex items-center p-4 bg-indigo-50 dark:bg-gray-700 rounded-lg hover:bg-indigo-100 dark:hover:bg-gray-600 transition-colors">
+          <div class="flex-shrink-0 mr-3">
+            <div class="w-10 h-10 bg-indigo-500 dark:bg-indigo-600 rounded-full flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+              </svg>
+            </div>
+          </div>
+          <div>
+            <h3 class="font-medium text-gray-800 dark:text-gray-100">Save Results</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300">Print or save as PDF</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- History Section (if applicable) -->
+    {% if previous_assessments %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 fade-in-up animate-delay-5">
+      <h2 class="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4">Previous Assessments</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead>
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Overall Score</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            {% for prev_response in previous_assessments %}
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">{{ prev_response.completed_at|date:"M d, Y" }}</td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm font-medium {% if prev_response.overall_score >= 75 %}text-green-600 dark:text-green-400{% elif prev_response.overall_score >= 50 %}text-yellow-500 dark:text-yellow-400{% else %}text-red-500 dark:text-red-400{% endif %}">
+                  {{ prev_response.overall_score|floatformat:1 }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                {% if prev_response.status == 'reviewed' %}
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  Reviewed
+                </span>
+                {% else %}
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  Completed
+                </span>
+                {% endif %}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <a href="{% url 'view_results' prev_response.id %}" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">View</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize animations for progress bars
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach(bar => {
+      // Get original width from style
+      const targetWidth = parseFloat(bar.style.width) || 0;
+      // Set initial width to 0
+      bar.style.width = '0%';
+      
+      // Use setTimeout to trigger animation after a small delay
+      setTimeout(() => {
+        const scoreValue = parseFloat(bar.parentElement.previousElementSibling.querySelector('.text-3xl').textContent);
+        bar.style.width = scoreValue + '%';
+      }, 300);
+    });
+    
+    // Initialize Radar Chart
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    
+    // Extract score data
+    const scoreData = [];
+    const scoreLabels = [];
+    {% for score in scores %}
+    scoreData.push({{ score.score_value|floatformat:1 }});
+    scoreLabels.push('{{ score.scale_name }}');
+    {% endfor %}
+    
+    const radarChart = new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: scoreLabels,
+        datasets: [{
+          label: 'Your Scores',
+          data: scoreData,
+          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+          borderColor: 'rgba(99, 102, 241, 1)',
+          borderWidth: 2,
+          pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: 'rgba(99, 102, 241, 1)'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          r: {
+            angleLines: {
+              color: 'rgba(200, 200, 200, 0.3)',
+            },
+            grid: {
+              color: 'rgba(200, 200, 200, 0.3)',
+            },
+            pointLabels: {
+              color: getComputedStyle(document.documentElement).getPropertyValue('--color-gray-700')
+            },
+            ticks: {
+              backdropColor: 'transparent',
+              color: getComputedStyle(document.documentElement).getPropertyValue('--color-gray-700')
+            },
+            min: 0,
+            max: 100
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            titleColor: '#1f2937',
+            bodyColor: '#4b5563',
+            borderColor: '#e5e7eb',
+            borderWidth: 1,
+            displayColors: false,
+            padding: 10,
+            titleFont: {
+              size: 14,
+              weight: 'bold'
+            },
+            bodyFont: {
+              size: 14
+            },
+            callbacks: {
+              title: function(context) {
+                return context[0].label;
+              },
+              label: function(context) {
+                return 'Score: ' + context.parsed.r + ' / 100';
+              }
+            }
+          }
+        },
+        elements: {
+          line: {
+            tension: 0.1
+          }
+        }
+      }
+    });
+    
+    // Add 3D effect to the radar chart on hover
+    const radarChartContainer = document.getElementById('radar-chart-container');
+    const radarChartElement = document.getElementById('radarChart');
+    
+    radarChartContainer.addEventListener('mousemove', function(e) {
+      const rect = radarChartContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = radarChartContainer.offsetWidth / 2;
+      const centerY = radarChartContainer.offsetHeight / 2;
+      const deltaX = (x - centerX) / centerX;
+      const deltaY = (y - centerY) / centerY;
+      const rotateY = deltaX * 10; // Adjust rotation sensitivity
+      const rotateX = -deltaY * 10; // Adjust rotation sensitivity
+      radarChartElement.style.transform = `rotateY(${rotateY}deg) rotateX(${rotateX}deg)`;
+});
+
+radarChartContainer.addEventListener('mouseleave', function() {
+  radarChartElement.style.transform = 'rotateY(0) rotateX(0)';
+});
+
+// Add animation classes to elements with delays
+const animatedElements = document.querySelectorAll('.fade-in-up');
+animatedElements.forEach((el, index) => {
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.classList.add('animate__animated', 'animate__fadeInUp');
+    el.style.opacity = '1';
+  }, 100 * index);
+});
+
+// Add scale-in animation to the summary card
+const summaryCard = document.querySelector('.scale-in');
+setTimeout(() => {
+  summaryCard.classList.add('animate__animated', 'animate__zoomIn');
+  summaryCard.style.opacity = '1';
+}, 100);
+
+// Add floating animation to elements
+const floatingElements = document.querySelectorAll('.floating');
+floatingElements.forEach(el => {
+  el.style.animationDelay = `${Math.random() * 0.5}s`;
+});
+});
+</script>
+{% endblock %})
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>

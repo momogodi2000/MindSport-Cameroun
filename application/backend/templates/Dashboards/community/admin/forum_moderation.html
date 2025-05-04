@@ -1,0 +1,536 @@
+{% extends 'Dashboards/Layout/admin_base.html' %}
+{% load static %}
+
+{% block title %}Forum Moderation{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.min.css" />
+<style>
+  .filter-item {
+    transition: all 0.2s ease;
+    transform-style: preserve-3d;
+  }
+  .filter-item:hover {
+    transform: translateY(-2px);
+  }
+  .filter-item.active {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 1);
+    color: rgba(59, 130, 246, 1);
+    font-weight: 600;
+    transform: translateY(-2px) scale(1.02);
+  }
+  .thread-card {
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+  }
+  .thread-card:hover {
+    transform: translateY(-5px) rotateX(2deg);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+  .search-bar {
+    position: relative;
+    transition: all 0.3s ease;
+  }
+  .search-bar:focus-within {
+    transform: scale(1.02);
+  }
+  .badge {
+    transition: all 0.3s ease;
+  }
+  .badge:hover {
+    transform: scale(1.1);
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease forwards;
+  }
+  @keyframes highlight {
+    0% { background-color: rgba(59, 130, 246, 0.1); }
+    100% { background-color: transparent; }
+  }
+  .highlight {
+    animation: highlight 2s ease;
+  }
+  .action-button {
+    transition: all 0.2s ease;
+  }
+  .action-button:hover {
+    transform: scale(1.1);
+  }
+  .pagination-link {
+    transition: all 0.2s ease;
+  }
+  .pagination-link:hover {
+    transform: translateY(-2px);
+  }
+  .status-indicator {
+    transition: all 0.3s ease;
+  }
+  .status-indicator:hover {
+    transform: scale(1.05);
+  }
+  .bg-gradient-radial {
+    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+  }
+  .empty-state {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+  .empty-state-icon {
+    transform: translateZ(30px);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg rounded-b-3xl relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-radial opacity-50"></div>
+    <div class="container mx-auto px-4 py-8 relative z-10">
+      <div class="flex flex-col md:flex-row items-center justify-between">
+        <div class="text-white mb-4 md:mb-0" data-aos="fade-right">
+          <h1 class="text-3xl font-bold">Forum Moderation</h1>
+          <p class="mt-2 opacity-80">Review, moderate, and manage community threads and discussions</p>
+        </div>
+        <div class="flex space-x-3" data-aos="fade-left">
+          <a href="{% url 'CommunityAdminDashboard' %}" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-xl transition-all flex items-center">
+            <i class="fas fa-th-large mr-2"></i> Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <!-- Sidebar Filters -->
+      <div class="col-span-1 space-y-6" data-aos="fade-right">
+        <!-- Search Bar -->
+        <div class="search-bar bg-white rounded-xl shadow-md p-4">
+          <form method="get" action="{% url 'forum_moderation' %}">
+            <div class="relative">
+              <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search threads..." 
+                     class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <button type="submit" class="absolute left-3 top-2.5 text-gray-400 hover:text-blue-500 transition-colors">
+                <i class="fas fa-search"></i>
+              </button>
+              {% if request.GET.q %}
+              <a href="{% url 'forum_moderation' %}" class="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-times"></i>
+              </a>
+              {% endif %}
+            </div>
+          </form>
+        </div>
+
+        <!-- Status Filters -->
+        <div class="bg-white rounded-xl shadow-md p-4">
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Filter by Status</h3>
+          <div class="space-y-2">
+            <a href="{% url 'forum_moderation' %}" 
+               class="filter-item block px-4 py-2 rounded-lg border border-gray-200 {% if not request.GET.status %}active{% endif %}">
+              <div class="flex items-center">
+                <i class="fas fa-list-ul mr-3 text-gray-500"></i>
+                <span>All Threads</span>
+                <span class="ml-auto bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {{ threads.paginator.count }}
+                </span>
+              </div>
+            </a>
+            <a href="{% url 'forum_moderation' %}?status=reported" 
+               class="filter-item block px-4 py-2 rounded-lg border border-gray-200 {% if request.GET.status == 'reported' %}active{% endif %}">
+              <div class="flex items-center">
+                <i class="fas fa-flag mr-3 text-red-500"></i>
+                <span>Reported</span>
+                <span class="ml-auto bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {{ reported_count|default:"0" }}
+                </span>
+              </div>
+            </a>
+            <a href="{% url 'forum_moderation' %}?status=locked" 
+               class="filter-item block px-4 py-2 rounded-lg border border-gray-200 {% if request.GET.status == 'locked' %}active{% endif %}">
+              <div class="flex items-center">
+                <i class="fas fa-lock mr-3 text-amber-500"></i>
+                <span>Locked</span>
+                <span class="ml-auto bg-amber-100 text-amber-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {{ locked_count|default:"0" }}
+                </span>
+              </div>
+            </a>
+            <a href="{% url 'forum_moderation' %}?status=pinned" 
+               class="filter-item block px-4 py-2 rounded-lg border border-gray-200 {% if request.GET.status == 'pinned' %}active{% endif %}">
+              <div class="flex items-center">
+                <i class="fas fa-thumbtack mr-3 text-green-500"></i>
+                <span>Pinned</span>
+                <span class="ml-auto bg-green-100 text-green-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {{ pinned_count|default:"0" }}
+                </span>
+              </div>
+            </a>
+            <a href="{% url 'forum_moderation' %}?status=inactive" 
+               class="filter-item block px-4 py-2 rounded-lg border border-gray-200 {% if request.GET.status == 'inactive' %}active{% endif %}">
+              <div class="flex items-center">
+                <i class="fas fa-eye-slash mr-3 text-gray-500"></i>
+                <span>Inactive</span>
+                <span class="ml-auto bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                  {{ inactive_count|default:"0" }}
+                </span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="bg-white rounded-xl shadow-md p-4" data-aos="fade-up" data-aos-delay="100">
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Forum Overview</h3>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="bg-blue-100 p-2 rounded-full mr-3">
+                  <i class="fas fa-comments text-blue-600"></i>
+                </div>
+                <span class="text-gray-600">Total Threads</span>
+              </div>
+              <span class="font-semibold">{{ threads.paginator.count }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="bg-red-100 p-2 rounded-full mr-3">
+                  <i class="fas fa-flag text-red-600"></i>
+                </div>
+                <span class="text-gray-600">Reported</span>
+              </div>
+              <span class="font-semibold text-red-600">{{ reported_count|default:"0" }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="bg-amber-100 p-2 rounded-full mr-3">
+                  <i class="fas fa-lock text-amber-600"></i>
+                </div>
+                <span class="text-gray-600">Locked</span>
+              </div>
+              <span class="font-semibold text-amber-600">{{ locked_count|default:"0" }}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="bg-green-100 p-2 rounded-full mr-3">
+                  <i class="fas fa-thumbtack text-green-600"></i>
+                </div>
+                <span class="text-gray-600">Pinned</span>
+              </div>
+              <span class="font-semibold text-green-600">{{ pinned_count|default:"0" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thread List -->
+      <div class="col-span-1 lg:col-span-3 space-y-6" data-aos="fade-left">
+        <!-- Actions & Sorting -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-xl shadow-md p-4">
+          <div class="text-gray-700">
+            Showing <span class="font-medium">{{ threads.start_index }}-{{ threads.end_index }}</span> of 
+            <span class="font-medium">{{ threads.paginator.count }}</span> threads
+            {% if request.GET.q %}
+              for "<span class="font-medium">{{ request.GET.q }}</span>"
+            {% elif request.GET.status %}
+              with status "<span class="font-medium">{{ request.GET.status }}</span>"
+            {% endif %}
+          </div>
+          <div class="flex items-center space-x-3">
+            <label for="sort" class="text-sm text-gray-600">Sort by:</label>
+            <select id="sort" class="rounded-lg border border-gray-300 text-sm px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+              <option value="created_at" {% if request.GET.sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+              <option value="-comment_count" {% if request.GET.sort == '-comment_count' %}selected{% endif %}>Most Comments</option>
+              <option value="-view_count" {% if request.GET.sort == '-view_count' %}selected{% endif %}>Most Views</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Threads Grid -->
+        <div class="grid grid-cols-1 gap-4">
+          {% for thread in threads %}
+          <div class="thread-card bg-white rounded-xl shadow-md overflow-hidden animate-fade-in" 
+               style="animation-delay: {{ forloop.counter0|divisibleby:2|yesno:'100,200' }}ms">
+            <div class="p-6">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <!-- Thread Info -->
+                <div class="flex-grow">
+                  <div class="mb-2 flex flex-wrap gap-2">
+                    {% if thread.is_pinned %}
+                    <span class="badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                          data-tippy-content="Pinned thread">
+                      <i class="fas fa-thumbtack mr-1"></i> Pinned
+                    </span>
+                    {% endif %}
+                    
+                    {% if thread.is_locked %}
+                    <span class="badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800"
+                          data-tippy-content="Locked thread">
+                      <i class="fas fa-lock mr-1"></i> Locked
+                    </span>
+                    {% endif %}
+                    
+                    {% if not thread.is_active %}
+                    <span class="badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                          data-tippy-content="Inactive thread">
+                      <i class="fas fa-eye-slash mr-1"></i> Inactive
+                    </span>
+                    {% endif %}
+                    
+                    {% if thread.reports > 0 %}
+                    <span class="badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
+                          data-tippy-content="{{ thread.reports }} report{{ thread.reports|pluralize }}">
+                      <i class="fas fa-flag mr-1"></i> {{ thread.reports }} Report{{ thread.reports|pluralize }}
+                    </span>
+                    {% endif %}
+                    
+                    <span class="badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          data-tippy-content="Category: {{ thread.category.name }}">
+                      {{ thread.category.name }}
+                    </span>
+                  </div>
+                  
+                  <h3 class="text-xl font-semibold text-gray-800 hover:text-blue-600 transition-colors">
+                    <a href="{% url 'moderate_thread' thread.id %}">{{ thread.title }}</a>
+                  </h3>
+                  
+                  <div class="mt-2 text-gray-600 line-clamp-2">
+                    {{ thread.content|striptags|truncatewords:30 }}
+                  </div>
+                  
+                  <div class="mt-3 flex items-center text-sm text-gray-500">
+                    <div class="flex items-center mr-4">
+                      <i class="fas fa-user-circle mr-1"></i>
+                      <a href="#" class="hover:text-blue-600 hover:underline">{{ thread.author.get_full_name|default:thread.author.username }}</a>
+                    </div>
+                    <div class="flex items-center mr-4">
+                      <i class="fas fa-clock mr-1"></i>
+                      {{ thread.created_at|date:"M j, Y" }}
+                    </div>
+                    <div class="flex items-center mr-4">
+                      <i class="fas fa-comments mr-1"></i>
+                      {{ thread.comment_count }} Comment{{ thread.comment_count|pluralize }}
+                    </div>
+                    <div class="flex items-center">
+                      <i class="fas fa-eye mr-1"></i>
+                      {{ thread.view_count }} View{{ thread.view_count|pluralize }}
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Thread Actions -->
+                <div class="flex flex-col items-end">
+                  <div class="flex items-center space-x-3 mb-3">
+                    <a href="{% url 'moderate_thread' thread.id %}" 
+                       class="action-button text-blue-500 hover:text-blue-700"
+                       data-tippy-content="Moderate thread">
+                      <i class="fas fa-edit text-lg"></i>
+                    </a>
+                    <a href="#" 
+                       class="action-button text-red-500 hover:text-red-700"
+                       data-tippy-content="Delete thread">
+                      <i class="fas fa-trash text-lg"></i>
+                    </a>
+                    {% if thread.is_locked %}
+                    <a href="#" 
+                       class="action-button text-green-500 hover:text-green-700"
+                       data-tippy-content="Unlock thread">
+                      <i class="fas fa-unlock text-lg"></i>
+                    </a>
+                    {% else %}
+                    <a href="#" 
+                       class="action-button text-amber-500 hover:text-amber-700"
+                       data-tippy-content="Lock thread">
+                      <i class="fas fa-lock text-lg"></i>
+                    </a>
+                    {% endif %}
+                    {% if thread.is_pinned %}
+                    <a href="#" 
+                       class="action-button text-gray-500 hover:text-gray-700"
+                       data-tippy-content="Unpin thread">
+                      <i class="fas fa-thumbtack text-lg"></i>
+                    </a>
+                    {% else %}
+                    <a href="#" 
+                       class="action-button text-purple-500 hover:text-purple-700"
+                       data-tippy-content="Pin thread">
+                      <i class="fas fa-thumbtack text-lg"></i>
+                    </a>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="status-indicator">
+                    {% if thread.reports > 0 %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Needs Review
+                    </span>
+                    {% elif thread.is_pinned %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Pinned
+                    </span>
+                    {% elif thread.is_locked %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                      Locked
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      Active
+                    </span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% empty %}
+          <div class="empty-state bg-white rounded-xl shadow-md p-8 text-center">
+            <div class="empty-state-icon inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <i class="fas fa-comment-slash text-gray-400 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-1">No threads found</h3>
+            <p class="text-gray-500 mb-4">
+              {% if request.GET.q %}
+              No threads match your search for "{{ request.GET.q }}"
+              {% elif request.GET.status %}
+              No threads with status "{{ request.GET.status }}"
+              {% else %}
+              There are currently no threads to display
+              {% endif %}
+            </p>
+            <a href="{% url 'forum_moderation' %}" 
+               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <i class="fas fa-sync-alt mr-2"></i> Reset Filters
+            </a>
+          </div>
+          {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if threads.paginator.num_pages > 1 %}
+        <div class="flex items-center justify-between bg-white rounded-xl shadow-md p-4">
+          <div class="flex-1 flex justify-between sm:hidden">
+            {% if threads.has_previous %}
+            <a href="?page={{ threads.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+               class="pagination-link relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Previous
+            </a>
+            {% endif %}
+            {% if threads.has_next %}
+            <a href="?page={{ threads.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+               class="pagination-link ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              Next
+            </a>
+            {% endif %}
+          </div>
+          <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+              <p class="text-sm text-gray-700">
+                Showing <span class="font-medium">{{ threads.start_index }}</span> to <span class="font-medium">{{ threads.end_index }}</span> of 
+                <span class="font-medium">{{ threads.paginator.count }}</span> results
+              </p>
+            </div>
+            <div>
+              <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                {% if threads.has_previous %}
+                <a href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                   class="pagination-link relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">First</span>
+                  <i class="fas fa-angle-double-left"></i>
+                </a>
+                <a href="?page={{ threads.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                   class="pagination-link relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">Previous</span>
+                  <i class="fas fa-angle-left"></i>
+                </a>
+                {% endif %}
+                
+                {% for num in threads.paginator.page_range %}
+                  {% if num == threads.number %}
+                  <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                     class="pagination-link relative inline-flex items-center px-4 py-2 border border-blue-500 bg-blue-50 text-sm font-medium text-blue-600">
+                    {{ num }}
+                  </a>
+                  {% elif num > threads.number|add:'-3' and num < threads.number|add:'3' %}
+                  <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                     class="pagination-link relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    {{ num }}
+                  </a>
+                  {% endif %}
+                {% endfor %}
+                
+                {% if threads.has_next %}
+                <a href="?page={{ threads.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                   class="pagination-link relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">Next</span>
+                  <i class="fas fa-angle-right"></i>
+                </a>
+                <a href="?page={{ threads.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}" 
+                   class="pagination-link relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                  <span class="sr-only">Last</span>
+                  <i class="fas fa-angle-double-right"></i>
+                </a>
+                {% endif %}
+              </nav>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy.min.js"></script>
+<script>
+  // Initialize animation library
+  AOS.init({
+    duration: 800,
+    easing: 'ease-out-cubic',
+    once: true
+  });
+
+  // Initialize tooltips
+  tippy('[data-tippy-content]', {
+    placement: 'top',
+    animation: 'scale',
+    theme: 'light',
+  });
+
+  // Sort functionality
+  document.getElementById('sort').addEventListener('change', function() {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', this.value);
+    window.location.href = url.toString();
+  });
+
+  // Highlight new or important threads
+  document.addEventListener('DOMContentLoaded', function() {
+    // Highlight threads with reports
+    document.querySelectorAll('.badge.bg-red-100').forEach(badge => {
+      badge.closest('.thread-card').classList.add('highlight');
+    });
+    
+    // Highlight if coming from moderation action
+    if (window.location.hash === '#moderated') {
+      const moderatedThread = document.querySelector(window.location.hash);
+      if (moderatedThread) {
+        moderatedThread.scrollIntoView({ behavior: 'smooth' });
+        moderatedThread.classList.add('highlight');
+      }
+    }
+  });
+</script>
+{% endblock %}

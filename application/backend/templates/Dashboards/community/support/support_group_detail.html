@@ -1,0 +1,335 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+    <!-- Group Header -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{% url 'support_groups_list' %}" class="text-gray-400 hover:text-gray-500">
+                            <svg class="flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span class="sr-only">Support Groups</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="ml-4 text-sm font-medium text-gray-500">{{ group.name }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ group.name }}</h1>
+                <div class="mt-2 flex items-center space-x-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{% if group.is_active %}green-100 text-green-800{% else %}gray-100 text-gray-800{% endif %}">
+                        {{ group.is_active|yesno:"Active,Inactive" }}
+                    </span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{ group.get_frequency_display }}
+                    </span>
+                </div>
+            </div>
+            {% if is_facilitator %}
+            <a href="{% url 'facilitated_groups' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105">
+                Manage Group
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Group Details -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Group Details</h3>
+                    <div class="mt-4 space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">Participants:</span> 
+                                    {{ group.participants.count }} of {{ group.max_participants }} spots filled
+                                </p>
+                            </div>
+                        </div>
+                        {% if group.meeting_link %}
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">Meeting Link:</span> 
+                                    <a href="{{ group.meeting_link }}" target="_blank" class="text-indigo-600 hover:text-indigo-800">Join Session</a>
+                                </p>
+                                {% if group.meeting_password %}
+                                <p class="text-sm text-gray-700 mt-1">
+                                    <span class="font-medium">Password:</span> 
+                                    {{ group.meeting_password }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Facilitator</h3>
+                    <div class="mt-4 flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <img class="h-16 w-16 rounded-full" src="{{ group.facilitator.profile.image.url|default:'/static/images/default-profile.jpg' }}" alt="">
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">
+                                {{ group.facilitator.get_full_name|default:group.facilitator.username }}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ group.facilitator.get_user_type_display }}
+                            </p>
+                            {% if group.facilitator.specialist_profile %}
+                            <p class="mt-1 text-sm text-gray-600">
+                                {{ group.facilitator.specialist_profile.expertise_areas|truncatewords:10 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6">
+                <h3 class="text-lg font-medium text-gray-900">About This Group</h3>
+                <div class="mt-2 prose max-w-none text-gray-600">
+                    {{ group.description|linebreaks }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sessions Section -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-900">Upcoming Sessions</h2>
+            {% if is_facilitator %}
+            <a href="{% url 'support_group_session_create' pk=group.pk %}" class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Add Session
+            </a>
+            {% endif %}
+        </div>
+        
+        {% if upcoming_sessions %}
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <ul class="divide-y divide-gray-200">
+                {% for session in upcoming_sessions %}
+                <li class="hover:bg-gray-50 transition-colors duration-150">
+                    <a href="{% url 'support_group_session_detail' group_pk=group.pk session_pk=session.pk %}" class="block px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0 bg-blue-100 rounded-md p-3">
+                                    <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">{{ session.title }}</h3>
+                                    <p class="text-sm text-gray-500">
+                                        <time datetime="{{ session.start_time|date:'Y-m-d H:i' }}">{{ session.start_time|date:"M d, Y H:i" }}</time> - 
+                                        <time datetime="{{ session.end_time|date:'Y-m-d H:i' }}">{{ session.end_time|date:"H:i" }}</time>
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                {% if session.is_completed %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    Completed
+                                </span>
+                                {% elif session.is_in_progress %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    In Progress
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    Upcoming
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% else %}
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-12 sm:px-6 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <h3 class="mt-2 text-lg font-medium text-gray-900">No upcoming sessions</h3>
+                <p class="mt-1 text-sm text-gray-500">Check back later for scheduled sessions.</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Registration Section -->
+    {% if not user_participation %}
+    {% if group.is_full %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="rounded-md bg-red-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">
+                            This group is full
+                        </h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            <p>
+                                All spots for this support group have been filled. Please check other available groups.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif not group.is_active %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="rounded-md bg-yellow-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">
+                            This group is not active
+                        </h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <p>
+                                This support group is currently not accepting new participants.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900">Join This Support Group</h3>
+            <div class="mt-4">
+                <p class="text-sm text-gray-600">
+                    By joining this support group, you'll be able to participate in all scheduled sessions and connect with other members.
+                </p>
+                <div class="mt-6">
+                    <a href="{% url 'support_group_register' pk=group.pk %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105">
+                        Register Now
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="rounded-md bg-green-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-green-800">
+                            You are registered for this group
+                        </h3>
+                        <div class="mt-2 text-sm text-green-700">
+                            <p>
+                                Your registration status: <span class="font-medium">{{ user_participation.get_status_display }}</span>
+                            </p>
+                            {% if group.meeting_link %}
+                            <p class="mt-2">
+                                <a href="{{ group.meeting_link }}" target="_blank" class="font-medium text-green-800 hover:text-green-600 underline">Click here to join the session</a>
+                                {% if group.meeting_password %}
+                                (Password: {{ group.meeting_password }})
+                                {% endif %}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Participants List -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Participants ({{ participants.count }})</h2>
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <ul class="divide-y divide-gray-200">
+                {% for participant in participants %}
+                <li class="px-4 py-4 sm:px-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <img class="h-10 w-10 rounded-full" src="{{ participant.user.profile.image.url|default:'/static/images/default-profile.jpg' }}" alt="">
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-gray-900 truncate">
+                                {{ participant.user.get_full_name|default:participant.user.username }}
+                            </p>
+                            <p class="text-sm text-gray-500 truncate">
+                                {{ participant.user.get_user_type_display }}
+                            </p>
+                        </div>
+                        <div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{% if participant.status == 'approved' %}green-100 text-green-800{% elif participant.status == 'pending' %}yellow-100 text-yellow-800{% else %}gray-100 text-gray-800{% endif %}">
+                                {{ participant.get_status_display }}
+                            </span>
+                        </div>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="px-4 py-12 sm:px-6 text-center">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <h3 class="mt-2 text-lg font-medium text-gray-900">No participants yet</h3>
+                    <p class="mt-1 text-sm text-gray-500">Be the first to join this support group.</p>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Floating decorative elements -->
+<div class="fixed bottom-0 right-0 w-64 h-64 bg-indigo-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float"></div>
+<div class="fixed top-1/3 left-0 w-48 h-48 bg-blue-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float-delay"></div>
+{% endblock %}

@@ -1,0 +1,138 @@
+<!-- journal_template_detail.html -->
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<style>
+    .template-card {
+        transition: all 0.3s ease;
+        transform-style: preserve-3d;
+    }
+    .template-card:hover {
+        transform: translateY(-5px) rotateX(5deg);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .template-field {
+        transition: all 0.2s ease;
+    }
+    .template-field:hover {
+        background-color: #f8fafc;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+                <div class="lg:col-span-2">
+                    <div class="template-card bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl" data-aos="fade-up">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-2xl font-bold text-gray-900">{{ template.title }}</h2>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    Template
+                                </span>
+                            </div>
+                            
+                            <p class="mt-2 text-gray-600">{{ template.description }}</p>
+                            
+                            <div class="mt-6">
+                                <h3 class="text-lg font-medium text-gray-900">Template Structure</h3>
+                                <div class="mt-4 space-y-4">
+                                    {% for field in template.structure.fields %}
+                                    <div class="template-field border border-gray-200 rounded-md p-4">
+                                        <div class="flex items-center justify-between">
+                                            <h4 class="text-sm font-medium text-gray-900">{{ field.label }}</h4>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                                {{ field.type }}
+                                            </span>
+                                        </div>
+                                        {% if field.description %}
+                                        <p class="mt-1 text-sm text-gray-500">{{ field.description }}</p>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8 pt-6 border-t border-gray-200">
+                                <a href="{% url 'create_from_template' template.id %}" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105">
+                                    Use This Template
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="mt-12 lg:mt-0">
+                    <!-- About Templates -->
+                    <div class="bg-white rounded-lg shadow-md p-6" data-aos="fade-left">
+                        <h3 class="text-lg font-medium text-gray-900">About Templates</h3>
+                        <div class="mt-4 space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <p class="ml-3 text-sm text-gray-700">Templates provide structure to your journal entries</p>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <p class="ml-3 text-sm text-gray-700">They help guide your reflection and ensure consistency</p>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <p class="ml-3 text-sm text-gray-700">You can always customize the content after creating from a template</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Other Templates -->
+                    <div class="mt-8 bg-white rounded-lg shadow-md p-6" data-aos="fade-left" data-aos-delay="100">
+                        <h3 class="text-lg font-medium text-gray-900">Other Templates</h3>
+                        <div class="mt-4 space-y-4">
+                            {% for other_template in templates %}
+                                {% if other_template.id != template.id %}
+                                <a href="{% url 'journal_template_detail' other_template.id %}" class="block bg-gray-50 rounded-lg p-4 hover:bg-blue-50 transition-colors duration-200">
+                                    <h4 class="text-sm font-medium text-gray-900">{{ other_template.title }}</h4>
+                                    <p class="mt-1 text-xs text-gray-500 line-clamp-2">{{ other_template.description }}</p>
+                                </a>
+                                {% endif %}
+                            {% empty %}
+                            <p class="text-sm text-gray-500">No other templates available</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+    });
+</script>
+{% endblock %}

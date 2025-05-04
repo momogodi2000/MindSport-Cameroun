@@ -1,0 +1,530 @@
+{% extends 'Dashboards/Layout/coach_base.html' %}
+{% load static %}
+
+{% block title %}My Athletes | Mental Health Platform{% endblock %}
+{% block header_title %}My Athletes{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6 transition-all duration-300 ease-in-out">
+  <!-- Stats Overview -->
+  <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+    <div class="rounded-lg bg-white p-6 shadow-lg transition-transform duration-300 hover:scale-105 dark:bg-gray-800">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Athletes</p>
+          <h3 class="mt-1 text-2xl font-bold text-gray-700 dark:text-white" id="active-count">0</h3>
+        </div>
+        <div class="rounded-full bg-blue-100 p-3 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center text-sm font-medium text-green-600 dark:text-green-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+        <span id="active-percent">0%</span><span class="ml-1">from last month</span>
+      </div>
+    </div>
+
+    <div class="rounded-lg bg-white p-6 shadow-lg transition-transform duration-300 hover:scale-105 dark:bg-gray-800">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Upcoming Sessions</p>
+          <h3 class="mt-1 text-2xl font-bold text-gray-700 dark:text-white" id="session-count">0</h3>
+        </div>
+        <div class="rounded-full bg-purple-100 p-3 text-purple-600 dark:bg-purple-900 dark:text-purple-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center text-sm font-medium text-green-600 dark:text-green-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+        <span id="session-percent">0%</span><span class="ml-1">from last week</span>
+      </div>
+    </div>
+
+    <div class="rounded-lg bg-white p-6 shadow-lg transition-transform duration-300 hover:scale-105 dark:bg-gray-800">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Assessments</p>
+          <h3 class="mt-1 text-2xl font-bold text-gray-700 dark:text-white" id="assessment-count">0</h3>
+        </div>
+        <div class="rounded-full bg-yellow-100 p-3 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center text-sm font-medium text-red-600 dark:text-red-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+        <span id="assessment-percent">0%</span><span class="ml-1">pending review</span>
+      </div>
+    </div>
+
+    <div class="rounded-lg bg-white p-6 shadow-lg transition-transform duration-300 hover:scale-105 dark:bg-gray-800">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Progress Rate</p>
+          <h3 class="mt-1 text-2xl font-bold text-gray-700 dark:text-white" id="progress-rate">0%</h3>
+        </div>
+        <div class="rounded-full bg-green-100 p-3 text-green-600 dark:bg-green-900 dark:text-green-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center text-sm font-medium text-green-600 dark:text-green-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+        <span id="progress-change">0%</span><span class="ml-1">improvement</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Section -->
+  <div class="mb-6 flex flex-col items-center justify-between space-y-4 rounded-lg bg-white p-4 shadow-md dark:bg-gray-800 sm:flex-row sm:space-y-0">
+    <div class="relative w-full max-w-md">
+      <input type="text" id="athlete-search" class="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-700 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300" placeholder="Search athletes...">
+      <div class="absolute inset-y-0 left-0 flex items-center pl-3">
+        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+      </div>
+    </div>
+    <div class="flex w-full flex-wrap gap-2 sm:w-auto">
+      <select id="filter-sport" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+        <option value="">All Sports</option>
+        <option value="boxing">Boxing</option>
+        <option value="wrestling">Wrestling</option>
+        <option value="judo">Judo</option>
+        <option value="taekwondo">Taekwondo</option>
+        <option value="karate">Karate</option>
+      </select>
+      <select id="filter-status" class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300">
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="pending">Pending</option>
+        <option value="inactive">Inactive</option>
+      </select>
+      <button id="add-athlete" class="flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-700 dark:hover:bg-blue-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Athlete
+      </button>
+    </div>
+  </div>
+
+  <!-- Athletes List -->
+  <div class="mb-8 overflow-hidden rounded-lg bg-white shadow-md dark:bg-gray-800">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead class="bg-gray-50 dark:bg-gray-900">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Athlete</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Sport</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Status</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Progress</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Last Session</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800" id="athletes-container">
+          <!-- Athletes will be added here dynamically -->
+        </tbody>
+      </table>
+    </div>
+    <div id="no-athletes" class="hidden py-8 text-center text-gray-500 dark:text-gray-400">
+      <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-4 h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+      </svg>
+      <p class="text-lg font-medium">No athletes found</p>
+      <p class="mt-1">Start by adding athletes to your roster or adjust your search filters.</p>
+    </div>
+  </div>
+
+  <!-- 3D Animation Element (Athletics Theme) -->
+  <div class="mb-8 overflow-hidden rounded-lg bg-gradient-to-r from-blue-900 to-purple-900 p-6 shadow-xl">
+    <div class="flex flex-col items-center md:flex-row">
+      <div class="mb-6 w-full md:mb-0 md:w-1/2">
+        <h3 class="mb-4 text-2xl font-bold text-white">Athlete Mental Performance</h3>
+        <p class="mb-4 text-lg text-blue-100">Track your athletes' mental health progress with our interactive 3D tools.</p>
+        <button class="group relative inline-flex items-center overflow-hidden rounded-lg bg-white px-6 py-3 text-lg font-bold text-blue-600 transition-all duration-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+          <span class="absolute right-0 translate-x-full transition-transform duration-300 group-hover:-translate-x-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </span>
+          <span class="transition-all duration-300 group-hover:mr-4">Explore Analytics</span>
+        </button>
+      </div>
+      <div class="flex w-full items-center justify-center md:w-1/2">
+        <div id="animation-container" class="h-64 w-64 transform-gpu">
+          <!-- 3D animation will be rendered here -->
+          <img src="{% static 'img/brain-3d.svg' %}" alt="3D Brain Animation" class="h-full w-full animate-float" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Tools & Resources -->
+  <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div class="group overflow-hidden rounded-lg bg-white transition-all duration-300 hover:shadow-xl dark:bg-gray-800">
+      <div class="relative h-48 overflow-hidden bg-blue-100 dark:bg-blue-900">
+        <div class="absolute inset-0 flex items-center justify-center rounded-t-lg bg-gradient-to-br from-blue-400 to-purple-500 opacity-90 transition-transform duration-300 group-hover:scale-110">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+        </div>
+      </div>
+      <div class="p-6">
+        <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Assessment Library</h3>
+        <p class="mb-4 text-gray-600 dark:text-gray-400">Access standardized psychological assessments specifically designed for combat athletes.</p>
+        <a href="#" class="inline-flex items-center font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+          Browse Assessments
+          <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="group overflow-hidden rounded-lg bg-white transition-all duration-300 hover:shadow-xl dark:bg-gray-800">
+      <div class="relative h-48 overflow-hidden bg-green-100 dark:bg-green-900">
+        <div class="absolute inset-0 flex items-center justify-center rounded-t-lg bg-gradient-to-br from-green-400 to-teal-500 opacity-90 transition-transform duration-300 group-hover:scale-110">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+          </svg>
+        </div>
+      </div>
+      <div class="p-6">
+        <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Session Resources</h3>
+        <p class="mb-4 text-gray-600 dark:text-gray-400">Therapeutic resources, exercises, and techniques to enhance your coaching sessions.</p>
+        <a href="#" class="inline-flex items-center font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+          View Resources
+          <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="group overflow-hidden rounded-lg bg-white transition-all duration-300 hover:shadow-xl dark:bg-gray-800">
+      <div class="relative h-48 overflow-hidden bg-purple-100 dark:bg-purple-900">
+        <div class="absolute inset-0 flex items-center justify-center rounded-t-lg bg-gradient-to-br from-purple-400 to-indigo-500 opacity-90 transition-transform duration-300 group-hover:scale-110">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+        </div>
+      </div>
+      <div class="p-6">
+        <h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-white">Crisis Management</h3>
+        <p class="mb-4 text-gray-600 dark:text-gray-400">Tools and protocols for supporting athletes experiencing mental health crises.</p>
+        <a href="#" class="inline-flex items-center font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+          Access Protocols
+          <svg xmlns="http://www.w3.org/2000/svg" class="ml-1 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Athlete Modal -->
+<div id="add-athlete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-50">
+  <div class="relative w-full max-w-lg rounded-lg bg-white p-8 shadow-xl dark:bg-gray-800">
+    <button id="close-modal" class="absolute right-4 top-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <h3 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Add New Athlete</h3>
+    <form id="add-athlete-form">
+      <div class="mb-4">
+        <label for="athlete-name" class="mb-2 block font-medium text-gray-700 dark:text-gray-300">Athlete Name</label>
+        <input type="text" id="athlete-name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white" required>
+      </div>
+      <div class="mb-4">
+        <label for="athlete-email" class="mb-2 block font-medium text-gray-700 dark:text-gray-300">Email</label>
+        <input type="email" id="athlete-email" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white" required>
+      </div>
+      <div class="mb-4">
+        <label for="athlete-sport" class="mb-2 block font-medium text-gray-700 dark:text-gray-300">Sport</label>
+        <select id="athlete-sport" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white" required>
+          <option value="">Select Sport</option>
+          <option value="boxing">Boxing</option>
+          <option value="wrestling">Wrestling</option>
+          <option value="judo">Judo</option>
+          <option value="taekwondo">Taekwondo</option>
+          <option value="karate">Karate</option>
+        </select>
+      </div>
+      <div class="mb-4">
+        <label for="athlete-goals" class="mb-2 block font-medium text-gray-700 dark:text-gray-300">Initial Goals</label>
+        <textarea id="athlete-goals" rows="3" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-white"></textarea>
+      </div>
+      <div class="flex justify-end">
+        <button type="button" id="cancel-add" class="mr-2 rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 hover:bg-gray-100 focus:outline-none dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700">Cancel</button>
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 focus:outline-none dark:bg-blue-700 dark:hover:bg-blue-800">Add Athlete</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Demo data
+    const athletesData = [
+      {
+        id: 1,
+        name: 'Thomas Ndong',
+        avatar: 'https://api.placeholder.com/40',
+        sport: 'Boxing',
+        status: 'active',
+        progress: 75,
+        lastSession: '2025-04-20'
+      },
+      {
+        id: 2,
+        name: 'Marie Kama',
+        avatar: 'https://api.placeholder.com/40',
+        sport: 'Wrestling',
+        status: 'active',
+        progress: 62,
+        lastSession: '2025-04-15'
+      },
+      {
+        id: 3,
+        name: 'David Chen',
+        avatar: 'https://api.placeholder.com/40',
+        sport: 'Judo',
+        status: 'pending',
+        progress: 45,
+        lastSession: '2025-04-10'
+      },
+      {
+        id: 4,
+        name: 'Sarah Kim',
+        avatar: 'https://api.placeholder.com/40',
+        sport: 'Taekwondo',
+        status: 'inactive',
+        progress: 30,
+        lastSession: '2025-03-25'
+      },
+      {
+        id: 5,
+        name: 'Miguel Rodriguez',
+        avatar: 'https://api.placeholder.com/40',
+        sport: 'Boxing',
+        status: 'active',
+        progress: 85,
+        lastSession: '2025-04-21'
+      }
+    ];
+
+    // Load athletes data
+    function loadAthletes(data) {
+      const container = document.getElementById('athletes-container');
+      const noAthletesMsg = document.getElementById('no-athletes');
+      
+      container.innerHTML = '';
+      
+      if (data.length === 0) {
+        noAthletesMsg.classList.remove('hidden');
+        return;
+      }
+      
+      noAthletesMsg.classList.add('hidden');
+      
+      data.forEach(athlete => {
+        let statusClass = 'bg-gray-100 text-gray-800';
+        if (athlete.status === 'active') {
+          statusClass = 'bg-green-100 text-green-800';
+        } else if (athlete.status === 'pending') {
+          statusClass = 'bg-yellow-100 text-yellow-800';
+        } else if (athlete.status === 'inactive') {
+          statusClass = 'bg-red-100 text-red-800';
+        }
+        
+        const formattedDate = new Date(athlete.lastSession).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td class="whitespace-nowrap px-6 py-4">
+            <div class="flex items-center">
+              <div class="h-10 w-10 flex-shrink-0">
+                <img class="h-10 w-10 rounded-full" src="${athlete.avatar}" alt="${athlete.name}">
+              </div>
+              <div class="ml-4">
+                <div class="text-sm font-medium text-gray-900 dark:text-white">${athlete.name}</div>
+              </div>
+            </div>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4">
+            <div class="text-sm text-gray-900 dark:text-white">${athlete.sport}</div>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4">
+            <span class="inline-flex rounded-full px-2 py-1 text-xs font-semibold ${statusClass} dark:bg-opacity-20">
+              ${athlete.status.charAt(0).toUpperCase() + athlete.status.slice(1)}
+            </span>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4">
+            <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+              <div class="bg-blue-600 h-2.5 rounded-full dark:bg-blue-500" style="width: ${athlete.progress}%"></div>
+            </div>
+            <div class="text-xs mt-1 text-gray-500 dark:text-gray-400">${athlete.progress}%</div>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4">
+            <div class="text-sm text-gray-900 dark:text-white">${formattedDate}</div>
+          </td>
+          <td class="whitespace-nowrap px-6 py-4 text-right text-sm font-medium">
+            <div class="flex space-x-2">
+              <button class="view-profile text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300" data-id="${athlete.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              <button class="schedule-session text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300" data-id="${athlete.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </button>
+              <button class="send-message text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300" data-id="${athlete.id}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // Search and filter
+    function filterAthletes() {
+      const searchTerm = document.getElementById('athlete-search').value.toLowerCase();
+      const sportFilter = document.getElementById('filter-sport').value.toLowerCase();
+      const statusFilter = document.getElementById('filter-status').value.toLowerCase();
+      
+      const filteredData = athletesData.filter(athlete => {
+        const matchesSearch = athlete.name.toLowerCase().includes(searchTerm);
+        const matchesSport = sportFilter === '' || athlete.sport.toLowerCase() === sportFilter;
+        const matchesStatus = statusFilter === '' || athlete.status.toLowerCase() === statusFilter;
+        
+        return matchesSearch && matchesSport && matchesStatus;
+      });
+      
+      loadAthletes(filteredData);
+      updateStats(filteredData);
+    }
+
+    // Update stats based on current data
+    function updateStats(data) {
+      const activeAthletes = data.filter(a => a.status === 'active').length;
+      const totalSessions = data.reduce((sum, a) => sum + Math.floor(Math.random() * 5), 0); // Dummy calculation
+      const pendingAssessments = Math.floor(data.length * 0.4); // Dummy calculation
+      const avgProgress = data.reduce((sum, a) => sum + a.progress, 0) / (data.length || 1);
+
+      document.getElementById('active-count').textContent = activeAthletes;
+      document.getElementById('session-count').textContent = totalSessions;
+      document.getElementById('assessment-count').textContent = pendingAssessments;
+      document.getElementById('progress-rate').textContent = `${Math.round(avgProgress)}%`;
+
+      // Random growth stats for demo
+      document.getElementById('active-percent').textContent = `${Math.floor(Math.random() * 15 + 5)}%`;
+      document.getElementById('session-percent').textContent = `${Math.floor(Math.random() * 20 + 10)}%`;
+      document.getElementById('assessment-percent').textContent = `${Math.floor(Math.random() * 30)}%`;
+      document.getElementById('progress-change').textContent = `${Math.floor(Math.random() * 10 + 5)}%`;
+    }
+
+    // Modal controls
+    const modal = document.getElementById('add-athlete-modal');
+    const addAthleteBtn = document.getElementById('add-athlete');
+    const closeModalBtn = document.getElementById('close-modal');
+    const cancelAddBtn = document.getElementById('cancel-add');
+    
+    function openModal() {
+      modal.classList.remove('hidden');
+    }
+    
+    function closeModal() {
+      modal.classList.add('hidden');
+      document.getElementById('add-athlete-form').reset();
+    }
+    
+    addAthleteBtn.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelAddBtn.addEventListener('click', closeModal);
+
+    // Form submission
+    document.getElementById('add-athlete-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const newAthlete = {
+        id: athletesData.length + 1,
+        name: document.getElementById('athlete-name').value,
+        avatar: 'https://api.placeholder.com/40',
+        sport: document.getElementById('athlete-sport').value,
+        status: 'pending',
+        progress: 0,
+        lastSession: 'N/A'
+      };
+      
+      athletesData.push(newAthlete);
+      closeModal();
+      filterAthletes();
+    });
+
+    // Search and filter event listeners
+    document.getElementById('athlete-search').addEventListener('input', filterAthletes);
+    document.getElementById('filter-sport').addEventListener('change', filterAthletes);
+    document.getElementById('filter-status').addEventListener('change', filterAthletes);
+
+    // Action button event listeners
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.view-profile')) {
+        const athleteId = e.target.closest('.view-profile').dataset.id;
+        alert(`View profile of athlete ID: ${athleteId}`);
+      } else if (e.target.closest('.schedule-session')) {
+        const athleteId = e.target.closest('.schedule-session').dataset.id;
+        alert(`Schedule session with athlete ID: ${athleteId}`);
+      } else if (e.target.closest('.send-message')) {
+        const athleteId = e.target.closest('.send-message').dataset.id;
+        alert(`Send message to athlete ID: ${athleteId}`);
+      }
+    });
+
+    // Initial load
+    loadAthletes(athletesData);
+    updateStats(athletesData);
+
+    // Simple animation for the 3D brain element
+    document.querySelector('.animate-float').style.animation = 'float 6s ease-in-out infinite';
+    document.head.insertAdjacentHTML('beforeend', `
+      <style>
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(5deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
+        }
+      </style>
+    `);
+  });
+</script>
+{% endblock %}

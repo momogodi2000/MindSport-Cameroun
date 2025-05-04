@@ -1,0 +1,27 @@
+  .fixed.inset-0.bg-black.bg-opacity-50.z-50.flex.items-center.justify-center:not(.hidden) {
+    display: flex !important;
+  }
+  
+  /* Make sure modals are absolutely positioned */
+  #book-appointment-modal,
+  #appointment-details-modal,
+  #feedback-modal,
+  #cancel-confirm-modal,
+  #reschedule-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    display: none;
+  }
+  
+  /* When modals are not hidden, they should be flex */
+  #book-appointment-modal:not(.hidden),
+  #appointment-details-modal:not(.hidden),
+  #feedback-modal:not(.hidden),
+  #cancel-confirm-modal:not(.hidden),
+  #reschedule-modal:not(.hidden) {
+    display: flex !important;
+  }

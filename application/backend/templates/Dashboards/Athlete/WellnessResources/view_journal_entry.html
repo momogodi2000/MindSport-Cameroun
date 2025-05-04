@@ -1,0 +1,210 @@
+<!-- view_journal_entry.html -->
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<style>
+    .entry-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+    }
+    .mood-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+    }
+    .mood-excellent { background-color: #10B981; }
+    .mood-good { background-color: #34D399; }
+    .mood-neutral { background-color: #6B7280; }
+    .mood-bad { background-color: #F59E0B; }
+    .mood-terrible { background-color: #EF4444; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if entry.mood == 'excellent' %}bg-green-100 text-green-800{% elif entry.mood == 'good' %}bg-blue-100 text-blue-800{% elif entry.mood == 'neutral' %}bg-gray-100 text-gray-800{% elif entry.mood == 'bad' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                        <span class="mood-indicator mood-{{ entry.mood }}"></span>
+                                        {{ entry.get_mood_display }}
+                                    </span>
+                                </div>
+                                <div class="flex space-x-4">
+                                    <a href="{% url 'edit_journal_entry' entry.id %}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                        Edit
+                                    </a>
+                                    <a href="{% url 'delete_journal_entry' entry.id %}" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                                        Delete
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <h1 class="mt-2 text-2xl font-bold text-gray-900">
+                                {{ entry.title|default:"Journal Entry" }}
+                            </h1>
+                            <p class="mt-1 text-sm text-gray-500">
+                                {{ entry.date|date:"F j, Y" }}
+                            </p>
+                            
+                            <div class="mt-6 prose prose-blue max-w-none entry-content">
+                                {{ entry.content|linebreaks }}
+                            </div>
+                            
+                            {% if entry.energy_level or entry.stress_level or entry.sleep_hours %}
+                            <div class="mt-8 pt-6 border-t border-gray-200">
+                                <h3 class="text-sm font-medium text-gray-900">Additional Details</h3>
+                                <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                    {% if entry.energy_level %}
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Energy Level</p>
+                                        <p class="mt-1 text-sm text-gray-900">{{ entry.get_energy_level_display }}</p>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if entry.stress_level %}
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Stress Level</p>
+                                        <p class="mt-1 text-sm text-gray-900">{{ entry.get_stress_level_display }}</p>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if entry.sleep_hours %}
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500">Sleep Hours</p>
+                                        <p class="mt-1 text-sm text-gray-900">{{ entry.sleep_hours }} hours</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if entry.tags %}
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <h3 class="text-sm font-medium text-gray-900">Tags</h3>
+                                <div class="mt-2 flex flex-wrap gap-2">
+                                    {% for tag in entry.get_tags_list %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                                        {{ tag }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if not entry.is_private and entry.shared_with.exists %}
+                            <div class="mt-6 pt-6 border-t border-gray-200">
+                                <h3 class="text-sm font-medium text-gray-900">Shared With</h3>
+                                <div class="mt-2">
+                                    <div class="space-y-2">
+                                        {% for user in entry.shared_with.all %}
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                                                <span class="text-gray-600">{{ user.first_name|first }}{{ user.last_name|first }}</span>
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">{{ user.get_full_name }}</p>
+                                                <p class="text-sm text-gray-500">{{ user.profile.get_user_type_display }}</p>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="mt-12 lg:mt-0">
+                    <!-- Related Entries -->
+                    <div class="bg-white rounded-lg shadow-md p-6" data-aos="fade-left">
+                        <h3 class="text-lg font-medium text-gray-900">Related Entries</h3>
+                        <div class="mt-4 space-y-4">
+                            {% for related in entry.get_related_entries %}
+                            <a href="{% url 'view_journal_entry' related.id %}" class="block bg-gray-50 rounded-lg p-4 hover:bg-blue-50 transition-colors duration-200">
+                                <h4 class="text-sm font-medium text-gray-900">{{ related.title|default:"Journal Entry" }}</h4>
+                                <div class="mt-1 flex items-center justify-between">
+                                    <span class="text-xs text-gray-500">{{ related.date|date:"M j, Y" }}</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {% if related.mood == 'excellent' %}bg-green-100 text-green-800{% elif related.mood == 'good' %}bg-blue-100 text-blue-800{% elif related.mood == 'neutral' %}bg-gray-100 text-gray-800{% elif related.mood == 'bad' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                        {{ related.get_mood_display }}
+                                    </span>
+                                </div>
+                            </a>
+                            {% empty %}
+                            <p class="text-sm text-gray-500">No related entries found</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="mt-8 bg-white rounded-lg shadow-md p-6" data-aos="fade-left" data-aos-delay="100">
+                        <h3 class="text-lg font-medium text-gray-900">Actions</h3>
+                        <div class="mt-4 space-y-4">
+                            <a href="{% url 'edit_journal_entry' entry.id %}" class="group flex items-center p-3 rounded-md hover:bg-blue-50 transition-colors duration-200">
+                                <div class="flex-shrink-0 bg-blue-100 rounded-md p-2 text-blue-600 group-hover:bg-blue-200 transition-colors duration-200">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Edit Entry</p>
+                                    <p class="text-sm text-gray-500">Update this journal entry</p>
+                                </div>
+                            </a>
+                            <a href="{% url 'delete_journal_entry' entry.id %}" class="group flex items-center p-3 rounded-md hover:bg-blue-50 transition-colors duration-200">
+                                <div class="flex-shrink-0 bg-blue-100 rounded-md p-2 text-blue-600 group-hover:bg-blue-200 transition-colors duration-200">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Delete Entry</p>
+                                    <p class="text-sm text-gray-500">Permanently remove this entry</p>
+                                </div>
+                            </a>
+                            <a href="{% url 'journal_home' %}" class="group flex items-center p-3 rounded-md hover:bg-blue-50 transition-colors duration-200">
+                                <div class="flex-shrink-0 bg-blue-100 rounded-md p-2 text-blue-600 group-hover:bg-blue-200 transition-colors duration-200">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">Back to Journal</p>
+                                    <p class="text-sm text-gray-500">Return to your journal home</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,679 @@
+{% extends 'Dashboards/Layout/psychologist_base.html' %}
+{% load static %}
+
+{% block title %}Wellness Resources | Mental Health Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-indigo-800 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-2 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                    <path d="M2 17l10 5 10-5"></path>
+                    <path d="M2 12l10 5 10-5"></path>
+                </svg>
+                Wellness Resources
+            </h1>
+            <p class="text-gray-600 mt-2">Create, manage, and share mental health resources with your athletes</p>
+        </div>
+
+        <!-- Resource Management Dashboard -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Column: Resource Stats & Quick Actions -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6 transform transition-all hover:scale-[1.01]">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        Overview
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-indigo-50 rounded-lg">
+                            <span class="text-indigo-800">Total Resources</span>
+                            <span class="font-bold text-indigo-600 text-xl" id="resources-count">28</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-green-800">Published</span>
+                            <span class="font-bold text-green-600 text-xl" id="published-count">23</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 bg-amber-50 rounded-lg">
+                            <span class="text-amber-800">Drafts</span>
+                            <span class="font-bold text-amber-600 text-xl" id="draft-count">5</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                            <span class="text-blue-800">Athlete Views</span>
+                            <span class="font-bold text-blue-600 text-xl" id="views-count">342</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6 transform transition-all hover:scale-[1.01]">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        Quick Actions
+                    </h2>
+                    
+                    <div class="space-y-3">
+                        <button id="create-new-resource" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium flex items-center justify-center transition-colors duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                            Create New Resource
+                        </button>
+                        
+                        <button class="w-full py-3 bg-white border border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg font-medium flex items-center justify-center transition-colors duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="12" y1="8" x2="12" y2="16"/>
+                                <line x1="8" y1="12" x2="16" y2="12"/>
+                            </svg>
+                            Import Resources
+                        </button>
+                        
+                        <button class="w-full py-3 bg-white border border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg font-medium flex items-center justify-center transition-colors duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Download Analytics
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6 transform transition-all hover:scale-[1.01]">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        Resource Categories
+                    </h2>
+                    
+                    <div class="space-y-2">
+                        <div class="resource-category flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors duration-200">
+                            <span class="flex items-center text-gray-700">
+                                <span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                                Stress Management
+                            </span>
+                            <span class="text-gray-500 text-sm">8</span>
+                        </div>
+                        
+                        <div class="resource-category flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors duration-200">
+                            <span class="flex items-center text-gray-700">
+                                <span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+                                Performance Anxiety
+                            </span>
+                            <span class="text-gray-500 text-sm">6</span>
+                        </div>
+                        
+                        <div class="resource-category flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors duration-200">
+                            <span class="flex items-center text-gray-700">
+                                <span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>
+                                Recovery & Resilience
+                            </span>
+                            <span class="text-gray-500 text-sm">5</span>
+                        </div>
+                        
+                        <div class="resource-category flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors duration-200">
+                            <span class="flex items-center text-gray-700">
+                                <span class="w-3 h-3 rounded-full bg-purple-500 mr-2"></span>
+                                Competition Mindset
+                            </span>
+                            <span class="text-gray-500 text-sm">4</span>
+                        </div>
+                        
+                        <div class="resource-category flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors duration-200">
+                            <span class="flex items-center text-gray-700">
+                                <span class="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
+                                Cultural Context
+                            </span>
+                            <span class="text-gray-500 text-sm">3</span>
+                        </div>
+                        
+                        <div class="resource-category flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors duration-200">
+                            <span class="flex items-center text-gray-700">
+                                <span class="w-3 h-3 rounded-full bg-pink-500 mr-2"></span>
+                                Mental Exercises
+                            </span>
+                            <span class="text-gray-500 text-sm">2</span>
+                        </div>
+                    </div>
+                    
+                    <button class="mt-4 w-full py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-medium flex items-center justify-center transition-colors duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Add Category
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Right Column: Resources and 3D visualization -->
+            <div class="lg:col-span-2">
+                <!-- Search and filter -->
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div class="relative flex-grow">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" placeholder="Search resources..." class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 focus:outline-none transition-all">
+                    </div>
+                    
+                    <div class="flex gap-2">
+                        <select class="bg-white py-3 px-4 rounded-lg border border-gray-300 text-gray-700 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 focus:outline-none transition-all">
+                            <option value="">All Types</option>
+                            <option value="article">Articles</option>
+                            <option value="video">Videos</option>
+                            <option value="exercise">Exercises</option>
+                            <option value="assessment">Assessments</option>
+                        </select>
+                        
+                        <select class="bg-white py-3 px-4 rounded-lg border border-gray-300 text-gray-700 focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 focus:outline-none transition-all">
+                            <option value="">All Categories</option>
+                            <option value="stress">Stress Management</option>
+                            <option value="anxiety">Performance Anxiety</option>
+                            <option value="recovery">Recovery & Resilience</option>
+                            <option value="competition">Competition Mindset</option>
+                            <option value="cultural">Cultural Context</option>
+                            <option value="exercises">Mental Exercises</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 3D Resource Visualization -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6 transform transition-all hover:scale-[1.01] relative overflow-hidden">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                        </svg>
+                        Resource Impact Analysis
+                    </h2>
+                    
+                    <div class="relative w-full h-64">
+                        <div id="resource-visualization" class="w-full h-full">
+                            <!-- The 3D visualization will be rendered here by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex justify-center gap-4 text-sm">
+                        <button class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full font-medium hover:bg-indigo-200 transition-colors">User Engagement</button>
+                        <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors">Content Distribution</button>
+                        <button class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors">Athlete Improvement</button>
+                    </div>
+                </div>
+                
+                <!-- Resources List -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transform transition-all hover:scale-[1.01]">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold text-gray-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
+                            Your Resources
+                        </h2>
+                        
+                        <div class="flex items-center">
+                            <span class="text-gray-500 text-sm mr-2">Sort by:</span>
+                            <select class="bg-white py-1 px-2 rounded border border-gray-300 text-gray-700 text-sm focus:ring-2 focus:ring-indigo-300 focus:border-indigo-500 focus:outline-none transition-all">
+                                <option value="recent">Most Recent</option>
+                                <option value="popular">Most Popular</option>
+                                <option value="aZ">A-Z</option>
+                                <option value="type">Resource Type</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <!-- Resource Item 1 -->
+                        <div class="resource-item group bg-white border border-gray-200 hover:border-indigo-300 rounded-lg p-4 transition-all duration-300 flex flex-col md:flex-row gap-4">
+                            <div class="flex-shrink-0 w-full md:w-36 h-24 bg-indigo-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                            </div>
+                            
+                            <div class="flex-grow">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h3 class="font-semibold text-lg text-gray-800">Pre-Competition Anxiety Management Guide</h3>
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">Published</span>
+                                </div>
+                                
+                                <p class="text-gray-600 text-sm mb-2 line-clamp-2">Comprehensive guide for athletes to manage anxiety before competitions. Includes breathing techniques, visualization exercises, and mindfulness practices.</p>
+                                
+                                <div class="flex flex-wrap items-center justify-between">
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <span class="flex items-center mr-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                            </svg>
+                                            Apr 16, 2025
+                                        </span>
+                                        <span class="flex items-center mr-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                            48 views
+                                        </span>
+                                        <span class="flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20 10c0 6-8 10-8 10s-8-4-8-10a8 8 0 0 1 16 0Z"></path>
+                                                <circle cx="12" cy="10" r="3"></circle>
+                                            </svg>
+                                            PDF
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="flex mt-2 md:mt-0">
+                                        <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 20h9"></path>
+                                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                                <polyline points="16 6 12 2 8 6"></polyline>
+                                                <line x1="12" y1="2" x2="12" y2="15"></line>
+                                            </svg>
+                                        </button>
+                                        <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Resource Item 2 -->
+                        <div class="resource-item group bg-white border border-gray-200 hover:border-indigo-300 rounded-lg p-4 transition-all duration-300 flex flex-col md:flex-row gap-4">
+                            <div class="flex-shrink-0 w-full md:w-36 h-24 bg-purple-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M23 7v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h18a2 2 0 0 1 2 2z"></path>
+                                    <polygon points="12 17 12 7 7 12 12 7 17 12"></polygon>
+                                </svg>
+                            </div>
+                            
+                            <div class="flex-grow">
+                                <div class="flex items-center justify-between mb-1">
+                                    <h3 class="font-semibold text-lg text-gray-800">Mental Resilience for Combat Athletes</h3>
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">Published</span>
+                                </div>
+                                
+                                <p class="text-gray-600 text-sm mb-2 line-clamp-2">Video series on building mental toughness specifically for combat sports. Features interviews with Cameroonian champions and practical exercises.</p>
+                                
+                                <div class="flex flex-wrap items-center justify-between">
+                                    <div class="flex items-center text-sm text-gray-500">
+                                        <span class="flex items-center mr-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                                            </svg>
+                                            Apr 14, 2025
+                                        </span>
+                                        <span class="flex items-center mr-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                            72 views
+                                        </span>
+                                        <span class="flex items-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M20 10c0 6-8 10-8 10s-8-4-8-10a8 8 0 0 1 16 0Z"></path>
+                                                <circle cx="12" cy="10" r="3"></circle>
+                                            </svg>
+                                            Video
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="flex mt-2 md:mt-0">
+                                        <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 20h9"></path>
+                                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                            </svg>
+                                        </button>
+                                        <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                                <polyline points="16 6 12 2 8 6"></polyline>
+                                                <line x1="12" y1="2" x2="12" y2="15"></line>
+                                            </svg>
+                                        </button>
+                                        <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                                                <!-- Resource Item 3 -->
+                                                <div class="resource-item group bg-white border border-gray-200 hover:border-indigo-300 rounded-lg p-4 transition-all duration-300 flex flex-col md:flex-row gap-4">
+                                                    <div class="flex-shrink-0 w-full md:w-36 h-24 bg-green-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                            <circle cx="10" cy="8" r="2"></circle>
+                                                            <path d="M20 17c0 0-2-1-4-1s-4 1-4 1m8-1c0 0-2-1-4-1s-4 1-4 1"></path>
+                                                        </svg>
+                                                    </div>
+                                                    
+                                                    <div class="flex-grow">
+                                                        <div class="flex items-center justify-between mb-1">
+                                                            <h3 class="font-semibold text-lg text-gray-800">Cultural Perspectives on Mental Health</h3>
+                                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">Published</span>
+                                                        </div>
+                                                        
+                                                        <p class="text-gray-600 text-sm mb-2 line-clamp-2">Addressing mental health stigma in Cameroonian sports culture with culturally sensitive approaches and community engagement strategies.</p>
+                                                        
+                                                        <div class="flex flex-wrap items-center justify-between">
+                                                            <div class="flex items-center text-sm text-gray-500">
+                                                                <span class="flex items-center mr-3">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                                                    </svg>
+                                                                    Apr 10, 2025
+                                                                </span>
+                                                                <span class="flex items-center mr-3">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                                    </svg>
+                                                                    36 views
+                                                                </span>
+                                                                <span class="flex items-center">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M20 10c0 6-8 10-8 10s-8-4-8-10a8 8 0 0 1 16 0Z"></path>
+                                                                        <circle cx="12" cy="10" r="3"></circle>
+                                                                    </svg>
+                                                                    Article
+                                                                </span>
+                                                            </div>
+                                                            
+                                                            <div class="flex mt-2 md:mt-0">
+                                                                <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M12 20h9"></path>
+                                                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                                                    </svg>
+                                                                </button>
+                                                                <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                                                        <polyline points="16 6 12 2 8 6"></polyline>
+                                                                        <line x1="12" y1="2" x2="12" y2="15"></line>
+                                                                    </svg>
+                                                                </button>
+                                                                <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Resource Item 4 -->
+                                                <div class="resource-item group bg-white border border-gray-200 hover:border-indigo-300 rounded-lg p-4 transition-all duration-300 flex flex-col md:flex-row gap-4">
+                                                    <div class="flex-shrink-0 w-full md:w-36 h-24 bg-yellow-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                                                        </svg>
+                                                    </div>
+                                                    
+                                                    <div class="flex-grow">
+                                                        <div class="flex items-center justify-between mb-1">
+                                                            <h3 class="font-semibold text-lg text-gray-800">Daily Mental Exercises for Athletes</h3>
+                                                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded font-medium">Draft</span>
+                                                        </div>
+                                                        
+                                                        <p class="text-gray-600 text-sm mb-2 line-clamp-2">Collection of 30 quick mental exercises to improve focus, confidence, and emotional regulation. Designed specifically for combat sports athletes.</p>
+                                                        
+                                                        <div class="flex flex-wrap items-center justify-between">
+                                                            <div class="flex items-center text-sm text-gray-500">
+                                                                <span class="flex items-center mr-3">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                                                    </svg>
+                                                                    Apr 8, 2025
+                                                                </span>
+                                                                <span class="flex items-center mr-3">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                                    </svg>
+                                                                    0 views
+                                                                </span>
+                                                                <span class="flex items-center">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M20 10c0 6-8 10-8 10s-8-4-8-10a8 8 0 0 1 16 0Z"></path>
+                                                                        <circle cx="12" cy="10" r="3"></circle>
+                                                                    </svg>
+                                                                    Workbook
+                                                                </span>
+                                                            </div>
+                                                            
+                                                            <div class="flex mt-2 md:mt-0">
+                                                                <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M12 20h9"></path>
+                                                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                                                    </svg>
+                                                                </button>
+                                                                <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                                                        <polyline points="16 6 12 2 8 6"></polyline>
+                                                                        <line x1="12" y1="2" x2="12" y2="15"></line>
+                                                                    </svg>
+                                                                </button>
+                                                                <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Resource Item 5 -->
+                                                <div class="resource-item group bg-white border border-gray-200 hover:border-indigo-300 rounded-lg p-4 transition-all duration-300 flex flex-col md:flex-row gap-4">
+                                                    <div class="flex-shrink-0 w-full md:w-36 h-24 bg-red-100 rounded-lg overflow-hidden flex items-center justify-center">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                                        </svg>
+                                                    </div>
+                                                    
+                                                    <div class="flex-grow">
+                                                        <div class="flex items-center justify-between mb-1">
+                                                            <h3 class="font-semibold text-lg text-gray-800">Post-Competition Recovery Protocol</h3>
+                                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded font-medium">Published</span>
+                                                        </div>
+                                                        
+                                                        <p class="text-gray-600 text-sm mb-2 line-clamp-2">Step-by-step guide for mental recovery after competitions, including emotional processing techniques and reflection exercises.</p>
+                                                        
+                                                        <div class="flex flex-wrap items-center justify-between">
+                                                            <div class="flex items-center text-sm text-gray-500">
+                                                                <span class="flex items-center mr-3">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                                                    </svg>
+                                                                    Apr 5, 2025
+                                                                </span>
+                                                                <span class="flex items-center mr-3">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                                        <circle cx="12" cy="12" r="3"></circle>
+                                                                    </svg>
+                                                                    28 views
+                                                                </span>
+                                                                <span class="flex items-center">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M20 10c0 6-8 10-8 10s-8-4-8-10a8 8 0 0 1 16 0Z"></path>
+                                                                        <circle cx="12" cy="10" r="3"></circle>
+                                                                    </svg>
+                                                                    Checklist
+                                                                </span>
+                                                            </div>
+                                                            
+                                                            <div class="flex mt-2 md:mt-0">
+                                                                <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M12 20h9"></path>
+                                                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                                                                    </svg>
+                                                                </button>
+                                                                <button class="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                                                        <polyline points="16 6 12 2 8 6"></polyline>
+                                                                        <line x1="12" y1="2" x2="12" y2="15"></line>
+                                                                    </svg>
+                                                                </button>
+                                                                <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Pagination -->
+                                            <div class="mt-6 flex items-center justify-between">
+                                                <div class="text-sm text-gray-500">
+                                                    Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">28</span> resources
+                                                </div>
+                                                <div class="flex space-x-1">
+                                                    <button class="px-3 py-1 border border-gray-300 rounded text-gray-500 hover:bg-gray-50">
+                                                        Previous
+                                                    </button>
+                                                    <button class="px-3 py-1 border border-indigo-500 bg-indigo-50 text-indigo-600 rounded">
+                                                        1
+                                                    </button>
+                                                    <button class="px-3 py-1 border border-gray-300 rounded text-gray-500 hover:bg-gray-50">
+                                                        2
+                                                    </button>
+                                                    <button class="px-3 py-1 border border-gray-300 rounded text-gray-500 hover:bg-gray-50">
+                                                        3
+                                                    </button>
+                                                    <button class="px-3 py-1 border border-gray-300 rounded text-gray-500 hover:bg-gray-50">
+                                                        Next
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- JavaScript for Interactive Elements -->
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Tab functionality
+                                const tabs = document.querySelectorAll('.tab-button');
+                                tabs.forEach(tab => {
+                                    tab.addEventListener('click', function() {
+                                        // Remove active class from all tabs
+                                        tabs.forEach(t => t.classList.remove('active', 'text-indigo-600', 'border-indigo-500'));
+                                        tabs.forEach(t => t.classList.add('text-gray-500', 'border-transparent'));
+                                        
+                                        // Add active class to clicked tab
+                                        this.classList.add('active', 'text-indigo-600', 'border-indigo-500');
+                                        this.classList.remove('text-gray-500', 'border-transparent');
+                                        
+                                        // Hide all tab content
+                                        document.querySelectorAll('.tab-content').forEach(content => {
+                                            content.classList.add('hidden');
+                                        });
+                                        
+                                        // Show the selected tab content
+                                        const tabId = this.id.replace('tab-', 'content-');
+                                        document.getElementById(tabId).classList.remove('hidden');
+                                    });
+                                });
+                                
+                                // Create new resource button
+                                document.getElementById('create-new-resource').addEventListener('click', function() {
+                                    // In a real implementation, this would open a modal or redirect
+                                    console.log('Create new resource clicked');
+                                    // Example: window.location.href = '/resources/new';
+                                });
+                                
+                                // Resource category filtering
+                                document.querySelectorAll('.resource-category').forEach(category => {
+                                    category.addEventListener('click', function() {
+                                        // In a real implementation, this would filter resources
+                                        const categoryName = this.querySelector('span').textContent.trim();
+                                        console.log(`Filtering by category: ${categoryName}`);
+                                    });
+                                });
+                                
+                                // Initialize 3D visualization (placeholder - would use Three.js in production)
+                                const visualizationContainer = document.getElementById('resource-visualization');
+                                if (visualizationContainer) {
+                                    visualizationContainer.innerHTML = `
+                                        <div class="w-full h-full flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M12 2l9 7-9 7-9-7z"></path>
+                                                <path d="M12 22V12"></path>
+                                            </svg>
+                                        `;
+                                    visualizationContainer.innerHTML += '<p class="text-gray-500">3D Visualization Placeholder</p>';
+                                }
+                            });
+                        </script>
+                        {% endblock %}

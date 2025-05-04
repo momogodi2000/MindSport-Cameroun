@@ -1,0 +1,438 @@
+{% extends 'Dashboards/Layout/nutritionist_base.html' %}
+{% block title %}Appointments | Nutritionist Dashboard{% endblock %}
+{% block nav_appointments %}text-white border-white hover:border-white border-b-2{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 animate-fade-in">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Appointments</h1>
+                <p class="mt-1 text-gray-600">Manage your sessions with athletes</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <button id="setAvailabilityBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Set Availability
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter and Search -->
+        <div class="bg-white rounded-xl shadow-md p-4 mb-8 animate-slide-up" style="animation-delay: 0.1s;">
+            <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                <div class="flex-grow">
+                    <label for="filter" class="block text-sm font-medium text-gray-700 mb-1">Filter</label>
+                    <select id="filter" class="border border-gray-300 rounded-lg p-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="all">All Appointments</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="flex-grow">
+                    <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                    <input type="date" id="date" class="border border-gray-300 rounded-lg p-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex-grow">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <div class="relative">
+                        <input type="text" id="search" placeholder="Search athletes..." class="pl-10 border border-gray-300 rounded-lg p-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Appointments -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 animate-slide-up" style="animation-delay: 0.2s;">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Today's Appointments
+            </h2>
+            <div class="space-y-4">
+                {% for i in "123" %}
+                <div class="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-4 hover:shadow-md transition duration-300 border-l-4 border-green-500 flex flex-col md:flex-row justify-between items-start md:items-center animate-fade-in" style="animation-delay: {{ forloop.counter|add:2 }}00ms;">
+                    <div class="flex items-center mb-3 md:mb-0">
+                        <div class="bg-gray-200 rounded-full h-12 w-12 flex items-center justify-center mr-4 overflow-hidden">
+                            <img src="https://via.placeholder.com/48" alt="Athlete Avatar" class="h-full w-full object-cover">
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-gray-900">John Doe</h3>
+                            <p class="text-sm text-gray-600">Boxing - Professional</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center text-gray-700 mb-3 md:mb-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{{ forloop.counter|add:1 }}:00 PM - {{ forloop.counter|add:2 }}:00 PM</span>
+                    </div>
+                    <div class="flex items-center space-x-2 w-full md:w-auto">
+                        <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition duration-300 text-sm flex-1 md:flex-initial text-center">
+                            Start Session
+                        </a>
+                        <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-3 rounded transition duration-300 text-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 animate-slide-up" style="animation-delay: 0.3s;">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Upcoming Appointments
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Athlete</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for i in "12345" %}
+                        <tr class="hover:bg-gray-50 animate-fade-in" style="animation-delay: {{ forloop.counter|add:5 }}00ms;">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 overflow-hidden">
+                                        <img src="https://via.placeholder.com/40" alt="Athlete Avatar" class="h-full w-full object-cover">
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">Athlete Name {{ forloop.counter }}</div>
+                                        <div class="text-sm text-gray-500">
+                                            {% if forloop.counter == 1 %}Kickboxing - Amateur
+                                            {% elif forloop.counter == 2 %}Boxing - Professional
+                                            {% elif forloop.counter == 3 %}Karate - Semi-Pro
+                                            {% elif forloop.counter == 4 %}MMA - Pro
+                                            {% else %}Wrestling - Amateur
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">April {{ forloop.counter|add:24 }}, 2025</div>
+                                <div class="text-sm text-gray-500">{{ forloop.counter|add:8 }}:00 AM</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    {% if forloop.counter == 1 %}Initial Consultation
+                                    {% elif forloop.counter == 2 %}Diet Planning
+                                    {% elif forloop.counter == 3 %}Performance Nutrition
+                                    {% elif forloop.counter == 4 %}Follow-up
+                                    {% else %}Weight Management
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Confirmed
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex space-x-2">
+                                    <button class="text-blue-600 hover:text-blue-900">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                    <button class="text-green-600 hover:text-green-900">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button class="text-red-600 hover:text-red-900">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-between items-center mt-4">
+                <div class="text-sm text-gray-700">
+                    Showing <span class="font-medium">1</span> to <span class="font-medium">5</span> of <span class="font-medium">12</span> results
+                </div>
+                <div class="flex space-x-2">
+                    <button class="bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md">
+                        Previous
+                    </button>
+                    <button class="bg-white border border-gray-300 text-gray-500 hover:bg-gray-50 relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3D Animation: Nutritional Planning Visualization -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 animate-slide-up" style="animation-delay: 0.4s;">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Athlete Nutrition Statistics
+            </h2>
+            <div class="flex flex-col md:flex-row">
+                <div class="w-full md:w-1/2 h-64 md:h-80" id="nutrition-chart">
+                    <!-- 3D Chart will be rendered here -->
+                </div>
+                <div class="w-full md:w-1/2 pl-0 md:pl-6 mt-6 md:mt-0">
+                    <h3 class="font-medium text-lg text-gray-800 mb-4">Nutrition Planning Impact</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>87% of athletes report improved energy levels after nutrition consultation</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>62% improvement in recovery time with proper nutritional guidance</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>93% of athletes achieved their weight management goals through personalized plans</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500 mr-2 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>75% report improved mental focus during competition after dietary adjustments</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Set Availability Modal -->
+<div id="availabilityModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">Set Your Availability</h3>
+            <button id="closeModalBtn" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <div class="mb-4">
+            <label for="availabilityDay" class="block text-sm font-medium text-gray-700 mb-1">Select Day</label>
+            <select id="availabilityDay" class="border border-gray-300 rounded-lg p-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="monday">Monday</option>
+                <option value="tuesday">Tuesday</option>
+                <option value="wednesday">Wednesday</option>
+                <option value="thursday">Thursday</option>
+                <option value="friday">Friday</option>
+                <option value="saturday">Saturday</option>
+                <option value="sunday">Sunday</option>
+            </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label for="startTime" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                <input type="time" id="startTime" class="border border-gray-300 rounded-lg p-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label for="endTime" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                <input type="time" id="endTime" class="border border-gray-300 rounded-lg p-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+        </div>
+        <div class="mb-4">
+            <label for="sessionLength" class="block text-sm font-medium text-gray-700 mb-1">Session Length (minutes)</label>
+            <select id="sessionLength" class="border border-gray-300 rounded-lg p-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="30">30 minutes</option>
+                <option value="45">45 minutes</option>
+                <option value="60" selected>60 minutes</option>
+                <option value="90">90 minutes</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <div class="flex items-center">
+                <input type="checkbox" id="repeatWeekly" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="repeatWeekly" class="ml-2 block text-sm text-gray-700">Repeat weekly</label>
+            </div>
+        </div>
+        <div class="flex justify-end space-x-2">
+            <button id="cancelBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded transition duration-300">
+                Cancel
+            </button>
+            <button id="saveAvailabilityBtn" class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded transition duration-300">
+                Save Availability
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+
+<script>
+    // Modal functionality
+    const modal = document.getElementById('availabilityModal');
+    const openModalBtn = document.getElementById('setAvailabilityBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    
+    openModalBtn.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+    });
+    
+    const closeModal = () => {
+        modal.classList.add('hidden');
+    };
+    
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+    
+    // 3D Nutrition Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.createElement('canvas');
+        document.getElementById('nutrition-chart').appendChild(ctx);
+        
+        const data = {
+            labels: ['Protein', 'Carbs', 'Fats', 'Vitamins', 'Hydration', 'Recovery'],
+            datasets: [{
+                label: 'Before Consultation',
+                data: [65, 59, 80, 45, 56, 40],
+                backgroundColor: 'rgba(54, 162, 235, 0.4)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }, {
+                label: 'After Consultation',
+                data: [85, 79, 70, 75, 92, 85],
+                backgroundColor: 'rgba(75, 192, 192, 0.4)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        };
+        
+        new Chart(ctx, {
+            type: 'radar',
+            data: data,
+            options: {
+                elements: {
+                    line: {
+                        tension: 0.4,
+                    }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                },
+                animation: {
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    });
+
+    // Add custom animations
+    document.addEventListener('DOMContentLoaded', () => {
+        // Define animations
+        const fadeIn = [
+            { opacity: 0, transform: 'translateY(20px)' },
+            { opacity: 1, transform: 'translateY(0)' }
+        ];
+        
+        const fadeInTiming = {
+            duration: 600,
+            fill: 'forwards',
+            easing: 'ease-out'
+        };
+        
+        // Apply animations to elements with animate-fade-in class
+        const fadeInElements = document.querySelectorAll('.animate-fade-in');
+        fadeInElements.forEach((element, index) => {
+            const delay = parseInt(element.style.animationDelay || '0ms');
+            setTimeout(() => {
+                element.animate(fadeIn, fadeInTiming);
+            }, delay);
+        });
+        
+        // Slide up animation
+        const slideUpElements = document.querySelectorAll('.animate-slide-up');
+        slideUpElements.forEach((element, index) => {
+            const delay = parseInt(element.style.animationDelay || '0ms');
+            const slideUp = [
+                { opacity: 0, transform: 'translateY(40px)' },
+                { opacity: 1, transform: 'translateY(0)' }
+            ];
+            
+            setTimeout(() => {
+                element.animate(slideUp, {
+                    duration: 800,
+                    fill: 'forwards',
+                    easing: 'ease-out'
+                });
+            }, delay);
+        });
+    });
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade-in {
+        opacity: 0;
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+    
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(40px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-slide-up {
+        opacity: 0;
+        animation: slideUp 0.8s ease-out forwards;
+    }
+</style>
+{% endblock %}

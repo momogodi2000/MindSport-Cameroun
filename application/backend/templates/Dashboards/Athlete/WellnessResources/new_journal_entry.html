@@ -1,0 +1,295 @@
+<!-- new_journal_entry.html -->
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<style>
+    .journal-form-card {
+        transition: all 0.3s ease;
+        transform-style: preserve-3d;
+    }
+    .journal-form-card:hover {
+        transform: translateY(-5px) rotateX(5deg);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .mood-option {
+        transition: all 0.2s ease;
+    }
+    .mood-option:hover {
+        transform: scale(1.05);
+    }
+    .mood-option input:checked + label {
+        transform: scale(1.1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .template-card {
+        transition: all 0.3s ease;
+    }
+    .template-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-3 lg:gap-8">
+                <div class="lg:col-span-2">
+                    <div class="journal-form-card bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl" data-aos="fade-up">
+                        <div class="p-6">
+                            <h2 class="text-2xl font-bold text-gray-900">New Journal Entry</h2>
+                            <p class="mt-2 text-gray-600">{{ today|date:"F j, Y" }}</p>
+                            
+                            <form method="post" class="mt-6 space-y-6">
+                                {% csrf_token %}
+                                
+                                <!-- Title -->
+                                <div>
+                                    <label for="title" class="block text-sm font-medium text-gray-700">Title (optional)</label>
+                                    <input type="text" name="title" id="title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                </div>
+                                
+                                <!-- Mood -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Mood *</label>
+                                    <div class="mt-2 grid grid-cols-5 gap-2">
+                                        <div class="mood-option">
+                                            <input type="radio" name="mood" id="mood-excellent" value="excellent" class="sr-only" required>
+                                            <label for="mood-excellent" class="flex flex-col items-center justify-center py-2 px-3 border border-gray-300 rounded-md cursor-pointer bg-green-50 hover:bg-green-100">
+                                                <span class="text-2xl">😊</span>
+                                                <span class="text-sm mt-1">Excellent</span>
+                                            </label>
+                                        </div>
+                                        <div class="mood-option">
+                                            <input type="radio" name="mood" id="mood-good" value="good" class="sr-only">
+                                            <label for="mood-good" class="flex flex-col items-center justify-center py-2 px-3 border border-gray-300 rounded-md cursor-pointer bg-blue-50 hover:bg-blue-100">
+                                                <span class="text-2xl">🙂</span>
+                                                <span class="text-sm mt-1">Good</span>
+                                            </label>
+                                        </div>
+                                        <div class="mood-option">
+                                            <input type="radio" name="mood" id="mood-neutral" value="neutral" class="sr-only">
+                                            <label for="mood-neutral" class="flex flex-col items-center justify-center py-2 px-3 border border-gray-300 rounded-md cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                                <span class="text-2xl">😐</span>
+                                                <span class="text-sm mt-1">Neutral</span>
+                                            </label>
+                                        </div>
+                                        <div class="mood-option">
+                                            <input type="radio" name="mood" id="mood-bad" value="bad" class="sr-only">
+                                            <label for="mood-bad" class="flex flex-col items-center justify-center py-2 px-3 border border-gray-300 rounded-md cursor-pointer bg-yellow-50 hover:bg-yellow-100">
+                                                <span class="text-2xl">😕</span>
+                                                <span class="text-sm mt-1">Bad</span>
+                                            </label>
+                                        </div>
+                                        <div class="mood-option">
+                                            <input type="radio" name="mood" id="mood-terrible" value="terrible" class="sr-only">
+                                            <label for="mood-terrible" class="flex flex-col items-center justify-center py-2 px-3 border border-gray-300 rounded-md cursor-pointer bg-red-50 hover:bg-red-100">
+                                                <span class="text-2xl">😞</span>
+                                                <span class="text-sm mt-1">Terrible</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Content -->
+                                <div>
+                                    <label for="content" class="block text-sm font-medium text-gray-700">Content *</label>
+                                    <textarea name="content" id="content" rows="10" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required></textarea>
+                                </div>
+                                
+                                <!-- Additional Fields -->
+                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                                    <!-- Energy Level -->
+                                    <div>
+                                        <label for="energy_level" class="block text-sm font-medium text-gray-700">Energy Level</label>
+                                        <select name="energy_level" id="energy_level" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <option value="">Select...</option>
+                                            <option value="very_high">Very High</option>
+                                            <option value="high">High</option>
+                                            <option value="moderate">Moderate</option>
+                                            <option value="low">Low</option>
+                                            <option value="very_low">Very Low</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Stress Level -->
+                                    <div>
+                                        <label for="stress_level" class="block text-sm font-medium text-gray-700">Stress Level</label>
+                                        <select name="stress_level" id="stress_level" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                            <option value="">Select...</option>
+                                            <option value="none">None</option>
+                                            <option value="mild">Mild</option>
+                                            <option value="moderate">Moderate</option>
+                                            <option value="high">High</option>
+                                            <option value="severe">Severe</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Sleep Hours -->
+                                    <div>
+                                        <label for="sleep_hours" class="block text-sm font-medium text-gray-700">Sleep Hours</label>
+                                        <input type="number" name="sleep_hours" id="sleep_hours" step="0.5" min="0" max="24" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    </div>
+                                </div>
+                                
+                                <!-- Tags -->
+                                <div>
+                                    <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
+                                    <input type="text" name="tags" id="tags" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="e.g., stress, training, recovery (comma-separated)">
+                                </div>
+                                
+                                <!-- Privacy -->
+                                <div class="flex items-center">
+                                    <input type="checkbox" name="is_private" id="is_private" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" checked>
+                                    <label for="is_private" class="ml-2 block text-sm text-gray-900">Keep this entry private</label>
+                                </div>
+                                
+                                <!-- Shared With (conditional on privacy) -->
+                                <div id="shared-with-container" class="hidden">
+                                    <label class="block text-sm font-medium text-gray-700">Share with</label>
+                                    <div class="mt-2 space-y-2">
+                                        {% for professional in request.user.get_available_professionals %}
+                                        <div class="flex items-center">
+                                            <input type="checkbox" name="shared_with" id="shared_with_{{ professional.id }}" value="{{ professional.id }}" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                            <label for="shared_with_{{ professional.id }}" class="ml-2 block text-sm text-gray-900">{{ professional.get_full_name }} ({{ professional.profile.get_user_type_display }})</label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Submit Button -->
+                                <div class="pt-6">
+                                    <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 transform hover:scale-105">
+                                        Save Entry
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Templates & Prompt -->
+                <div class="mt-12 lg:mt-0">
+                    <!-- Journal Prompt -->
+                    {% if prompt %}
+                    <div class="bg-blue-50 rounded-lg p-6" data-aos="fade-left">
+                        <h3 class="text-lg font-medium text-blue-800">Journal Prompt</h3>
+                        <div class="mt-4">
+                            <p class="text-gray-700">{{ prompt.text }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Templates -->
+                    <div class="mt-8" data-aos="fade-left" data-aos-delay="100">
+                        <h3 class="text-lg font-medium text-gray-900">Start with a template</h3>
+                        <p class="mt-2 text-sm text-gray-500">Choose a template to structure your entry</p>
+                        
+                        <div class="mt-4 space-y-4">
+                            {% for template in templates %}
+                            <a href="{% url 'create_from_template' template.id %}" class="template-card block bg-white rounded-lg shadow p-4 hover:bg-blue-50 transition-colors duration-200">
+                                <h4 class="text-md font-medium text-gray-900">{{ template.title }}</h4>
+                                <p class="mt-1 text-sm text-gray-500 line-clamp-2">{{ template.description }}</p>
+                            </a>
+                            {% empty %}
+                            <div class="text-center py-4">
+                                <p class="text-sm text-gray-500">No templates available</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Tips -->
+                    <div class="mt-8 bg-white rounded-lg shadow-md p-6" data-aos="fade-left" data-aos-delay="200">
+                        <h3 class="text-lg font-medium text-gray-900">Journaling Tips</h3>
+                        <div class="mt-4 space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <p class="ml-3 text-sm text-gray-700">Write freely without worrying about grammar or spelling</p>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <p class="ml-3 text-sm text-gray-700">Be honest with yourself - this is for your eyes only</p>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <p class="ml-3 text-sm text-gray-700">Reflect on both positive and challenging experiences</p>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 h-5 w-5 text-blue-500">
+                                    <svg fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <p class="ml-3 text-sm text-gray-700">Try to journal at the same time each day to build a habit</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Toggle shared with field based on privacy checkbox
+        const privacyCheckbox = document.getElementById('is_private');
+        const sharedWithContainer = document.getElementById('shared-with-container');
+        
+        if (privacyCheckbox && sharedWithContainer) {
+            privacyCheckbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    sharedWithContainer.classList.remove('hidden');
+                } else {
+                    sharedWithContainer.classList.add('hidden');
+                }
+            });
+        }
+
+        // Pre-fill content if prompt is provided
+        const urlParams = new URLSearchParams(window.location.search);
+        const promptId = urlParams.get('prompt_id');
+        
+        if (promptId) {
+            fetch(`/api/journal-prompts/${promptId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.text) {
+                        const contentField = document.getElementById('content');
+                        if (contentField) {
+                            contentField.value = `Journal Prompt: ${data.text}\n\nMy Response: `;
+                        }
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+</script>
+{% endblock %}

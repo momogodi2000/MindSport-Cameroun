@@ -1,0 +1,311 @@
+<!-- journal_analysis.html -->
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block head %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .analysis-card {
+        transition: all 0.3s ease;
+        transform-style: preserve-3d;
+    }
+    .analysis-card:hover {
+        transform: translateY(-5px) rotateX(5deg);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .mood-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 4px;
+    }
+    .mood-excellent { background-color: #10B981; }
+    .mood-good { background-color: #34D399; }
+    .mood-neutral { background-color: #6B7280; }
+    .mood-bad { background-color: #F59E0B; }
+    .mood-terrible { background-color: #EF4444; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:flex lg:items-center lg:justify-between mb-8">
+                <div class="flex-1 min-w-0">
+                    <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                        Journal Analysis
+                    </h2>
+                    <p class="mt-2 text-sm text-gray-500">
+                        Insights and trends from your journal entries
+                    </p>
+                </div>
+                <div class="mt-5 flex lg:mt-0 lg:ml-4">
+                    <form method="get" class="flex space-x-4">
+                        <div>
+                            <label for="start_date" class="sr-only">Start Date</label>
+                            <input type="date" name="start_date" id="start_date" value="{{ start_date|date:'Y-m-d' }}" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="end_date" class="sr-only">End Date</label>
+                            <input type="date" name="end_date" id="end_date" value="{{ end_date|date:'Y-m-d' }}" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        </div>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Apply
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-3 mb-8">
+                <div class="analysis-card bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl" data-aos="fade-up">
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-md p-3 text-blue-600">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Entries</dt>
+                                <dd class="flex items-baseline">
+                                    <p class="text-2xl font-semibold text-gray-900">{{ entries.count }}</p>
+                                </dd>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="analysis-card bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl" data-aos="fade-up" data-aos-delay="100">
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-md p-3 text-blue-600">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <dt class="text-sm font-medium text-gray-500 truncate">Average Mood</dt>
+                                <dd class="flex items-baseline">
+                                    <p class="text-2xl font-semibold text-gray-900">
+                                        {% if mood_avg %}
+                                        <span class="mood-indicator {% if mood_avg >= 4.5 %}mood-excellent{% elif mood_avg >= 3.5 %}mood-good{% elif mood_avg >= 2.5 %}mood-neutral{% elif mood_avg >= 1.5 %}mood-bad{% else %}mood-terrible{% endif %}"></span>
+                                        {{ mood_avg|floatformat:1 }}/5.0
+                                        {% else %}
+                                        N/A
+                                        {% endif %}
+                                    </p>
+                                </dd>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="analysis-card bg-white rounded-lg shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl" data-aos="fade-up" data-aos-delay="200">
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-blue-100 rounded-md p-3 text-blue-600">
+                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div class="ml-5">
+                                <dt class="text-sm font-medium text-gray-500 truncate">Mood Trend</dt>
+                                <dd class="flex items-baseline">
+                                    <p class="text-2xl font-semibold text-gray-900">
+                                        {% if mood_trend == "improving" %}
+                                        <span class="text-green-600">Improving ↑</span>
+                                        {% else %}
+                                        <span class="text-gray-600">Stable →</span>
+                                        {% endif %}
+                                    </p>
+                                </dd>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mood Chart -->
+            <div class="analysis-card bg-white rounded-lg shadow-md overflow-hidden mb-8" data-aos="fade-up">
+                <div class="p-6">
+                    <h3 class="text-lg font-medium text-gray-900">Mood Over Time</h3>
+                    <p class="mt-1 text-sm text-gray-500">How your mood has changed from {{ start_date|date:"M j" }} to {{ end_date|date:"M j" }}</p>
+                    <div class="mt-6">
+                        <canvas id="moodChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                <!-- Mood Distribution -->
+                <div class="analysis-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900">Mood Distribution</h3>
+                        <p class="mt-1 text-sm text-gray-500">Breakdown of your mood ratings</p>
+                        <div class="mt-6">
+                            <canvas id="moodDistributionChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Top Tags -->
+                <div class="analysis-card bg-white rounded-lg shadow-md overflow-hidden" data-aos="fade-up" data-aos-delay="100">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900">Top Tags</h3>
+                        <p class="mt-1 text-sm text-gray-500">Most frequently used tags in your entries</p>
+                        <div class="mt-6">
+                            {% if top_tags %}
+                            <div class="space-y-4">
+                                {% for tag, count in top_tags %}
+                                <div>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-sm font-medium text-gray-900">{{ tag }}</span>
+                                        <span class="text-sm text-gray-500">{{ count }} time{{ count|pluralize }}</span>
+                                    </div>
+                                    <div class="mt-1 w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-blue-600 h-2 rounded-full" style="width: {% widthratio count top_tags.0.1 100 %}%"></div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-8">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                                </svg>
+                                <p class="mt-2 text-sm text-gray-500">No tags found in your entries</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Mood Over Time Chart
+        const moodCtx = document.getElementById('moodChart').getContext('2d');
+        const moodChart = new Chart(moodCtx, {
+            type: 'line',
+            data: {
+                labels: JSON.parse('{{ dates_json|escapejs }}'),
+                datasets: [{
+                    label: 'Mood',
+                    data: JSON.parse('{{ moods_json|escapejs }}'),
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    pointBackgroundColor: function(context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        if (value >= 4.5) return '#10B981';
+                        if (value >= 3.5) return '#3B82F6';
+                        if (value >= 2.5) return '#6B7280';
+                        if (value >= 1.5) return '#F59E0B';
+                        return '#EF4444';
+                    },
+                    pointBorderColor: 'rgba(255, 255, 255, 1)',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 1,
+                        max: 5,
+                        ticks: {
+                            stepSize: 1,
+                            callback: function(value) {
+                                if (value === 1) return 'Terrible';
+                                if (value === 2) return 'Bad';
+                                if (value === 3) return 'Neutral';
+                                if (value === 4) return 'Good';
+                                if (value === 5) return 'Excellent';
+                                return '';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                if (value >= 4.5) return 'Excellent: ' + value;
+                                if (value >= 3.5) return 'Good: ' + value;
+                                if (value >= 2.5) return 'Neutral: ' + value;
+                                if (value >= 1.5) return 'Bad: ' + value;
+                                return 'Terrible: ' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Mood Distribution Chart
+        const moodDistCtx = document.getElementById('moodDistributionChart').getContext('2d');
+        const moodDistChart = new Chart(moodDistCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Excellent', 'Good', 'Neutral', 'Bad', 'Terrible'],
+                datasets: [{
+                    data: [25, 40, 15, 12, 8], // Replace with actual data from backend
+                    backgroundColor: [
+                        '#10B981',
+                        '#3B82F6',
+                        '#6B7280',
+                        '#F59E0B',
+                        '#EF4444'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${percentage}% (${value})`;
+                            }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    });
+</script>
+{% endblock %}

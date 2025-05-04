@@ -1,0 +1,800 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+{% load dict_filters %}
+{% load assessment_filters %}
+
+{% block title %}Taking: {{ assessment.title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<style>
+  /* Custom animations */
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+  
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .question-enter {
+    animation: fadeInRight 0.5s ease-out;
+  }
+  
+  .question-exit {
+    animation: fadeOutLeft 0.5s ease-out;
+  }
+  
+  /* 3D card effect */
+  .card-3d {
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+  
+  .card-3d:hover {
+    transform: translateY(-5px) rotateX(5deg);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Custom likert scale */
+  .likert-point {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f3f4f6;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  
+  input[type="radio"]:checked + .likert-point {
+    background-color: #4f46e5;
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(79, 70, 229, 0.4);
+  }
+  
+  /* Confetti animation for completion */
+  @keyframes confetti-fall {
+    0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+  }
+  
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background-color: var(--color);
+    opacity: 0;
+    top: 0;
+    z-index: 1000;
+    animation: confetti-fall var(--fall-time) linear forwards;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="relative min-h-screen bg-gradient-to-b from-indigo-50 to-white pt-6 pb-16">
+  <div class="container mx-auto px-4 py-8 animate-fade-in relative z-10">
+    <!-- 3D Floating Elements -->
+    <div class="hidden md:block absolute top-10 right-10 float-animation" style="animation-delay: 0.5s;">
+      <div class="w-20 h-20 rounded-full bg-gradient-to-r from-purple-400 to-indigo-500 opacity-20"></div>
+    </div>
+    <div class="hidden md:block absolute bottom-20 left-10 float-animation" style="animation-delay: 1s;">
+      <div class="w-16 h-16 rounded-full bg-gradient-to-r from-blue-400 to-cyan-300 opacity-20"></div>
+    </div>
+    
+    <div class="max-w-3xl mx-auto">
+      <!-- Assessment Header with 3D Effect -->
+      <div class="card-3d bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg rounded-2xl shadow-xl p-6 mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="flex items-center mb-4 md:mb-0">
+            <div class="bg-indigo-600 rounded-full p-3 mr-3 text-white">
+              <i class="fas fa-brain text-lg"></i>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-indigo-800">{{ assessment.title }}</h1>
+              <p class="text-gray-600 text-sm">Complete this assessment to improve your mental performance</p>
+            </div>
+          </div>
+          <div class="flex flex-col items-end">
+            <div class="flex items-center">
+              <i class="fas fa-stopwatch text-indigo-500 mr-2"></i>
+              <span class="text-gray-600">Est. time: {{ assessment.estimated_time_minutes|default:"15-20" }} mins</span>
+            </div>
+            <div class="flex items-center mt-1">
+              <i class="fas fa-question-circle text-indigo-500 mr-2"></i>
+              <span class="text-sm text-gray-500">
+                Question <span id="current-question" class="font-bold">1</span> of <span class="font-bold">{{ assessment.questions.count }}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Progress Bar -->
+      <div class="mb-8">
+        <div class="relative h-3 bg-gray-200 rounded-full overflow-hidden">
+          <div id="progress-bar" class="absolute h-full left-0 top-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+        </div>
+        <div class="flex justify-between mt-2 text-xs text-gray-500">
+          <span>Start</span>
+          <span>Halfway</span>
+          <span>Complete</span>
+        </div>
+      </div>
+
+      <!-- Assessment Form -->
+      <form id="assessment-form" action="{% url 'complete_assessment' response.id %}" method="POST">
+        {% csrf_token %}
+        
+        <div id="questions-container" class="relative min-h-[400px]">
+          {% for question in questions %}
+            <div class="question-container absolute w-full transition-all duration-500 {% if forloop.counter0 != 0 %}opacity-0 translate-x-full{% endif %}" 
+                data-question-id="{{ question.id }}" 
+                data-question-type="{{ question.question_type }}"
+                data-question-index="{{ forloop.counter0 }}">
+              
+              <div class="card-3d bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <!-- Question number indicator -->
+                <div class="flex justify-between items-center mb-4">
+                  <div class="flex items-center">
+                    <span class="bg-indigo-100 text-indigo-800 font-bold rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                      {{ forloop.counter }}
+                    </span>
+                    {% if question.required %}
+                      <span class="text-red-500 ml-1">*</span>
+                    {% endif %}
+                  </div>
+                  <div class="question-badge px-3 py-1 rounded-full text-xs font-medium">
+                    {% if question.question_type == 'likert_5' %}
+                      <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">5-point Scale</span>
+                    {% elif question.question_type == 'likert_7' %}
+                      <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">7-point Scale</span>
+                    {% elif question.question_type == 'yes_no' %}
+                      <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full">Yes/No</span>
+                    {% elif question.question_type == 'multiple_choice' %}
+                      <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">Multiple Choice</span>
+                    {% elif question.question_type == 'slider' %}
+                      <span class="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">Slider</span>
+                    {% elif question.question_type == 'text' %}
+                      <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full">Open Text</span>
+                    {% endif %}
+                  </div>
+                </div>
+                
+                <!-- Question text -->
+                <h3 class="text-lg font-medium text-gray-800 mb-4">{{ question.text }}</h3>
+                
+                {% if question.help_text %}
+                  <div class="bg-blue-50 border-l-4 border-blue-400 p-3 mb-4 rounded-r">
+                    <div class="flex">
+                      <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle text-blue-500"></i>
+                      </div>
+                      <div class="ml-3">
+                        <p class="text-sm text-blue-700">{{ question.help_text }}</p>
+                      </div>
+                    </div>
+                  </div>
+                {% endif %}
+
+                <!-- Question Input -->
+                <div class="question-input mt-6">
+                  {% if question.question_type == 'likert_5' %}
+                    <!-- 5-point Likert Scale -->
+                    <div class="likert-scale">
+                      <div class="flex justify-between mb-3">
+                        <span class="text-sm text-gray-600 font-medium">Strongly Disagree</span>
+                        <span class="text-sm text-gray-600 font-medium">Strongly Agree</span>
+                      </div>
+                      <div class="flex justify-between">
+                        {% for i in 1|range_to:5 %}
+                          <label class="likert-option flex flex-col items-center group">
+                            <input type="radio" name="question_{{ question.id }}" value="{{ i }}" 
+                              {% if answered_questions|get_item:question.id == i|stringformat:"s" %}checked{% endif %}
+                              class="sr-only peer" {% if question.required %}required{% endif %}>
+                            <div class="likert-point peer-checked:bg-indigo-600 peer-checked:text-white group-hover:bg-indigo-100">{{ i }}</div>
+                            <span class="mt-1 text-xs text-center text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {% if i == 1 %}Strongly Disagree
+                              {% elif i == 2 %}Disagree
+                              {% elif i == 3 %}Neutral
+                              {% elif i == 4 %}Agree
+                              {% elif i == 5 %}Strongly Agree
+                              {% endif %}
+                            </span>
+                          </label>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  
+                  {% elif question.question_type == 'likert_7' %}
+                    <!-- 7-point Likert Scale -->
+                    <div class="likert-scale">
+                      <div class="flex justify-between mb-3">
+                        <span class="text-sm text-gray-600 font-medium">Strongly Disagree</span>
+                        <span class="text-sm text-gray-600 font-medium">Strongly Agree</span>
+                      </div>
+                      <div class="flex justify-between">
+                        {% for i in 1|range_to:7 %}
+                          <label class="likert-option flex flex-col items-center group">
+                            <input type="radio" name="question_{{ question.id }}" value="{{ i }}" 
+                              {% if answered_questions|get_item:question.id == i|stringformat:"s" %}checked{% endif %}
+                              class="sr-only peer" {% if question.required %}required{% endif %}>
+                            <div class="likert-point peer-checked:bg-indigo-600 peer-checked:text-white group-hover:bg-indigo-100">{{ i }}</div>
+                            <span class="mt-1 text-xs text-center text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {% if i == 1 %}Strongly Disagree
+                              {% elif i == 2 %}Disagree
+                              {% elif i == 3 %}Slightly Disagree
+                              {% elif i == 4 %}Neutral
+                              {% elif i == 5 %}Slightly Agree
+                              {% elif i == 6 %}Agree
+                              {% elif i == 7 %}Strongly Agree
+                              {% endif %}
+                            </span>
+                          </label>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  
+                  {% elif question.question_type == 'yes_no' %}
+                    <!-- Yes/No Question -->
+                    <div class="flex space-x-6 justify-center">
+                      <label class="relative flex flex-col items-center cursor-pointer group">
+                        <input type="radio" name="question_{{ question.id }}" value="yes" 
+                          {% if answered_questions|get_item:question.id == 'yes' %}checked{% endif %}
+                          class="sr-only peer" {% if question.required %}required{% endif %}>
+                        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-green-500 peer-checked:bg-green-500 peer-checked:text-white transition-all duration-300 group-hover:shadow-lg">
+                          <i class="fas fa-check text-2xl"></i>
+                        </div>
+                        <span class="mt-2 font-medium text-gray-700">Yes</span>
+                      </label>
+                      
+                      <label class="relative flex flex-col items-center cursor-pointer group">
+                        <input type="radio" name="question_{{ question.id }}" value="no" 
+                          {% if answered_questions|get_item:question.id == 'no' %}checked{% endif %}
+                          class="sr-only peer" {% if question.required %}required{% endif %}>
+                        <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center text-red-500 peer-checked:bg-red-500 peer-checked:text-white transition-all duration-300 group-hover:shadow-lg">
+                          <i class="fas fa-times text-2xl"></i>
+                        </div>
+                        <span class="mt-2 font-medium text-gray-700">No</span>
+                      </label>
+                    </div>
+                  
+                  {% elif question.question_type == 'multiple_choice' %}
+                    <!-- Multiple Choice Question -->
+                    <div class="space-y-3">
+                      {% for choice in question.choices %}
+                        <label class="relative flex items-center p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors group">
+                          <input type="radio" name="question_{{ question.id }}" value="{{ choice.value }}" 
+                            {% if answered_questions|get_item:question.id == choice.value %}checked{% endif %}
+                            class="sr-only peer" {% if question.required %}required{% endif %}>
+                          <div class="w-6 h-6 rounded-full border-2 border-gray-300 flex items-center justify-center mr-3 peer-checked:border-indigo-600 peer-checked:bg-indigo-600 transition-all">
+                            <i class="fas fa-check text-xs text-white opacity-0 peer-checked:opacity-100"></i>
+                          </div>
+                          <span class="font-medium text-gray-700 group-hover:text-indigo-600 peer-checked:text-indigo-800 transition-colors">
+                            {{ choice.text }}
+                            {% if choice.description %}
+                              <p class="text-sm text-gray-500 mt-1">{{ choice.description }}</p>
+                            {% endif %}
+                          </span>
+                        </label>
+                      {% endfor %}
+                    </div>
+                  
+                  {% elif question.question_type == 'slider' %}
+                    <!-- Slider Question -->
+                    <div class="px-4 py-6">
+                      <div class="flex justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-700">{{ question.min_value }}</span>
+                        <span class="text-sm font-medium text-gray-700">{{ question.max_value }}</span>
+                      </div>
+                      <div class="relative">
+                        <div class="absolute -top-8 left-0 right-0">
+                          <div id="slider-value-{{ question.id }}" class="slider-value bg-indigo-600 text-white text-center py-1 px-2 rounded-md text-sm w-10 opacity-80" style="transform: translateX(0%);">
+                            {{ answered_questions|get_item:question.id|default:question.min_value }}
+                          </div>
+                        </div>
+                        <input type="range" name="question_{{ question.id }}" 
+                          min="{{ question.min_value }}" max="{{ question.max_value }}" step="{{ question.step|default:'1' }}"
+                          value="{{ answered_questions|get_item:question.id|default:question.min_value }}"
+                          class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+                          oninput="updateSliderValue(this, '{{ question.id }}', {{ question.min_value }}, {{ question.max_value }})"
+                          {% if question.required %}required{% endif %}>
+                      </div>
+                      <div class="flex justify-between mt-2">
+                        {% for i in "12345"|make_list %}
+                          <div class="h-1 w-0.5 bg-gray-300"></div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  
+                  {% elif question.question_type == 'text' %}
+                    <!-- Open Text Question -->
+                    <div class="relative">
+                      <textarea name="question_{{ question.id }}" rows="4" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow resize-none"
+                        placeholder="Type your answer here..."
+                        {% if question.required %}required{% endif %}>{{ answered_questions|get_item:question.id }}</textarea>
+                      <div class="absolute bottom-3 right-3 text-gray-400">
+                        <i class="fas fa-pencil-alt"></i>
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+              
+              <!-- Error message for required questions -->
+              <div class="validation-error hidden bg-red-50 border-l-4 border-red-500 p-3 mb-4 rounded-r">
+                <div class="flex">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                  </div>
+                  <div class="ml-3">
+                    <p class="text-sm text-red-700">Please answer this required question to continue.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="flex justify-between items-center mt-8">
+          <button type="button" id="prev-btn" class="flex items-center px-6 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-sm hidden">
+            <i class="fas fa-arrow-left mr-2"></i> Previous
+          </button>
+          
+          <div class="flex-1 mx-4 hidden md:block">
+            <div id="questions-dots" class="flex justify-center space-x-1">
+              {% for question in questions %}
+                <div class="question-dot w-2 h-2 rounded-full bg-gray-300 cursor-pointer hover:bg-gray-400 transition-colors" data-index="{{ forloop.counter0 }}"></div>
+              {% endfor %}
+            </div>
+          </div>
+          
+          <button type="button" id="next-btn" class="flex items-center px-6 py-3 border border-transparent rounded-lg shadow-md text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all ml-auto">
+            Next <i class="fas fa-arrow-right ml-2"></i>
+          </button>
+          
+          <button type="submit" id="submit-btn" class="flex items-center px-6 py-3 border border-transparent rounded-lg shadow-md text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all hidden">
+            Complete Assessment <i class="fas fa-check-circle ml-2"></i>
+          </button>
+        </div>
+
+        <!-- Bottom save indicator -->
+        <div class="mt-3 text-center">
+          <span id="save-indicator" class="inline-flex items-center text-sm text-gray-500 opacity-0 transition-opacity">
+            <i class="fas fa-save mr-1"></i> Saving...
+          </span>
+        </div>
+      </form>
+
+      <!-- Help/Info button (fixed) -->
+      <button id="help-btn" class="fixed bottom-6 right-6 bg-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow z-20">
+        <i class="fas fa-question text-indigo-600"></i>
+      </button>
+      
+      <!-- Help modal -->
+      <div id="help-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl max-w-md mx-4 w-full p-6 shadow-2xl">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold text-gray-800">Assessment Help</h3>
+            <button id="close-help" class="text-gray-500 hover:text-gray-700">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-start">
+              <div class="flex-shrink-0 mt-1">
+                <i class="fas fa-lightbulb text-yellow-500"></i>
+              </div>
+              <div class="ml-3">
+                <h4 class="text-sm font-medium text-gray-800">How to complete this assessment</h4>
+                <p class="text-sm text-gray-600">Answer each question honestly. There are no right or wrong answers; this assessment is designed to help you understand your mental approach.</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <div class="flex-shrink-0 mt-1">
+                <i class="fas fa-save text-blue-500"></i>
+              </div>
+              <div class="ml-3">
+                <h4 class="text-sm font-medium text-gray-800">Saving your progress</h4>
+                <p class="text-sm text-gray-600">Your answers are automatically saved as you navigate between questions.</p>
+              </div>
+            </div>
+            <div class="flex items-start">
+              <div class="flex-shrink-0 mt-1">
+                <i class="fas fa-lock text-green-500"></i>
+              </div>
+              <div class="ml-3">
+                <h4 class="text-sm font-medium text-gray-800">Privacy</h4>
+                <p class="text-sm text-gray-600">Your responses are confidential and will only be shared with your assigned psychologist.</p>
+              </div>
+            </div>
+          </div>
+          <div class="mt-6">
+            <button id="close-help-btn" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors">Got it</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  
+  <!-- Confetti container for completion -->
+  <div id="confetti-container" class="fixed inset-0 pointer-events-none z-20 opacity-0"></div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const questions = document.querySelectorAll('.question-container');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    const currentQuestionSpan = document.getElementById('current-question');
+    const progressBar = document.getElementById('progress-bar');
+    const questionDots = document.querySelectorAll('.question-dot');
+    const saveIndicator = document.getElementById('save-indicator');
+    const form = document.getElementById('assessment-form');
+    const helpBtn = document.getElementById('help-btn');
+    const helpModal = document.getElementById('help-modal');
+    const closeHelp = document.getElementById('close-help');
+    const closeHelpBtn = document.getElementById('close-help-btn');
+    
+    let currentQuestion = 0;
+    let totalQuestions = questions.length;
+    let savingTimeout;
+
+    // Initialize
+    updateQuestionVisibility();
+    updateProgress();
+    updateButtons();
+    highlightCurrentDot();
+
+    // Show the current question and hide others
+    function updateQuestionVisibility() {
+        questions.forEach((question, index) => {
+            if (index === currentQuestion) {
+                question.style.opacity = '1';
+                question.style.transform = 'translateX(0)';
+                question.style.position = 'relative';
+            } else if (index < currentQuestion) {
+                question.style.opacity = '0';
+                question.style.transform = 'translateX(-100%)';
+                question.style.position = 'absolute';
+            } else {
+                question.style.opacity = '0';
+                question.style.transform = 'translateX(100%)';
+                question.style.position = 'absolute';
+            }
+        });
+    }
+
+    // Update progress bar and counter
+    function updateProgress() {
+        const progress = ((currentQuestion + 1) / totalQuestions) * 100;
+        progressBar.style.width = `${progress}%`;
+        currentQuestionSpan.textContent = currentQuestion + 1;
+    }
+
+    // Show appropriate buttons based on current question
+    function updateButtons() {
+        prevBtn.classList.toggle('hidden', currentQuestion === 0);
+        nextBtn.classList.toggle('hidden', currentQuestion === totalQuestions - 1);
+        submitBtn.classList.toggle('hidden', currentQuestion !== totalQuestions - 1);
+    }
+
+    // Update dot indicators
+    function highlightCurrentDot() {
+        questionDots.forEach((dot, index) => {
+            if (index === currentQuestion) {
+                dot.classList.remove('bg-gray-300');
+                dot.classList.add('bg-indigo-600');
+                dot.classList.add('w-3', 'h-3');
+            } else {
+                dot.classList.remove('bg-indigo-600');
+                dot.classList.add('bg-gray-300');
+                dot.classList.remove('w-3', 'h-3');
+                dot.classList.add('w-2', 'h-2');
+            }
+        });
+    }
+
+    // Show saving indicator with fade effect
+    function showSavingIndicator() {
+        clearTimeout(savingTimeout);
+        saveIndicator.style.opacity = '1';
+        
+        savingTimeout = setTimeout(() => {
+            gsap.to(saveIndicator, {
+                opacity: 0,
+                duration: 0.5
+            });
+        }, 1500);
+    }
+
+    // Validate current question
+    function validateCurrentQuestion() {
+        const question = questions[currentQuestion];
+        const questionId = question.dataset.questionId;
+        const questionType = question.dataset.questionType;
+        const isRequired = question.querySelector('input[required]') || 
+                          question.querySelector('textarea[required]') || 
+                          question.querySelector('select[required]');
+        
+        if (!isRequired) return true;
+        
+        let isValid = false;
+        
+        if (questionType === 'likert_5' || questionType === 'likert_7' || 
+            questionType === 'yes_no' || questionType === 'multiple_choice') {
+            isValid = !!question.querySelector('input[type="radio"]:checked');
+        } else if (questionType === 'slider') {
+            // Sliders always have a value
+            isValid = true;
+        } else if (questionType === 'text') {
+            const textarea = question.querySelector('textarea');
+            isValid = textarea && textarea.value.trim() !== '';
+        }
+        
+        const errorMessage = question.querySelector('.validation-error');
+        if (errorMessage) {
+            if (!isValid) {
+                errorMessage.classList.remove('hidden');
+                
+                // Add shake animation
+                question.classList.add('animate__animated', 'animate__shakeX');
+                setTimeout(() => {
+                    question.classList.remove('animate__animated', 'animate__shakeX');
+                }, 1000);
+            } else {
+                errorMessage.classList.add('hidden');
+            }
+        }
+        
+        return isValid;
+    }
+
+    // Save answer when moving between questions
+    function saveAnswer() {
+        const question = questions[currentQuestion];
+        const questionId = question.dataset.questionId;
+        const questionType = question.dataset.questionType;
+        let answerValue;
+    
+        if (questionType === 'likert_5' || questionType === 'likert_7' || 
+            questionType === 'yes_no' || questionType === 'multiple_choice') {
+            const selected = question.querySelector('input[type="radio"]:checked');
+            answerValue = selected ? selected.value : null;
+        } else if (questionType === 'slider') {
+            answerValue = question.querySelector('input[type="range"]').value;
+        } else if (questionType === 'text') {
+            answerValue = question.querySelector('textarea').value;
+        }
+    
+        if (answerValue !== null) {
+            showSavingIndicator();
+            
+            const formData = new FormData();
+            formData.append('question_id', questionId);
+            formData.append('answer_value', answerValue);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            
+            fetch("{% url 'save_question_response' response.id %}", {
+                method: 'POST',
+                body: formData
+            }).catch(error => {
+                console.error('Error saving answer:', error);
+            });
+        }
+    }
+
+    // Navigation functions
+    function goToNextQuestion() {
+        if (!validateCurrentQuestion()) return;
+        
+        saveAnswer();
+        
+        // Animate transition
+        gsap.to(questions[currentQuestion], {
+            opacity: 0,
+            x: '-100%',
+            duration: 0.3,
+            onComplete: () => {
+                currentQuestion++;
+                updateQuestionVisibility();
+                updateButtons();
+                updateProgress();
+                highlightCurrentDot();
+                
+                // Animate new question entrance
+                gsap.fromTo(questions[currentQuestion], 
+                    { opacity: 0, x: '100%' },
+                    { opacity: 1, x: '0%', duration: 0.3 }
+                );
+            }
+        });
+    }
+
+    function goToPrevQuestion() {
+        saveAnswer();
+        
+        // Animate transition
+        gsap.to(questions[currentQuestion], {
+            opacity: 0,
+            x: '100%',
+            duration: 0.3,
+            onComplete: () => {
+                currentQuestion--;
+                updateQuestionVisibility();
+                updateButtons();
+                updateProgress();
+                highlightCurrentDot();
+                
+                // Animate new question entrance
+                gsap.fromTo(questions[currentQuestion], 
+                    { opacity: 0, x: '-100%' },
+                    { opacity: 1, x: '0%', duration: 0.3 }
+                );
+            }
+        });
+    }
+
+    function goToQuestion(index) {
+        if (index === currentQuestion) return;
+        if (index < currentQuestion) {
+            // Going backward
+            saveAnswer();
+            gsap.to(questions[currentQuestion], {
+                opacity: 0,
+                x: '100%',
+                duration: 0.3,
+                onComplete: () => {
+                    currentQuestion = index;
+                    updateQuestionVisibility();
+                    updateButtons();
+                    updateProgress();
+                    highlightCurrentDot();
+                    
+                    gsap.fromTo(questions[currentQuestion], 
+                        { opacity: 0, x: '-100%' },
+                        { opacity: 1, x: '0%', duration: 0.3 }
+                    );
+                }
+            });
+        } else {
+            // Going forward
+            if (!validateCurrentQuestion()) return;
+            saveAnswer();
+            gsap.to(questions[currentQuestion], {
+                opacity: 0,
+                x: '-100%',
+                duration: 0.3,
+                onComplete: () => {
+                    currentQuestion = index;
+                    updateQuestionVisibility();
+                    updateButtons();
+                    updateProgress();
+                    highlightCurrentDot();
+                    
+                    gsap.fromTo(questions[currentQuestion], 
+                        { opacity: 0, x: '100%' },
+                        { opacity: 1, x: '0%', duration: 0.3 }
+                    );
+                }
+            });
+        }
+    }
+
+    // Slider value update function
+    window.updateSliderValue = function(slider, questionId, minValue, maxValue) {
+        const valueDisplay = document.getElementById(`slider-value-${questionId}`);
+        const value = slider.value;
+        const percentage = ((value - minValue) / (maxValue - minValue)) * 100;
+        
+        valueDisplay.textContent = value;
+        valueDisplay.style.transform = `translateX(${percentage}%)`;
+    };
+
+    // Event listeners
+    nextBtn.addEventListener('click', goToNextQuestion);
+    prevBtn.addEventListener('click', goToPrevQuestion);
+    
+    questionDots.forEach(dot => {
+        dot.addEventListener('click', function() {
+            const index = parseInt(this.dataset.index);
+            goToQuestion(index);
+        });
+    });
+
+    // Help modal functionality
+    helpBtn.addEventListener('click', () => {
+        helpModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    });
+
+    closeHelp.addEventListener('click', () => {
+        helpModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    });
+
+    closeHelpBtn.addEventListener('click', () => {
+        helpModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight' && currentQuestion < totalQuestions - 1) {
+            goToNextQuestion();
+        } else if (e.key === 'ArrowLeft' && currentQuestion > 0) {
+            goToPrevQuestion();
+        }
+    });
+
+    // Form submission with confetti
+    form.addEventListener('submit', function(e) {
+        if (!validateCurrentQuestion()) {
+            e.preventDefault();
+            return;
+        }
+        
+        saveAnswer();
+        
+        // Create confetti effect
+        const confettiContainer = document.getElementById('confetti-container');
+        confettiContainer.innerHTML = '';
+        confettiContainer.style.opacity = '1';
+        
+        const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+        
+        for (let i = 0; i < 100; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = `${Math.random() * 100}%`;
+            confetti.style.setProperty('--color', colors[Math.floor(Math.random() * colors.length)]);
+            confetti.style.setProperty('--fall-time', `${Math.random() * 3 + 2}s`);
+            confetti.style.animationDelay = `${Math.random() * 0.5}s`;
+            confettiContainer.appendChild(confetti);
+        }
+        
+        // Hide confetti after animation
+        setTimeout(() => {
+            confettiContainer.style.opacity = '0';
+        }, 3000);
+    });
+
+    // Auto-save text answers after typing stops
+    const textAnswers = document.querySelectorAll('textarea');
+    textAnswers.forEach(textarea => {
+        let timeout;
+        
+        textarea.addEventListener('input', function() {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                saveAnswer();
+            }, 1000);
+        });
+    });
+
+    // Auto-save slider answers
+    const sliders = document.querySelectorAll('input[type="range"]');
+    sliders.forEach(slider => {
+        slider.addEventListener('change', function() {
+            saveAnswer();
+        });
+    });
+});
+</script>
+{% endblock %}

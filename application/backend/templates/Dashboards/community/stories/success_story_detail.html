@@ -1,0 +1,195 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+    <!-- Story Header -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{% url 'success_story_list' %}" class="text-gray-400 hover:text-gray-500">
+                            <svg class="flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                            <span class="sr-only">Success Stories</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="ml-4 text-sm font-medium text-gray-500">{{ story.title|truncatewords:5 }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ story.title }}</h1>
+                <div class="mt-2 flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <img class="h-8 w-8 rounded-full" src="{% if story.is_anonymous %}{% static 'images/anonymous-user.jpg' %}{% else %}{{ story.author.profile.image.url|default:'/static/images/default-profile.jpg' }}{% endif %}" alt="">
+                        </div>
+                        <div class="ml-2">
+                            <p class="text-sm font-medium text-gray-900">
+                                {% if story.is_anonymous %}Anonymous{% else %}{{ story.author.get_full_name|default:story.author.username }}{% endif %}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ story.created_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+                    </div>
+                    {% if story.is_featured %}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Featured
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% if story.author == request.user or request.user.is_staff %}
+            <div class="relative inline-block text-left">
+                <div>
+                    <button type="button" class="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="story-menu-button" aria-expanded="false" aria-haspopup="true">
+                        Options
+                        <svg class="-mr-1 ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="story-menu-button" tabindex="-1">
+                    <div class="py-1" role="none">
+                        {% if story.author == request.user %}
+                        <a href="{% url 'success_story_update' slug=story.slug %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" tabindex="-1">
+                            Edit Story
+                        </a>
+                        
+                        {% endif %}
+                        {% if request.user.is_staff %}
+                        <form method="post" action="{% url 'success_story_toggle_featured' slug=story.slug %}" role="menuitem" tabindex="-1">
+                            {% csrf_token %}
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                {% if story.is_featured %}Remove Featured{% else %}Mark as Featured{% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if story.author == request.user or request.user.is_staff %}
+                        <form method="post" action="{% url 'success_story_delete' slug=story.slug %}" role="menuitem" tabindex="-1">
+                            {% csrf_token %}
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                Delete Story
+                            </button>
+                            <a href="{% url 'success_story_delete' slug=story.slug %}" 
+                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700">
+                             Delete Story
+                         </a>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Story Content -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        {% if story.featured_image %}
+        <div class="h-64 overflow-hidden">
+            <img class="w-full h-full object-cover" src="{{ story.featured_image.url }}" alt="{{ story.title }}">
+        </div>
+        {% endif %}
+        <div class="px-4 py-5 sm:p-6">
+            <div class="prose max-w-none">
+                {{ story.content|safe }}
+            </div>
+            <div class="mt-6 flex items-center justify-between">
+                <div class="text-sm text-gray-500">
+                    {{ story.view_count }} view{{ story.view_count|pluralize }}
+                </div>
+                {% if story.author == request.user %}
+                <div class="flex space-x-3">
+                    <a href="{% url 'success_story_update' slug=story.slug %}" class="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Edit Story
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Stories -->
+    {% if related_stories %}
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">More Inspiring Stories</h2>
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {% for related_story in related_stories %}
+            <div class="bg-white overflow-hidden shadow rounded-lg hover:shadow-xl transition-shadow duration-300">
+                {% if related_story.featured_image %}
+                <div class="h-48 overflow-hidden">
+                    <img class="w-full h-full object-cover" src="{{ related_story.featured_image.url }}" alt="{{ related_story.title }}">
+                </div>
+                {% endif %}
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <img class="h-10 w-10 rounded-full" src="{% if related_story.is_anonymous %}{% static 'images/anonymous-user.jpg' %}{% else %}{{ related_story.author.profile.image.url|default:'/static/images/default-profile.jpg' }}{% endif %}" alt="">
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-gray-900">
+                                {% if related_story.is_anonymous %}Anonymous{% else %}{{ related_story.author.get_full_name|default:related_story.author.username }}{% endif %}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ related_story.created_at|date:"M d, Y" }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="text-lg font-medium text-gray-900">{{ related_story.title }}</h3>
+                        <p class="mt-2 text-sm text-gray-600 line-clamp-2">
+                            {{ related_story.content|striptags|truncatewords:20 }}
+                        </p>
+                    </div>
+                    <div class="mt-5 flex justify-end">
+                        <a href="{% url 'success_story_detail' slug=related_story.slug %}" class="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-full shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105">
+                            Read Story
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Floating decorative elements -->
+<div class="fixed bottom-0 right-0 w-64 h-64 bg-indigo-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float"></div>
+<div class="fixed top-1/3 left-0 w-48 h-48 bg-blue-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float-delay"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle story menu
+    document.getElementById('story-menu-button').addEventListener('click', function() {
+        const menu = this.nextElementSibling;
+        menu.classList.toggle('hidden');
+    });
+
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('#story-menu-button') && !event.target.closest('[role="menu"]')) {
+            const menu = document.querySelector('[role="menu"]');
+            if (menu && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        }
+    });
+</script>
+{% endblock %}

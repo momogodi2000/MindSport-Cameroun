@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Session with John Doe</title>
+    
+    <!-- Jitsi Meet API library -->
+    <script src='https://meet.jit.si/external_api.js'></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSAP for animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Three.js for 3D effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js"></script>
+    <style>
+        #jitsi-container {
+            width: 100%;
+            height: calc(100vh - 240px);
+            min-height: 500px;
+            overflow: hidden;
+            position: relative;
+            border-radius: 0.75rem;
+            background-color: #1a1a1a;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .session-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .session-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .controls-button {
+            transition: all 0.2s ease;
+            transform-origin: center;
+        }
+        
+        .controls-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .copy-btn {
+            transition: all 0.15s ease;
+        }
+        
+        .copy-btn:hover {
+            background-color: #e2e8f0;
+        }
+        
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+        
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        @media (max-width: 768px) {
+            #jitsi-container {
+                height: calc(100vh - 300px);
+                min-height: 400px;
+            }
+        }
+        
+        .connection-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .connection-good {
+            background-color: #10b981;
+            box-shadow: 0 0 8px #10b981;
+        }
+        
+        .connection-warning {
+            background-color: #f59e0b;
+            box-shadow: 0 0 8px #f59e0b;
+        }
+        
+        .connection-poor {
+            background-color: #ef4444;
+            box-shadow: 0 0 8px #ef4444;
+        }
+        
+        .timer {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <img class="h-8 w-auto" src="/api/placeholder/180/40" alt="Logo">
+                    </div>
+                    <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                        <a href="#" class="border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Dashboard
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Appointments
+                        </a>
+                        <a href="#" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            Messages
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <div class="ml-3 relative">
+                        <div>
+                            <button type="button" class="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                                <span class="sr-only">Open user menu</span>
+                                <img class="h-8 w-8 rounded-full" src="/api/placeholder/32/32" alt="User avatar">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6 max-w-6xl">
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-6 shadow-md relative overflow-hidden">
+            <div id="canvas-container"></div>
+            
+            <div class="relative z-10">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-gray-800">Video Session: April 25, 2025 at 2:00 PM</h2>
+                    <div class="timer text-lg font-medium text-gray-700" id="session-timer">00:00:00</div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6 mt-4">
+                    <div class="session-card p-5">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-3">Session Details</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Specialist:</span>
+                                <span class="font-medium text-gray-800">John Doe</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Duration:</span>
+                                <span class="font-medium text-gray-800">60 minutes</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Status:</span>
+                                <span class="font-medium text-green-600">Active</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="session-card p-5">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-3">Connection Information</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Session ID:</span>
+                                <div class="flex items-center">
+                                    <span id="session-id" class="font-mono bg-gray-100 px-2 py-1 rounded text-sm">athleteApp-session-12345</span>
+                                    <button class="copy-btn ml-2 p-1 rounded-md hover:bg-gray-200 tooltip" onclick="copySessionInfo('session-id')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                        </svg>
+                                        <span class="tooltip-text">Copy to clipboard</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Password:</span>
+                                <div class="flex items-center">
+                                    <span id="session-password" class="font-mono bg-gray-100 px-2 py-1 rounded text-sm">secure-password-123</span>
+                                    <button class="copy-btn ml-2 p-1 rounded-md hover:bg-gray-200 tooltip" onclick="copySessionInfo('session-password')">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                        </svg>
+                                        <span class="tooltip-text">Copy to clipboard</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Network Quality:</span>
+                                <div class="flex items-center">
+                                    <span id="connection-quality" class="connection-indicator connection-good mr-2"></span>
+                                    <span id="connection-text" class="text-sm">Excellent</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="jitsi-container" class="animate-fade-in"></div>
+        
+        <div class="flex flex-wrap justify-center gap-4 mt-6">
+            <button id="leave-btn" class="controls-button bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium flex items-center shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Leave Session
+            </button>
+            
+            <a href="/appointments/123/notes" class="controls-button bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Session Notes
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize 3D background animation
+            initBackgroundAnimation();
+            
+            // Initialize session timer
+            initSessionTimer();
+            
+            // Add loading animation
+            gsap.from("#jitsi-container", {duration: 0.8, opacity: 0, y: 20, ease: "power3.out"});
+            gsap.from(".session-card", {duration: 0.6, opacity: 0, y: 15, stagger: 0.2, ease: "back.out(1.7)"});
+            
+            // Simulate connection quality updates (in real app, this would use actual metrics)
+            simulateConnectionQuality();
+            
+            // Jitsi configuration
+            const domain = 'meet.jit.si';
+            const options = {
+                roomName: 'athleteApp-session-12345',
+                width: '100%',
+                height: '100%',
+                parentNode: document.querySelector('#jitsi-container'),
+                userInfo: {
+                    displayName: 'Jane Smith',
+                    email: 'jane@example.com',
+                    avatarURL: '/api/placeholder/64/64',
+                },
+                configOverwrite: {
+                    prejoinPageEnabled: false,
+                    disableDeepLinking: true,
+                    startWithVideoMuted: false,
+                    startWithAudioMuted: false,
+                    enableWelcomePage: false,
+                    enableClosePage: false,
+                    disableThirdPartyRequests: true,
+                    analytics: {
+                        disabled: true
+                    },
+                    notifications: [
+                        'connection.CONNFAIL',
+                        'dialog.error',
+                        'connection.DISCONNECTED',
+                        'passwordRequired'
+                    ],
+                    // Set room password
+                    password: 'secure-password-123'
+                },
+                interfaceConfigOverwrite: {
+                    TOOLBAR_BUTTONS: [
+                        'microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen',
+                        'fodeviceselection', 'hangup', 'profile', 'chat', 'recording',
+                        'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                        'videoquality', 'filmstrip', 'feedback', 'stats', 'shortcuts',
+                        'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone',
+                        'security'
+                    ],
+                    SHOW_JITSI_WATERMARK: false,
+                    SHOW_WATERMARK_FOR_GUESTS: false,
+                    DEFAULT_BACKGROUND: '#1a1a1a',
+                    DEFAULT_REMOTE_DISPLAY_NAME: 'User',
+                    SHOW_PROMOTIONAL_CLOSE_PAGE: false
+                },
+                onload: function() {
+                    console.log('Jitsi Meet loaded successfully');
+                    // Show success message
+                    showToast('Connected successfully!', 'success');
+                }
+            };
+            
+            // Create Jitsi Meet API instance
+            const api = new JitsiMeetExternalAPI(domain, options);
+            
+            // Handle leave button
+            document.getElementById('leave-btn').addEventListener('click', function() {
+                showConfirmModal('Are you sure you want to leave this session?', function() {
+                    api.executeCommand('hangup');
+                    window.location.href = "/appointments";
+                });
+            });
+            
+            // Listen for video conference left event
+            api.addEventListeners({
+                readyToClose: function() {
+                    window.location.href = "/appointments";
+                },
+                videoConferenceJoined: function() {
+                    showToast('You have joined the session', 'info');
+                },
+                participantJoined: function(participant) {
+                    showToast(`${participant.displayName} has joined`, 'info');
+                },
+                participantLeft: function(participant) {
+                    showToast(`${participant.displayName} has left`, 'info');
+                },
+                videoMuteStatusChanged: function(muted) {
+                    console.log('Video mute status changed:', muted);
+                },
+                audioMuteStatusChanged: function(muted) {
+                    console.log('Audio mute status changed:', muted);
+                },
+                screenSharingStatusChanged: function(sharing) {
+                    console.log('Screen sharing status changed:', sharing);
+                }
+            });
+            
+            // Lock the room with password when joining
+            api.addEventListener('participantRoleChanged', function(event) {
+                if (event.role === 'moderator') {
+                    api.executeCommand('password', 'secure-password-123');
+                }
+            });
+            
+            // Add unload handler
+            window.addEventListener('beforeunload', function() {
+                api.dispose();
+            });
+        });
+        
+        function copySessionInfo(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(function() {
+                showToast('Copied to clipboard!', 'success');
+            }, function(err) {
+                console.error('Could not copy text: ', err);
+                showToast('Failed to copy text', 'error');
+            });
+        }
+        
+        function showToast(message, type = 'info') {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 rounded-lg px-4 py-2 text-white text-sm font-medium z-50 shadow-lg`;
+            
+            // Set background color based on toast type
+            switch(type) {
+                case 'success':
+                    toast.classList.add('bg-green-600');
+                    break;
+                case 'error':
+                    toast.classList.add('bg-red-600');
+                    break;
+                case 'warning':
+                    toast.classList.add('bg-yellow-600');
+                    break;
+                default:
+                    toast.classList.add('bg-blue-600');
+            }
+            
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            // Animate toast
+            gsap.fromTo(toast, 
+                {y: 50, opacity: 0}, 
+                {y: 0, opacity: 1, duration: 0.3, ease: "power2.out"}
+            );
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                gsap.to(toast, {
+                    opacity: 0, y: 20, duration: 0.3, 
+                    onComplete: () => document.body.removeChild(toast)
+                });
+            }, 3000);
+        }
+        
+        function showConfirmModal(message, confirmCallback) {
+            // Create modal backdrop
+            const backdrop = document.createElement('div');
+            backdrop.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            
+            // Create modal content
+            const modal = document.createElement('div');
+            modal.className = 'bg-white rounded-lg p-6 max-w-sm mx-4 shadow-xl';
+            
+            const text = document.createElement('p');
+            text.className = 'text-gray-700 mb-6';
+            text.textContent = message;
+            
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'flex justify-end space-x-3';
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'px-4 py-2 text-gray-600 rounded hover:bg-gray-100';
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.onclick = () => document.body.removeChild(backdrop);
+            
+            const confirmBtn = document.createElement('button');
+            confirmBtn.className = 'px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700';
+            confirmBtn.textContent = 'Confirm';
+            confirmBtn.onclick = () => {
+                document.body.removeChild(backdrop);
+                confirmCallback();
+            };
+            
+            buttonContainer.appendChild(cancelBtn);
+            buttonContainer.appendChild(confirmBtn);
+            
+            modal.appendChild(text);
+            modal.appendChild(buttonContainer);
+            backdrop.appendChild(modal);
+            
+            document.body.appendChild(backdrop);
+            
+            // Animate modal
+            gsap.from(modal, {scale: 0.8, opacity: 0, duration: 0.3, ease: "back.out(1.7)"});
+        }
+        
+        function initSessionTimer() {
+            if (document.getElementById('session-timer')) {
+                let seconds = 0;
+                let minutes = 0;
+                let hours = 0;
+                
+                setInterval(() => {
+                    seconds++;
+                    if (seconds >= 60) {
+                        seconds = 0;
+                        minutes++;
+                        if (minutes >= 60) {
+                            minutes = 0;
+                            hours++;
+                        }
+                    }
+                    
+                    const formattedHours = hours.toString().padStart(2, '0');
+                    const formattedMinutes = minutes.toString().padStart(2, '0');
+                    const formattedSeconds = seconds.toString().padStart(2, '0');
+                    
+                    document.getElementById('session-timer').textContent = 
+                        `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+                }, 1000);
+            }
+        }
+        
+        function simulateConnectionQuality() {
+            const qualityIndicator = document.getElementById('connection-quality');
+            const qualityText = document.getElementById('connection-text');
+            
+            if (!qualityIndicator || !qualityText) return;
+            
+            const qualities = [
+                { class: 'connection-good', text: 'Excellent', probability: 0.7 },
+                { class: 'connection-warning', text: 'Fair', probability: 0.2 },
+                { class: 'connection-poor', text: 'Poor', probability: 0.1 }
+            ];
+            
+            setInterval(() => {
+                const random = Math.random();
+                let cumulativeProbability = 0;
+                
+                for (const quality of qualities) {
+                    cumulativeProbability += quality.probability;
+                    
+                    if (random <= cumulativeProbability) {
+                        qualityIndicator.className = 'connection-indicator ' + quality.class;
+                        qualityText.textContent = quality.text;
+                        break;
+                    }
+                }
+            }, 10000); // Update every 10 seconds
+        }
+        
+        function initBackgroundAnimation() {
+            const container = document.getElementById('canvas-container');
+            if (!container) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // Create particles
+            const particlesGeometry = new THREE.BufferGeometry();
+            const particlesCount = 100;
+            
+            const posArray = new Float32Array(particlesCount * 3);
+            
+            for(let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 5;
+            }
+            
+            particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            
+            const particlesMaterial = new THREE.PointsMaterial({
+                size: 0.05,
+                color: 0x4169e1,
+                transparent: true
+            });
+            
+            const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+            scene.add(particlesMesh);
+            
+            camera.position.z = 2;
+            
+            // Animation
+            const animate = () => {
+                requestAnimationFrame(animate);
+                
+                particlesMesh.rotation.x += 0.001;
+                particlesMesh.rotation.y += 0.001;
+                
+                renderer.render(scene, camera);
+            };
+            
+            animate();
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                
+                renderer.setSize(width, height);
+            });
+        }
+    </script>
+</body>
+</html>

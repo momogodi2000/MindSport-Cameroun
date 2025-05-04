@@ -1,0 +1,195 @@
+{% extends 'Dashboards/Layout/psychologist_base.html' %}
+{% load static %}
+{% block title %}Create Assessment | Mental Health Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <span class="mr-3">Create New Assessment</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+        </h1>
+        <p class="mt-2 text-lg text-gray-600">Create a new assessment for evaluating mental health aspects.</p>
+    </div>
+
+    {% if error %}
+    <div class="rounded-md bg-red-50 p-4 mb-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-red-800">{{ error }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{% url 'create_assessment' %}">
+        {% csrf_token %}
+        <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+            <div class="px-6 py-5 border-b border-gray-200">
+                <h3 class="text-lg font-medium leading-6 text-gray-900">Basic Information</h3>
+            </div>
+            <div class="px-6 py-5 space-y-6">
+                <!-- Title -->
+                <div>
+                    <label for="title" class="block text-sm font-medium text-gray-700">Assessment Title*</label>
+                    <div class="mt-1">
+                        <input type="text" name="title" id="title" required
+                            class="focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                            placeholder="E.g. Anxiety Assessment"
+                            value="{{ form_data.title|default:'' }}">
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700">Description*</label>
+                    <div class="mt-1">
+                        <textarea id="description" name="description" rows="3" required
+                            class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            placeholder="Describe the purpose and benefits of this assessment...">{{ form_data.description|default:'' }}</textarea>
+                    </div>
+                </div>
+
+                <!-- Category -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700">Category*</label>
+                    <select id="category" name="category" required
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if form_data.category == category.id|stringformat:"i" %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Difficulty Level -->
+                <div>
+                    <label for="difficulty_level" class="block text-sm font-medium text-gray-700">Difficulty Level</label>
+                    <select id="difficulty_level" name="difficulty_level"
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option value="basic" {% if form_data.difficulty_level == 'basic' %}selected{% endif %}>Basic</option>
+                        <option value="intermediate" {% if form_data.difficulty_level == 'intermediate' or not form_data.difficulty_level %}selected{% endif %}>Intermediate</option>
+                        <option value="advanced" {% if form_data.difficulty_level == 'advanced' %}selected{% endif %}>Advanced</option>
+                    </select>
+                </div>
+
+                <!-- Estimated Time -->
+                <div>
+                    <label for="estimated_time_minutes" class="block text-sm font-medium text-gray-700">Estimated Time (minutes)</label>
+                    <div class="mt-1">
+                        <input type="number" name="estimated_time_minutes" id="estimated_time_minutes"
+                            class="focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                            min="1" max="120" value="{{ form_data.estimated_time_minutes|default:'15' }}">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+            <div class="px-6 py-5 border-b border-gray-200">
+                <h3 class="text-lg font-medium leading-6 text-gray-900">Assessment Settings</h3>
+            </div>
+            <div class="px-6 py-5 space-y-6">
+                <!-- Public/Private -->
+                <div class="relative flex items-start">
+                    <div class="flex items-center h-5">
+                        <input id="is_public" name="is_public" type="checkbox"
+                            class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                            {% if form_data.is_public %}checked{% endif %}>
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="is_public" class="font-medium text-gray-700">Make Public</label>
+                        <p class="text-gray-500">Public assessments can be taken by any athlete without specific assignment.</p>
+                    </div>
+                </div>
+
+                <!-- Show Results Immediately -->
+                <div class="relative flex items-start">
+                    <div class="flex items-center h-5">
+                        <input id="show_results_immediately" name="show_results_immediately" type="checkbox"
+                            class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                            {% if form_data.show_results_immediately or form_data.show_results_immediately is None %}checked{% endif %}>
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="show_results_immediately" class="font-medium text-gray-700">Show Results Immediately</label>
+                        <p class="text-gray-500">Allow athletes to see their results as soon as assessment is completed.</p>
+                    </div>
+                </div>
+
+                <!-- Require Psychologist Review -->
+                <div class="relative flex items-start">
+                    <div class="flex items-center h-5">
+                        <input id="require_psychologist_review" name="require_psychologist_review" type="checkbox"
+                            class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                            {% if form_data.require_psychologist_review %}checked{% endif %}>
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="require_psychologist_review" class="font-medium text-gray-700">Require Psychologist Review</label>
+                        <p class="text-gray-500">Results require psychologist review before being finalized.</p>
+                    </div>
+                </div>
+
+                <!-- Allow Retake -->
+                <div class="relative flex items-start">
+                    <div class="flex items-center h-5">
+                        <input id="allow_retake" name="allow_retake" type="checkbox"
+                            class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                            {% if form_data.allow_retake or form_data.allow_retake is None %}checked{% endif %}>
+                    </div>
+                    <div class="ml-3 text-sm">
+                        <label for="allow_retake" class="font-medium text-gray-700">Allow Retake</label>
+                        <p class="text-gray-500">Athletes can take this assessment multiple times.</p>
+                    </div>
+                </div>
+
+                <!-- Minimum Days Between Retakes -->
+                <div id="retake_days_container">
+                    <label for="minimum_days_between_retakes" class="block text-sm font-medium text-gray-700">Minimum Days Between Retakes</label>
+                    <div class="mt-1">
+                        <input type="number" name="minimum_days_between_retakes" id="minimum_days_between_retakes"
+                            class="focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                            min="0" value="{{ form_data.minimum_days_between_retakes|default:'7' }}">
+                    </div>
+                    <p class="mt-1 text-sm text-gray-500">Set to 0 for no waiting period.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex items-center justify-end space-x-4">
+            <a href="{% url 'PsychologistAssessments' %}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Cancel
+            </a>
+            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Create Assessment
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const allowRetakeCheckbox = document.getElementById('allow_retake');
+        const retakeDaysContainer = document.getElementById('retake_days_container');
+        
+        function updateRetakeDaysVisibility() {
+            retakeDaysContainer.style.display = allowRetakeCheckbox.checked ? 'block' : 'none';
+        }
+        
+        allowRetakeCheckbox.addEventListener('change', updateRetakeDaysVisibility);
+        
+        // Initialize visibility
+        updateRetakeDaysVisibility();
+    });
+</script>
+{% endblock %}

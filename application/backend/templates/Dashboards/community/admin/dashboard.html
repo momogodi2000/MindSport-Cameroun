@@ -1,0 +1,352 @@
+{% extends 'Dashboards/Layout/admin_base.html' %}
+{% load static %}
+
+{% block title %}Community Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+<style>
+  .stat-card {
+    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+  }
+  .stat-card:hover {
+    transform: translateY(-5px) rotateX(5deg);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+  .chart-container {
+    perspective: 1000px;
+    transition: all 0.5s ease;
+  }
+  .chart-container:hover {
+    transform: scale(1.02);
+  }
+  .activity-item {
+    transition: all 0.3s ease;
+  }
+  .activity-item:hover {
+    transform: translateX(5px);
+  }
+  .table-row {
+    transition: all 0.2s ease;
+  }
+  .table-row:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease forwards;
+  }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  .animate-pulse {
+    animation: pulse 2s infinite;
+  }
+  .bg-gradient-radial {
+    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-blue-600 to-indigo-700 shadow-lg rounded-b-3xl relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-radial opacity-50"></div>
+    <div class="container mx-auto px-4 py-8 relative z-10">
+      <div class="flex flex-col md:flex-row items-center justify-between">
+        <div class="text-white mb-4 md:mb-0" data-aos="fade-right">
+          <h1 class="text-3xl font-bold">Community Admin Dashboard</h1>
+          <p class="mt-2 opacity-80">Manage your community forums, mentorship programs, and support groups</p>
+        </div>
+        <div class="flex space-x-3" data-aos="fade-left">
+          <a href="{% url 'forum_moderation' %}" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-xl transition-all flex items-center">
+            <i class="fas fa-comment-alt mr-2"></i> Forum Moderation
+          </a>
+          <a href="{% url 'mentorship_admin' %}" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-xl transition-all flex items-center">
+            <i class="fas fa-user-friends mr-2"></i> Mentorship
+          </a>
+          <a href="{% url 'support_group_admin' %}" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-xl transition-all flex items-center">
+            <i class="fas fa-users mr-2"></i> Support Groups
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="container mx-auto px-4 -mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <!-- Forum Stats -->
+      <div class="stat-card bg-white rounded-xl shadow-md overflow-hidden" data-aos="flip-left" data-aos-delay="100">
+        <div class="p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-700">Total Threads</h3>
+              <p class="mt-1 text-3xl font-bold text-blue-600">{{ total_threads }}</p>
+            </div>
+            <div class="bg-blue-100 p-3 rounded-full">
+              <i class="fas fa-comment-dots text-blue-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 text-sm text-gray-500">
+            <p>{{ total_comments }} Comments</p>
+            <p>{{ active_categories }} Active Categories</p>
+          </div>
+        </div>
+        <div class="bg-blue-50 px-6 py-2">
+          <a href="{% url 'forum_moderation' %}" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            <span class="font-medium">View All</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Mentorship Stats -->
+      <div class="stat-card bg-white rounded-xl shadow-md overflow-hidden" data-aos="flip-left" data-aos-delay="200">
+        <div class="p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-700">Active Programs</h3>
+              <p class="mt-1 text-3xl font-bold text-green-600">{{ active_programs }}</p>
+            </div>
+            <div class="bg-green-100 p-3 rounded-full">
+              <i class="fas fa-user-friends text-green-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 text-sm text-gray-500">
+            <p>{{ active_relationships }} Active Relationships</p>
+            <p>Mentors & Mentees</p>
+          </div>
+        </div>
+        <div class="bg-green-50 px-6 py-2">
+          <a href="{% url 'mentorship_admin' %}" class="flex items-center text-green-600 hover:text-green-800 transition-colors">
+            <span class="font-medium">View All</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Support Group Stats -->
+      <div class="stat-card bg-white rounded-xl shadow-md overflow-hidden" data-aos="flip-left" data-aos-delay="300">
+        <div class="p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-700">Active Groups</h3>
+              <p class="mt-1 text-3xl font-bold text-purple-600">{{ active_groups }}</p>
+            </div>
+            <div class="bg-purple-100 p-3 rounded-full">
+              <i class="fas fa-users text-purple-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 text-sm text-gray-500">
+            <p>{{ upcoming_sessions }} Upcoming Sessions</p>
+            <p>Facilitated by Professionals</p>
+          </div>
+        </div>
+        <div class="bg-purple-50 px-6 py-2">
+          <a href="{% url 'support_group_admin' %}" class="flex items-center text-purple-600 hover:text-purple-800 transition-colors">
+            <span class="font-medium">View All</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Success Stories Stats -->
+      <div class="stat-card bg-white rounded-xl shadow-md overflow-hidden" data-aos="flip-left" data-aos-delay="400">
+        <div class="p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-lg font-semibold text-gray-700">Success Stories</h3>
+              <p class="mt-1 text-3xl font-bold text-amber-600">{{ recent_stories|length }}</p>
+            </div>
+            <div class="bg-amber-100 p-3 rounded-full">
+              <i class="fas fa-medal text-amber-600 text-xl"></i>
+            </div>
+          </div>
+          <div class="mt-4 text-sm text-gray-500">
+            <p>Recent Inspirational Stories</p>
+            <p>Shared by Community Members</p>
+          </div>
+        </div>
+        <div class="bg-amber-50 px-6 py-2">
+          <a href="#" class="flex items-center text-amber-600 hover:text-amber-800 transition-colors">
+            <span class="font-medium">View All</span>
+            <i class="fas fa-arrow-right ml-2"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics & Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+      <!-- Chart -->
+      <div class="col-span-1 lg:col-span-2 chart-container" data-aos="fade-up">
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Forum Activity by Category</h3>
+          <div class="h-80">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="col-span-1 bg-white rounded-xl shadow-md p-6" data-aos="fade-left">
+        <h3 class="text-lg font-semibold text-gray-700 mb-4">Recent Activity</h3>
+        <div class="space-y-4 max-h-80 overflow-y-auto pr-2">
+          {% for thread in recent_threads %}
+          <div class="activity-item p-3 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+            <p class="text-sm font-medium text-gray-600">New Thread</p>
+            <a href="#" class="text-blue-600 hover:underline">{{ thread.title }}</a>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ thread.created_at|date:"M d, Y" }} by {{ thread.author.get_username }}
+            </p>
+          </div>
+          {% endfor %}
+          
+          {% for question in recent_questions %}
+          <div class="activity-item p-3 border-l-4 border-green-500 bg-green-50 rounded-r-lg">
+            <p class="text-sm font-medium text-gray-600">Anonymous Question</p>
+            <a href="#" class="text-green-600 hover:underline">{{ question.title }}</a>
+            <p class="text-xs text-gray-500 mt-1">{{ question.created_at|date:"M d, Y" }}</p>
+          </div>
+          {% endfor %}
+          
+          {% for story in recent_stories %}
+          <div class="activity-item p-3 border-l-4 border-amber-500 bg-amber-50 rounded-r-lg">
+            <p class="text-sm font-medium text-gray-600">Success Story</p>
+            <a href="#" class="text-amber-600 hover:underline">{{ story.title }}</a>
+            <p class="text-xs text-gray-500 mt-1">
+              {{ story.created_at|date:"M d, Y" }} by {{ story.author.get_username }}
+            </p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8" data-aos="fade-up">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">Quick Actions</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a href="{% url 'forum_moderation' %}?status=reported" class="flex flex-col items-center justify-center bg-red-50 hover:bg-red-100 text-red-700 p-6 rounded-xl transition-all">
+          <div class="animate-pulse bg-red-100 rounded-full p-3 mb-3">
+            <i class="fas fa-flag text-red-600 text-xl"></i>
+          </div>
+          <span class="text-sm font-medium">Review Reported Content</span>
+        </a>
+        
+        <a href="{% url 'mentorship_admin' %}" class="flex flex-col items-center justify-center bg-green-50 hover:bg-green-100 text-green-700 p-6 rounded-xl transition-all">
+          <div class="bg-green-100 rounded-full p-3 mb-3">
+            <i class="fas fa-handshake text-green-600 text-xl"></i>
+          </div>
+          <span class="text-sm font-medium">Manage Mentorship Programs</span>
+        </a>
+        
+        <a href="{% url 'support_group_admin' %}" class="flex flex-col items-center justify-center bg-purple-50 hover:bg-purple-100 text-purple-700 p-6 rounded-xl transition-all">
+          <div class="bg-purple-100 rounded-full p-3 mb-3">
+            <i class="fas fa-calendar-alt text-purple-600 text-xl"></i>
+          </div>
+          <span class="text-sm font-medium">Upcoming Support Sessions</span>
+        </a>
+        
+        <a href="#" class="flex flex-col items-center justify-center bg-amber-50 hover:bg-amber-100 text-amber-700 p-6 rounded-xl transition-all">
+          <div class="bg-amber-100 rounded-full p-3 mb-3">
+            <i class="fas fa-check-circle text-amber-600 text-xl"></i>
+          </div>
+          <span class="text-sm font-medium">Approve Success Stories</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+<script>
+  // Initialize animation library
+  AOS.init({
+    duration: 800,
+    easing: 'ease-out-cubic',
+    once: true
+  });
+
+  // Category chart
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    
+    // Format category data
+    const categoryData = JSON.parse('{{ category_thread_counts|escapejs }}');
+    const labels = categoryData.map(item => item.name);
+    const data = categoryData.map(item => item.thread_count);
+    
+    // Create a gradient for the bars
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+    
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Threads',
+          data: data,
+          backgroundColor: gradient,
+          borderColor: 'rgb(59, 130, 246)',
+          borderWidth: 1,
+          borderRadius: 8,
+          maxBarThickness: 40
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(17, 24, 39, 0.8)',
+            padding: 12,
+            titleFont: {
+              size: 14,
+              weight: 'bold'
+            },
+            bodyFont: {
+              size: 13
+            },
+            displayColors: false
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              borderDash: [2, 4]
+            }
+          }
+        },
+        animation: {
+          duration: 2000,
+          easing: 'easeOutQuart'
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

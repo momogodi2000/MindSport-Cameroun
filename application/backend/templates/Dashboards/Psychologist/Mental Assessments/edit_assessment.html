@@ -1,0 +1,737 @@
+{% extends 'Dashboards/Layout/psychologist_base.html' %}
+{% load static %}
+{% block title %}Edit Assessment | Mental Health Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="mb-8 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                <span class="mr-3">Edit Assessment</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+            </h1>
+            <p class="mt-2 text-lg text-gray-600">Edit assessment details, questions, and scoring.</p>
+        </div>
+        <div class="flex space-x-4">
+            <form method="POST" action="{% url 'edit_assessment' assessment.id %}" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="publish">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                    Publish Assessment
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="rounded-md bg-red-50 p-4 mb-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm font-medium text-red-800">{{ error }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Column - Assessment Details -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Assessment Details Form -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-200">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Assessment Details</h3>
+                </div>
+                <div class="px-6 py-5 space-y-6">
+                    <form method="POST" action="{% url 'edit_assessment' assessment.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_assessment">
+                        
+                        <!-- Title -->
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-gray-700">Title*</label>
+                            <input type="text" name="title" id="title" required
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                value="{{ assessment.title }}">
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700">Description*</label>
+                            <textarea id="description" name="description" rows="3" required
+                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">{{ assessment.description }}</textarea>
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <label for="category" class="block text-sm font-medium text-gray-700">Category*</label>
+                            <select id="category" name="category" required
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if category.id == assessment.category.id %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Difficulty Level -->
+                        <div>
+                            <label for="difficulty_level" class="block text-sm font-medium text-gray-700">Difficulty Level</label>
+                            <select id="difficulty_level" name="difficulty_level"
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option value="basic" {% if assessment.difficulty_level == 'basic' %}selected{% endif %}>Basic</option>
+                                <option value="intermediate" {% if assessment.difficulty_level == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                                <option value="advanced" {% if assessment.difficulty_level == 'advanced' %}selected{% endif %}>Advanced</option>
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Status</label>
+                            <div class="mt-1">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
+                                    {% if assessment.status == 'published' %}bg-green-100 text-green-800
+                                    {% elif assessment.status == 'draft' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ assessment.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="pt-4">
+                            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Update Details
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Assessment Settings -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-200">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Settings</h3>
+                </div>
+                <div class="px-6 py-5 space-y-4">
+                    <form method="POST" action="{% url 'edit_assessment' assessment.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_assessment">
+                        
+                        <!-- Public/Private -->
+                        <div class="relative flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="is_public" name="is_public" type="checkbox"
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                    {% if assessment.is_public %}checked{% endif %}>
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="is_public" class="font-medium text-gray-700">Public Assessment</label>
+                                <p class="text-gray-500">Available to all athletes without assignment</p>
+                            </div>
+                        </div>
+
+                        <!-- Show Results -->
+                        <div class="relative flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="show_results_immediately" name="show_results_immediately" type="checkbox"
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                    {% if assessment.show_results_immediately %}checked{% endif %}>
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="show_results_immediately" class="font-medium text-gray-700">Show Results Immediately</label>
+                                <p class="text-gray-500">Athletes see results right after completion</p>
+                            </div>
+                        </div>
+
+                        <!-- Require Review -->
+                        <div class="relative flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="require_psychologist_review" name="require_psychologist_review" type="checkbox"
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                    {% if assessment.require_psychologist_review %}checked{% endif %}>
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="require_psychologist_review" class="font-medium text-gray-700">Require Review</label>
+                                <p class="text-gray-500">Results need psychologist approval</p>
+                            </div>
+                        </div>
+
+                        <!-- Allow Retake -->
+                        <div class="relative flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="allow_retake" name="allow_retake" type="checkbox"
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                    {% if assessment.allow_retake %}checked{% endif %}>
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="allow_retake" class="font-medium text-gray-700">Allow Retake</label>
+                                <p class="text-gray-500">Athletes can take this assessment multiple times</p>
+                            </div>
+                        </div>
+
+                        <!-- Minimum Days -->
+                        <div>
+                            <label for="minimum_days_between_retakes" class="block text-sm font-medium text-gray-700">Days Between Retakes</label>
+                            <input type="number" name="minimum_days_between_retakes" id="minimum_days_between_retakes"
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                min="0" value="{{ assessment.minimum_days_between_retakes }}">
+                        </div>
+
+                        <!-- Estimated Time -->
+                        <div>
+                            <label for="estimated_time_minutes" class="block text-sm font-medium text-gray-700">Estimated Time (minutes)</label>
+                            <input type="number" name="estimated_time_minutes" id="estimated_time_minutes"
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                                min="1" value="{{ assessment.estimated_time_minutes }}">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Middle Column - Questions -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Questions</h3>
+                    <button onclick="openQuestionModal()" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Add Question
+                    </button>
+                </div>
+                <div class="px-6 py-4">
+                    {% if questions %}
+                        <ul class="divide-y divide-gray-200">
+                            {% for question in questions %}
+                            <li class="py-4 flex justify-between items-start">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        Q{{ question.order }}: {{ question.text|truncatechars:50 }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        {{ question.get_question_type_display }}
+                                        {% if question.required %}<span class="text-red-500">*Required</span>{% endif %}
+                                    </p>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex space-x-2">
+                                    <button onclick="editQuestion('{{ question.id }}')" class="text-indigo-600 hover:text-indigo-900">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <form method="POST" action="{% url 'delete_question' question.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-red-600 hover:text-red-900">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-sm text-gray-500">No questions added yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Scoring Scales -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Scoring Scales</h3>
+                    <button onclick="openScaleModal()" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Add Scale
+                    </button>
+                </div>
+                <div class="px-6 py-4">
+                    {% if scales %}
+                        <ul class="divide-y divide-gray-200">
+                            {% for scale in scales %}
+                            <li class="py-4 flex justify-between items-start">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        {{ scale.name }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        Score range: {{ scale.min_score }} to {{ scale.max_score }}
+                                    </p>
+                                </div>
+                                <div class="ml-4 flex-shrink-0 flex space-x-2">
+                                    <button onclick="editScale('{{ scale.id }}')" class="text-indigo-600 hover:text-indigo-900">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <form method="POST" action="{% url 'delete_scale' scale.id %}" class="inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-red-600 hover:text-red-900">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-sm text-gray-500">No scoring scales added yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Question Modal (hidden by default) -->
+<div id="questionModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                    Add New Question
+                </h3>
+                <form id="questionForm" method="POST" action="{% url 'edit_assessment' assessment.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_question">
+                    
+                    <div class="mt-4 space-y-4">
+                        <!-- Question Text -->
+                        <div>
+                            <label for="question_text" class="block text-sm font-medium text-gray-700">Question Text*</label>
+                            <textarea id="question_text" name="question_text" rows="3" required
+                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"></textarea>
+                        </div>
+
+                        <!-- Question Type -->
+                        <div>
+                            <label for="question_type" class="block text-sm font-medium text-gray-700">Question Type*</label>
+                            <select id="question_type" name="question_type" required
+                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option value="">Select a question type</option>
+                                <option value="likert_5">5-point Likert Scale</option>
+                                <option value="likert_7">7-point Likert Scale</option>
+                                <option value="yes_no">Yes/No</option>
+                                <option value="multiple_choice">Multiple Choice</option>
+                                <option value="slider">Slider</option>
+                                <option value="text">Open Text</option>
+                            </select>
+                        </div>
+
+                        <!-- Required -->
+                        <div class="relative flex items-start">
+                            <div class="flex items-center h-5">
+                                <input id="required" name="required" type="checkbox" checked
+                                    class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                            </div>
+                            <div class="ml-3 text-sm">
+                                <label for="required" class="font-medium text-gray-700">Required Question</label>
+                            </div>
+                        </div>
+
+                        <!-- Help Text -->
+                        <div>
+                            <label for="help_text" class="block text-sm font-medium text-gray-700">Help Text</label>
+                            <input type="text" id="help_text" name="help_text"
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        </div>
+
+                        <!-- Multiple Choice Options (hidden by default) -->
+                        <div id="multipleChoiceOptions" class="hidden space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Options</label>
+                            <div id="choiceContainer">
+                                <div class="flex items-center space-x-2">
+                                    <input type="text" name="choice_1" class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                            <button type="button" onclick="addChoiceField()" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Add Option
+                            </button>
+                        </div>
+
+                        <!-- Slider Options (hidden by default) -->
+                        <div id="sliderOptions" class="hidden space-y-2">
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label for="min_value" class="block text-sm font-medium text-gray-700">Min Value</label>
+                                    <input type="number" id="min_value" name="min_value"
+                                        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="max_value" class="block text-sm font-medium text-gray-700">Max Value</label>
+                                    <input type="number" id="max_value" name="max_value"
+                                        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                </div>
+                                <div>
+                                    <label for="step" class="block text-sm font-medium text-gray-700">Step</label>
+                                    <input type="number" id="step" name="step" step="0.1"
+                                        class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                <button type="button" onclick="document.getElementById('questionForm').submit();"
+                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm">
+                    Save Question
+                </button>
+                <button type="button" onclick="closeModal('questionModal')"
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scale Modal (hidden by default) -->
+<div id="scaleModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+            <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+        </div>
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-6">
+            <div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                    Add New Scoring Scale
+                </h3>
+                <form id="scaleForm" method="POST" action="{% url 'edit_assessment' assessment.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_scale">
+                    
+                    <div class="mt-4 space-y-4">
+                        <!-- Scale Name -->
+                        <div>
+                            <label for="scale_name" class="block text-sm font-medium text-gray-700">Scale Name*</label>
+                            <input type="text" id="scale_name" name="scale_name" required
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label for="scale_description" class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea id="scale_description" name="scale_description" rows="2"
+                                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"></textarea>
+                        </div>
+
+                        <!-- Score Range -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="min_score" class="block text-sm font-medium text-gray-700">Minimum Score*</label>
+                                <input type="number" id="min_score" name="min_score" required step="0.1"
+                                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                            <div>
+                                <label for="max_score" class="block text-sm font-medium text-gray-700">Maximum Score*</label>
+                                <input type="number" id="max_score" name="max_score" required step="0.1"
+                                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                        </div>
+
+                        <!-- Interpretation Ranges -->
+                        <div class="space-y-4">
+                            <label class="block text-sm font-medium text-gray-700">Interpretation Ranges*</label>
+                            
+                            <div id="rangeContainer">
+                                <!-- Range 1 -->
+                                <div class="border rounded p-3 space-y-2">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700">Min Score*</label>
+                                            <input type="number" name="range_1_min" required step="0.1"
+                                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-700">Max Score*</label>
+                                            <input type="number" name="range_1_max" required step="0.1"
+                                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700">Label*</label>
+                                        <input type="text" name="range_1_label" required
+                                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-700">Description</label>
+                                        <textarea name="range_1_description" rows="2"
+                                            class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button type="button" onclick="addRangeField()" class="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Add Range
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
+                <button type="button" onclick="document.getElementById('scaleForm').submit();"
+                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:col-start-2 sm:text-sm">
+                    Save Scale
+                </button>
+                <button type="button" onclick="closeModal('scaleModal')"
+                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:col-start-1 sm:text-sm">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Modal functions
+    function openQuestionModal() {
+        document.getElementById('questionModal').classList.remove('hidden');
+    }
+
+    function openScaleModal() {
+        document.getElementById('scaleModal').classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Show/hide question type specific fields
+    document.getElementById('question_type').addEventListener('change', function() {
+        const type = this.value;
+        
+        // Hide all option sections
+        document.getElementById('multipleChoiceOptions').classList.add('hidden');
+        document.getElementById('sliderOptions').classList.add('hidden');
+        
+        // Show relevant section
+        if (type === 'multiple_choice') {
+            document.getElementById('multipleChoiceOptions').classList.remove('hidden');
+        } else if (type === 'slider') {
+            document.getElementById('sliderOptions').classList.remove('hidden');
+        }
+    });
+
+// Add choice field for multiple choice questions
+let choiceCount = 1;
+function addChoiceField() {
+    choiceCount++;
+    const container = document.getElementById('choiceContainer');
+    const newChoice = document.createElement('div');
+    newChoice.className = 'flex items-center space-x-2 mt-2';
+    newChoice.innerHTML = `
+        <input type="text" name="choice_${choiceCount}" 
+            class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+        <button type="button" onclick="removeChoice(this)" class="text-red-500 hover:text-red-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    `;
+    container.appendChild(newChoice);
+}
+
+// Remove choice field
+function removeChoice(button) {
+    button.parentElement.remove();
+}
+
+// Range count for interpretation ranges
+let rangeCount = 1;
+function addRangeField() {
+    rangeCount++;
+    const container = document.getElementById('rangeContainer');
+    const newRange = document.createElement('div');
+    newRange.className = 'border rounded p-3 space-y-2 mt-3';
+    newRange.innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-medium text-gray-700">Min Score*</label>
+                <input type="number" name="range_${rangeCount}_min" required step="0.1"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-gray-700">Max Score*</label>
+                <input type="number" name="range_${rangeCount}_max" required step="0.1"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+            </div>
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-700">Label*</label>
+            <input type="text" name="range_${rangeCount}_label" required
+                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+        </div>
+        <div>
+            <label class="block text-xs font-medium text-gray-700">Description</label>
+            <textarea name="range_${rangeCount}_description" rows="2"
+                class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"></textarea>
+        </div>
+        <button type="button" onclick="removeRange(this)" class="mt-1 inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50">
+            Remove Range
+        </button>
+    `;
+    container.appendChild(newRange);
+}
+
+// Remove range field
+function removeRange(button) {
+    button.parentElement.remove();
+}
+
+// Edit question function
+function editQuestion(questionId) {
+    // You would typically fetch question data via AJAX here
+    fetch(`/psychologist/question/${questionId}/`)
+        .then(response => response.json())
+        .then(data => {
+            // Populate form with question data
+            document.getElementById('questionForm').action = `/psychologist/edit_question/${questionId}/`;
+            document.getElementById('question_text').value = data.text;
+            document.getElementById('question_type').value = data.question_type;
+            document.getElementById('required').checked = data.required;
+            document.getElementById('help_text').value = data.help_text || '';
+            
+            // Handle specific question types
+            if (data.question_type === 'multiple_choice') {
+                document.getElementById('multipleChoiceOptions').classList.remove('hidden');
+                // Clear existing choices
+                document.getElementById('choiceContainer').innerHTML = '';
+                
+                // Add choices from data
+                data.choices.forEach((choice, index) => {
+                    const newChoice = document.createElement('div');
+                    newChoice.className = 'flex items-center space-x-2 mt-2';
+                    newChoice.innerHTML = `
+                        <input type="text" name="choice_${index+1}" value="${choice}"
+                            class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        ${index > 0 ? `<button type="button" onclick="removeChoice(this)" class="text-red-500 hover:text-red-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>` : ''}
+                    `;
+                    document.getElementById('choiceContainer').appendChild(newChoice);
+                });
+                choiceCount = data.choices.length;
+            }
+            
+            if (data.question_type === 'slider') {
+                document.getElementById('sliderOptions').classList.remove('hidden');
+                document.getElementById('min_value').value = data.min_value;
+                document.getElementById('max_value').value = data.max_value;
+                document.getElementById('step').value = data.step;
+            }
+            
+            // Update modal title and form action
+            document.getElementById('modal-title').textContent = 'Edit Question';
+            document.querySelector('#questionForm input[name="action"]').value = 'update_question';
+            document.querySelector('#questionForm').insertAdjacentHTML('beforeend', 
+                `<input type="hidden" name="question_id" value="${questionId}">`);
+            
+            // Show modal
+            openQuestionModal();
+        })
+        .catch(error => {
+            console.error('Error fetching question data:', error);
+            alert('Error loading question data. Please try again.');
+        });
+}
+
+// Edit scale function
+function editScale(scaleId) {
+    // Fetch scale data via AJAX
+    fetch(`/psychologist/scale/${scaleId}/`)
+        .then(response => response.json())
+        .then(data => {
+            // Populate form with scale data
+            document.getElementById('scaleForm').action = `/psychologist/edit_scale/${scaleId}/`;
+            document.getElementById('scale_name').value = data.name;
+            document.getElementById('scale_description').value = data.description || '';
+            document.getElementById('min_score').value = data.min_score;
+            document.getElementById('max_score').value = data.max_score;
+            
+            // Clear existing ranges
+            document.getElementById('rangeContainer').innerHTML = '';
+            
+            // Add ranges from data
+            data.ranges.forEach((range, index) => {
+                const newRange = document.createElement('div');
+                newRange.className = 'border rounded p-3 space-y-2' + (index > 0 ? ' mt-3' : '');
+                newRange.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Min Score*</label>
+                            <input type="number" name="range_${index+1}_min" value="${range.min_score}" required step="0.1"
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700">Max Score*</label>
+                            <input type="number" name="range_${index+1}_max" value="${range.max_score}" required step="0.1"
+                                class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Label*</label>
+                        <input type="text" name="range_${index+1}_label" value="${range.label}" required
+                            class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700">Description</label>
+                        <textarea name="range_${index+1}_description" rows="2"
+                            class="mt-1 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md">${range.description || ''}</textarea>
+                    </div>
+                    ${index > 0 ? `<button type="button" onclick="removeRange(this)" class="mt-1 inline-flex items-center px-2 py-1 border border-gray-300 shadow-sm text-xs font-medium rounded text-red-600 bg-white hover:bg-red-50">
+                        Remove Range
+                    </button>` : ''}
+                `;
+                document.getElementById('rangeContainer').appendChild(newRange);
+            });
+            rangeCount = data.ranges.length;
+            
+            // Update modal title and form action
+            document.getElementById('modal-title').textContent = 'Edit Scoring Scale';
+            document.querySelector('#scaleForm input[name="action"]').value = 'update_scale';
+            document.querySelector('#scaleForm').insertAdjacentHTML('beforeend', 
+                `<input type="hidden" name="scale_id" value="${scaleId}">`);
+            
+            // Show modal
+            openScaleModal();
+        })
+        .catch(error => {
+            console.error('Error fetching scale data:', error);
+            alert('Error loading scale data. Please try again.');
+        });
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    const modals = [document.getElementById('questionModal'), document.getElementById('scaleModal')];
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+}
+</script>
+{% endblock %}

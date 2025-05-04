@@ -1,0 +1,413 @@
+{% extends 'Dashboards/Layout/athlete_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="px-4 py-6 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+    <!-- Program Header -->
+    <div class="mb-8">
+        <nav class="flex mb-4" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-4">
+                <li>
+                    <div>
+                        <a href="{% url 'community:mentorship_programs_list' %}" class="text-gray-400 hover:text-gray-500">
+                            <svg class="flex-shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            <span class="sr-only">Mentorship</span>
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="flex-shrink-0 h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span class="ml-4 text-sm font-medium text-gray-500">{{ program.name }}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="flex items-start justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ program.name }}</h1>
+                <div class="mt-2 flex items-center space-x-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if program.is_open_for_registration %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {% if program.is_open_for_registration %}Open{% else %}Closed{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                {% if user_relation %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    {{ user_relation.get_status_display }}
+                </span>
+                {% elif program.is_open_for_registration %}
+                <a href="{% url 'community:mentorship_apply' pk=program.pk %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105">
+                    Apply Now
+                </a>
+                {% endif %}
+                {% if request.user == program.facilitator or request.user.is_staff %}
+                <a href="{% url 'community:mentorship_edit' pk=program.pk %}" class="inline-flex items-center px-3 py-1 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Edit
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Program Details -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="prose max-w-none">
+                {{ program.description|safe }}
+            </div>
+            <div class="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Program Details</h3>
+                    <div class="mt-4 space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">Duration:</span> 
+                                    <time datetime="{{ program.start_date|date:'Y-m-d' }}">{{ program.start_date|date:"M d, Y" }}</time>
+                                    {% if program.end_date %}
+                                    to <time datetime="{{ program.end_date|date:'Y-m-d' }}">{{ program.end_date|date:"M d, Y" }}</time>
+                                    {% else %}
+                                    onwards
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">Participants:</span> 
+                                    {{ program.relationships.count }} active participants
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">Facilitator:</span> 
+                                    {{ program.facilitator.get_full_name|default:program.facilitator.username }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900">Program Statistics</h3>
+                    <div class="mt-4 space-y-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">Mentors:</span> 
+                                    {{ mentor_count }} available
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">Mentees:</span> 
+                                    {{ mentee_count }} participating
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">Active Pairs:</span> 
+                                    {{ active_pairs }} mentor-mentee relationships
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Form or Status -->
+    {% if user_relation %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900">Your Application Status</h3>
+            <div class="mt-4">
+                <div class="rounded-md bg-blue-50 p-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">
+                                You are registered as a {{ user_relation.get_role_display }}
+                            </h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <p>
+                                    Status: <span class="font-medium">{{ user_relation.get_status_display }}</span>
+                                </p>
+                                {% if user_relation.paired_with %}
+                                <p class="mt-1">
+                                    Paired with: {{ user_relation.paired_with.user.get_full_name|default:user_relation.paired_with.user.username }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if user_relation.goals %}
+            <div class="mt-4">
+                <h4 class="text-sm font-medium text-gray-900">Your Goals</h4>
+                <div class="mt-2 text-sm text-gray-600">
+                    {{ user_relation.goals }}
+                </div>
+            </div>
+            {% endif %}
+            {% if request.user == program.facilitator or request.user.is_staff %}
+            <div class="mt-4">
+                <a href="{% url 'community:mentorship_manage' pk=user_relation.pk %}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                    Manage Relationship
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% elif program.is_open_for_registration %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900">Apply to This Program</h3>
+            <div class="mt-4">
+                <form method="post" action="{% url 'community:mentorship_apply' pk=program.pk %}">
+                    {% csrf_token %}
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Role</label>
+                            <div class="mt-1 space-y-2">
+                                <div class="flex items-center">
+                                    <input id="role_mentee" name="role" type="radio" value="mentee" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300" checked>
+                                    <label for="role_mentee" class="ml-3 block text-sm font-medium text-gray-700">
+                                        Mentee
+                                        <p class="text-xs text-gray-500">I want to learn from experienced mentors</p>
+                                    </label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="role_mentor" name="role" type="radio" value="mentor" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300">
+                                    <label for="role_mentor" class="ml-3 block text-sm font-medium text-gray-700">
+                                        Mentor
+                                        <p class="text-xs text-gray-500">I want to share my knowledge and experience</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="goals" class="block text-sm font-medium text-gray-700">What do you hope to achieve?</label>
+                            <div class="mt-1">
+                                <textarea id="goals" name="goals" rows="4" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" required></textarea>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">Briefly explain what you hope to gain or contribute through this mentorship.</p>
+                        </div>
+                        <div class="flex justify-end">
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-300 transform hover:scale-105">
+                                Submit Application
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <div class="rounded-md bg-yellow-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">
+                            Program Not Accepting Applications
+                        </h3>
+                        <div class="mt-2 text-sm text-yellow-700">
+                            <p>
+                                This program is currently not accepting new applications. Please check back later or explore other mentorship programs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Program Participants (Visible to facilitators) -->
+    {% if request.user == program.facilitator or request.user.is_staff %}
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Program Participants</h3>
+            
+            <div class="mb-6">
+                <h4 class="text-md font-medium text-gray-900 mb-2">Mentors</h4>
+                {% if mentors %}
+                <ul class="divide-y divide-gray-200">
+                    {% for relationship in mentors %}
+                    <li class="py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                    <span class="text-indigo-600">{{ relationship.user.get_initials }}</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ relationship.user.get_full_name|default:relationship.user.username }}</p>
+                                    <p class="text-sm text-gray-500">{{ relationship.get_status_display }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <a href="{% url 'community:mentorship_manage' pk=relationship.pk %}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                                    Manage
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-sm text-gray-500">No mentors currently registered.</p>
+                {% endif %}
+            </div>
+            
+            <div>
+                <h4 class="text-md font-medium text-gray-900 mb-2">Mentees</h4>
+                {% if mentees %}
+                <ul class="divide-y divide-gray-200">
+                    {% for relationship in mentees %}
+                    <li class="py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <span class="text-purple-600">{{ relationship.user.get_initials }}</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ relationship.user.get_full_name|default:relationship.user.username }}</p>
+                                    <p class="text-sm text-gray-500">{{ relationship.get_status_display }}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <a href="{% url 'community:mentorship_manage' pk=relationship.pk %}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                                    Manage
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-sm text-gray-500">No mentees currently registered.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Success Stories from This Program -->
+    <div class="mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">Success Stories</h2>
+        {% if success_stories %}
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {% for story in success_stories %}
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            {% if story.featured_image %}
+                            <img class="h-12 w-12 rounded-full" src="{{ story.featured_image.url }}" alt="">
+                            {% else %}
+                            <div class="h-12 w-12 rounded-full bg-gradient-to-r from-purple-500 to-indigo-600 flex items-center justify-center text-white">
+                                {{ story.author.get_initials }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-medium text-gray-900">{{ story.title }}</h3>
+                            <p class="text-sm text-gray-500">
+                                by {{ story.author.get_full_name|default:story.author.username }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-600 line-clamp-3">
+                            {{ story.content|truncatewords:20 }}
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{{ story.get_absolute_url }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+                            Read full story
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:p-6 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                <h3 class="mt-2 text-lg font-medium text-gray-900">No stories yet</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    Be the first to share your success story from this program.
+                </p>
+                <div class="mt-6">
+                    <a href="{% url 'community:success_story_create' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Share Your Story
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Floating decorative elements -->
+<div class="fixed bottom-0 right-0 w-64 h-64 bg-indigo-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float"></div>
+<div class="fixed top-1/3 left-0 w-48 h-48 bg-purple-300 rounded-full filter blur-3xl opacity-10 -z-10 animate-float-delay"></div>
+{% endblock %}

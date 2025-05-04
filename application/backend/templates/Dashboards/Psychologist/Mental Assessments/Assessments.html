@@ -1,0 +1,452 @@
+{% extends 'Dashboards/Layout/psychologist_base.html' %}
+{% load static %}
+{% block title %}Assessments | Mental Health Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+            <span class="mr-3">Assessments Management</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+        </h1>
+        <p class="mt-2 text-lg text-gray-600">Create, manage, and track assessments for your athletes.</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white overflow-hidden shadow rounded-lg transition-all duration-300 transform hover:scale-105">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Create Assessment</dt>
+                            <dd>
+                                <div class="text-lg font-medium text-gray-900">New Template</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button id="createAssessmentBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" onclick="window.location.href='{% url 'create_assessment' %}'">
+                        Get Started
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg transition-all duration-300 transform hover:scale-105">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Assign Assessment</dt>
+                            <dd>
+                                <div class="text-lg font-medium text-gray-900">To Athletes</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <a href="{% url 'assign_assessment' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                        Assign Now
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white overflow-hidden shadow rounded-lg transition-all duration-300 transform hover:scale-105">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-teal-500 rounded-md p-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Assessment Analytics</dt>
+                            <dd>
+                                <div class="text-lg font-medium text-gray-900">View Reports</div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button id="viewAnalyticsBtn" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                        View Analytics
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area with Tabs -->
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+        <div class="border-b border-gray-200">
+            <nav class="flex -mb-px">
+                <button id="tab-recent" class="tab-button active text-indigo-600 border-indigo-500 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+                    Recent Assignments
+                </button>
+                <button id="tab-templates" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 border-transparent font-medium text-sm">
+                    My Templates
+                </button>
+                <button id="tab-reviews" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 border-transparent font-medium text-sm">
+                    Pending Reviews
+                </button>
+                <button id="tab-completed" class="tab-button text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 border-transparent font-medium text-sm">
+                    Completed Assessments
+                </button>
+            </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="content-recent">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Recently Assigned Assessments</h3>
+                    <input type="text" placeholder="Search assignments..." class="px-4 py-2 border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Assessment Name</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Athlete</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date Assigned</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Due Date</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
+                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                            {% for assignment in assigned_assessments %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ assignment.assessment.title }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ assignment.athlete.get_full_name }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ assignment.assigned_date|date:"M d, Y" }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    {% if assignment.due_date %}{{ assignment.due_date|date:"M d, Y" }}{% else %}-{% endif %}
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if assignment.completed %}bg-green-100 text-green-800
+                                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                        {% if assignment.completed %}Completed{% else %}In Progress{% endif %}
+                                    </span>
+                                </td>
+                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                    {% if assignment.completed %}
+                                    <a href="{% url 'view_results' assignment.assessment_response.id %}" class="text-indigo-600 hover:text-indigo-900">View Results</a>
+                                    {% else %}
+                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Send Reminder</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content hidden" id="content-templates">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">My Assessment Templates</h3>
+                    <div class="flex">
+                        <input type="text" placeholder="Search templates..." class="mr-2 px-4 py-2 border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            New Template
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for assessment in created_assessments %}
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <div class="p-5">
+                            <div class="flex justify-between items-start">
+                                <h4 class="text-lg font-semibold text-gray-900">{{ assessment.title }}</h4>
+                                <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">{{ assessment.category.name }}</span>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600">{{ assessment.description|truncatechars:100 }}</p>
+                            <div class="mt-4 flex items-center text-sm text-gray-500">
+                                <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                </svg>
+                                {{ assessment.questions.count }} questions
+                            </div>
+                            <div class="mt-6 flex justify-between">
+                                <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Edit Template</a>
+                                <a href="{% url 'assign_assessment' %}?assessment={{ assessment.id }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Assign</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-span-3 text-center py-8">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No assessment templates</h3>
+                        <p class="mt-1 text-sm text-gray-500">Get started by creating a new assessment template.</p>
+                        <div class="mt-6">
+                            <a href="{% url 'create_assessment' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                <svg class="h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Create Assessment
+                            </a>
+                        </div>
+                    </div>
+                    
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content hidden" id="content-reviews">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Assessments Waiting for Review</h3>
+                    <input type="text" placeholder="Search responses..." class="px-4 py-2 border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Assessment Name</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Athlete</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Completion Date</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Assignment Status</th>
+                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                            {% for response in responses_to_review %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ response.assessment.title }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ response.athlete.get_full_name }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ response.completed_at|date:"M d, Y" }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                        Ready for Review
+                                    </span>
+                                </td>
+                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                    <a href="{% url 'psychologist_review' response.id %}" class="text-indigo-600 hover:text-indigo-900">Review Now</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
+                                    No assessments waiting for review
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content hidden" id="content-completed">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Reviewed Assessments</h3>
+                    <input type="text" placeholder="Search reviews..." class="px-4 py-2 border border-gray-300 rounded-md text-sm shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                
+                <!-- Chart Area -->
+                <div class="bg-white p-6 rounded-lg shadow mb-6">
+                    <h4 class="text-base font-medium text-gray-700 mb-4">Assessment Trends</h4>
+                    <div class="h-64 w-full" id="completionChart">
+                        <canvas id="assessmentCompletionChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Completed Assessment List -->
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Assessment Name</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Athlete</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Review Date</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Follow-up</th>
+                                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                            {% for response in reviewed_responses %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{{ response.assessment.title }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ response.athlete.get_full_name }}</td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                    {{ response.psychologist_review.review_date|date:"M d, Y" }}
+                                </td>
+                                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {% if response.psychologist_review.follow_up_needed %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                        {% if response.psychologist_review.follow_up_needed %}Needed{% else %}Not Needed{% endif %}
+                                    </span>
+                                </td>
+                                <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                    <a href="{% url 'view_results' response.id %}" class="text-indigo-600 hover:text-indigo-900">View Details</a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-sm text-gray-500">
+                                    No reviewed assessments found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Interactive Elements -->
+<script>
+    // Tab switching functionality
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active', 'text-indigo-600', 'border-indigo-500');
+                btn.classList.add('text-gray-500', 'border-transparent');
+            });
+            
+            // Add active class to clicked tab
+            this.classList.add('active', 'text-indigo-600', 'border-indigo-500');
+            this.classList.remove('text-gray-500', 'border-transparent');
+            
+            // Hide all tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show the selected tab content
+            const tabId = this.id.replace('tab-', 'content-');
+            document.getElementById(tabId).classList.remove('hidden');
+        });
+    });
+
+    // Initialize charts when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Assessment Completion Chart
+        const ctx = document.getElementById('assessmentCompletionChart').getContext('2d');
+        const completionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                datasets: [{
+                    label: 'Completed Assessments',
+                    data: [12, 19, 15, 8, 5, 12, 15],
+                    backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                    borderColor: 'rgba(79, 70, 229, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: "rgba(0, 0, 0, 0.05)"
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Quick action buttons functionality
+        document.getElementById('createAssessmentBtn').addEventListener('click', function() {
+            // Logic to open assessment creation modal or redirect
+            window.location.href = "/assessments/create/";
+        });
+
+        document.getElementById('viewAnalyticsBtn').addEventListener('click', function() {
+            // Switch to analytics tab
+            document.getElementById('tab-completed').click();
+        });
+    });
+
+    // Table row search functionality
+    const tableSearchInputs = document.querySelectorAll('input[placeholder*="Search"]');
+    tableSearchInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const tableBody = this.closest('.tab-content').querySelector('tbody');
+            const rows = tableBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    });
+</script>
+
+<style>
+    .tab-button.active {
+        color: #4f46e5;
+        border-bottom-color: #4f46e5;
+    }
+    
+    .tab-content {
+        transition: opacity 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'Dashboards/Layout/psychologist_base.html' %}
+{% load static %}
+{% block title %}Review Assessment | Mental Health Platform{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 py-6 px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                    <span class="mr-3">Assessment Review</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </h1>
+                <p class="mt-2 text-lg text-gray-600">Review and provide professional feedback for {{ response.athlete.get_full_name }}'s assessment.</p>
+            </div>
+            <div>
+                <a href="{% url 'view_results' response.id %}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    View Raw Results
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+        <div class="px-6 py-5 border-b border-gray-200">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Assessment Information</h3>
+        </div>
+        <div class="px-6 py-5 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Assessment Title</h4>
+                <p class="mt-1 text-lg font-semibold text-gray-900">{{ assessment.title }}</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Category</h4>
+                <p class="mt-1 text-lg font-semibold text-gray-900">{{ assessment.category.name }}</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Date Completed</h4>
+                <p class="mt-1 text-lg font-semibold text-gray-900">{{ response.completed_at|date:"F j, Y" }}</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Athlete</h4>
+                <p class="mt-1 text-lg font-semibold text-gray-900">{{ response.athlete.get_full_name }}</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Duration</h4>
+                <p class="mt-1 text-lg font-semibold text-gray-900">
+                    {% if response.started_at and response.completed_at %}
+                        {{ response.completed_at|timeuntil:response.started_at }}
+                    {% else %}
+                        Not Available
+                    {% endif %}
+                </p>
+            </div>
+            <div>
+                <h4 class="text-sm font-medium text-gray-500">Number of Questions</h4>
+                <p class="mt-1 text-lg font-semibold text-gray-900">{{ assessment.questions.count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scores Overview Section -->
+    <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+        <div class="px-6 py-5 border-b border-gray-200">
+            <h3 class="text-lg font-medium leading-6 text-gray-900">Score Overview</h3>
+        </div>
+        <div class="px-6 py-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for scale, data in scores.items %}
+                {% if scale != 'overall' %}
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h4 class="text-base font-medium text-gray-900">{{ scale|title }}</h4>
+                    <div class="mt-3 relative">
+                        <div class="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full 
+                                {% if data.interpretation.label == 'High' %}bg-green-500
+                                {% elif data.interpretation.label == 'Moderate' %}bg-yellow-500
+                                {% else %}bg-red-500{% endif %}"
+                                style="width: {{ data.score_percentage }}%">
+                            </div>
+                        </div>
+                        <div class="mt-2 flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-500">Score: {{ data.raw_score }}</span>
+                            <span class="text-sm font-medium 
+                                {% if data.interpretation.label == 'High' %}text-green-700
+                                {% elif data.interpretation.label == 'Moderate' %}text-yellow-700
+                                {% else %}text-red-700{% endif %}">
+                                {{ data.interpretation.label }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Psychologist Review Form -->
+    <form method="POST" action="{% url 'psychologist_review' response.id %}">
+        {% csrf_token %}
+        <div class="bg-white shadow rounded-lg overflow-hidden mb-8">
+            <div class="px-6 py-5 border-b border-gray-200">
+                <h3 class="text-lg font-medium leading-6 text-gray-900">Professional Review</h3>
+            </div>
+            <div class="px-6 py-5 space-y-6">
+                <!-- Score Adjustments -->
+                <div>
+                    <h4 class="text-base font-medium text-gray-900 mb-4">Score Adjustments (if needed)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {% for scale, data in scores.items %}
+                        {% if scale != 'overall' %}
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <label for="score_adjustment_{{ scale }}" class="block text-sm font-medium text-gray-700">{{ scale|title }}</label>
+                            <div class="mt-1 flex items-center">
+                                <input type="number" name="score_adjustment_{{ scale }}" id="score_adjustment_{{ scale }}" 
+                                    class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                                    step="0.1" value="{{ review.score_adjustments|get_item:scale|default:'0' }}" min="-10" max="10">
+                                <span class="ml-2 text-xs text-gray-500">+/-</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Comments Section -->
+                <div>
+                    <label for="comments" class="block text-sm font-medium text-gray-700">Professional Comments</label>
+                    <div class="mt-1">
+                        <textarea id="comments" name="comments" rows="5"
+                            class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            placeholder="Provide your professional assessment based on the results...">{{ review.comments|default:'' }}</textarea>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500">These comments will be shared with the athlete.</p>
+                </div>
+
+                <!-- Recommendations Section -->
+                <div>
+                    <label for="recommendations" class="block text-sm font-medium text-gray-700">Recommendations</label>
+                    <div class="mt-1">
+                        <textarea id="recommendations" name="recommendations" rows="5"
+                            class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                            placeholder="Provide recommendations for improvement or follow-up actions...">{{ review.recommendations|default:'' }}</textarea>
+                    </div>
+                    <p class="mt-2 text-sm text-gray-500">Specific actions or resources that would benefit the athlete.</p>
+                </div>
+
+                <!-- Follow-up Toggle -->
+                <div class="flex items-center">
+                    <input type="checkbox" id="follow_up_needed" name="follow_up_needed" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                        {% if review.follow_up_needed %}checked{% endif %}>
+                    <label for="follow_up_needed" class="ml-2 block text-sm text-gray-900">Schedule follow-up assessment or consultation</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex items-center justify-end space-x-4">
+            <a href="{% url 'view_results' response.id %}" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Cancel
+            </a>
+            <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Submit Review
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Add any client-side validation or interaction here
+    document.addEventListener('DOMContentLoaded', function() {
+        // Example: Validation for required fields
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const comments = document.getElementById('comments').value.trim();
+            if (!comments) {
+                e.preventDefault();
+                alert('Please provide your professional comments before submitting.');
+            }
+        });
+    });
+</script>
+{% endblock %}
