@@ -4411,9 +4411,8 @@ def is_psychologist(user):
 def is_nutritionist(user):
     return hasattr(user, 'nutritionist_profile')
 
-@method_decorator(login_required, name='dispatch')
-@method_decorator(user_passes_test(lambda u: is_coach(u) or is_psychologist(u) or is_nutritionist(u)), name='dispatch')
-class ProfessionalDashboard(ListView):
+@method_decorator([login_required, professional_required], name='dispatch')
+class ProfessionalDashboard(TemplateView):
     template_name = 'Dashboards/community/professional/professional_dashboard.html'
     context_object_name = 'groups'
     
@@ -4482,6 +4481,141 @@ def respond_to_question(request, question_id):
     return render(request, 'Dashboards/community/professional/respond_to_question.html', {
         'question': question
     })
+
+
+
+##chat
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse, HttpResponseForbidden
+from django.db.models import Q
+from .models import Conversation, PrivateMessage, ForumCategory, ForumThread, ClientAssignment
+from django.contrib.auth import get_user_model
+import json
+from django.conf import settings
+import jwt
+from datetime import datetime, timedelta
+
+# Get the actual User model class
+UserModel = get_user_model()
+
+@login_required
+def chat_home(request):
+    """Main chat view with WebSocket token generation"""
+    try:
+        # Generate JWT token for WebSocket authentication
+        token = jwt.encode({
+            'user_id': str(request.user.id),
+            'exp': datetime.utcnow() + timedelta(minutes=30)
+        }, settings.SECRET_KEY, algorithm='HS256')
+
+        conversations = Conversation.objects.filter(
+            participants=request.user
+        ).order_by('-updated_at').prefetch_related('participants', 'messages')
+        
+        active_conversation_id = request.GET.get('conversation')
+        active_conversation = None
+        if active_conversation_id:
+            active_conversation = get_object_or_404(
+                Conversation.objects.prefetch_related('messages__sender', 'messages__read_by'),
+                id=active_conversation_id,
+                participants=request.user
+            )
+            # Mark messages as read when opening conversation
+            unread_messages = active_conversation.messages.exclude(sender=request.user).exclude(read_by=request.user)
+            for message in unread_messages:
+                message.read_by.add(request.user)
+
+        context = {
+            'conversations': conversations,
+            'active_conversation': active_conversation,
+            'available_users': get_available_users_for_chat(request.user),
+            'websocket_token': token,
+            'user_type': request.user.user_type,
+        }
+        return render(request, 'Dashboards/Chat/chat_message.html', context)
+    except Exception as e:
+        print(f"Error in chat_home: {str(e)}")  # Log the error
+        raise  # Re-raise the exception after logging
+
+def get_available_users_for_chat(user):
+    """Get users that can be messaged based on user type"""
+    try:
+        if not hasattr(user, '_meta'):  # Check if it's a model instance
+            return UserModel.objects.none()
+        
+        base_query = UserModel.objects.exclude(id=user.id)
+        
+        if user.user_type == 'admin':
+            return base_query.order_by('first_name')
+        
+        if user.user_type == 'athlete':
+            return base_query.filter(
+                assigned_clients__client=user,
+                assigned_clients__active=True
+            ).order_by('first_name')
+        
+        if user.user_type in ['psychologist', 'coach', 'nutritionist']:
+            # Get assigned clients and colleagues
+            return base_query.filter(
+                Q(assigned_professionals__professional=user, assigned_professionals__active=True) |
+                Q(user_type=user.user_type)
+            ).distinct().order_by('first_name')
+        
+        return UserModel.objects.none()
+    except Exception as e:
+        print(f"Error in get_available_users_for_chat: {str(e)}")
+        return UserModel.objects.none()
+
+@login_required
+def get_conversation_token(request, conversation_id):
+    """API endpoint to get JWT token for specific conversation"""
+    try:
+        conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+        
+        token = jwt.encode({
+            'user_id': str(request.user.id),
+            'conversation_id': str(conversation_id),
+            'exp': datetime.utcnow() + timedelta(hours=1)
+        }, settings.SECRET_KEY, algorithm='HS256')
+        
+        return JsonResponse({'token': token})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+@login_required
+def create_message(request):
+    """HTTP endpoint for fallback message sending"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            conversation_id = data.get('conversation_id')
+            content = data.get('content')
+            
+            conversation = get_object_or_404(
+                Conversation,
+                id=conversation_id,
+                participants=request.user
+            )
+            
+            message = PrivateMessage.objects.create(
+                conversation=conversation,
+                sender=request.user,
+                content=content
+            )
+            
+            return JsonResponse({
+                'status': 'success',
+                'message_id': str(message.id)
+            })
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+    return JsonResponse({'status': 'error'}, status=405)
+
+
+
 
 
 

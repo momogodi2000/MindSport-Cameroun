@@ -834,10 +834,7 @@ class JournalTemplate(models.Model):
     def __str__(self):
         return self.title
 
-
-
-
-##
+## Forum
 
 class Category(models.Model):
     """Forum category model for organizing discussions by topic/sport"""
@@ -1159,4 +1156,456 @@ class SupportGroupAttendance(models.Model):
     def __str__(self):
         status = "Attended" if self.attended else "Did not attend"
         return f"{self.participant.user.get_full_name()} - {status} - {self.session.title}"
+
+
+
+
+## chat web stocket
+
+from django.db import models
+from django.conf import settings
+from django.utils.crypto import get_random_string
+from django.utils import timezone
+import os
+import uuid
+from django.core.validators import FileExtensionValidator, MaxValueValidator
+
+# Import the User model which already exists
+User = settings.AUTH_USER_MODEL
+
+def message_file_path(instance, filename):
+    """Generate file path for uploaded message files"""
+    ext = filename.split('.')[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join('message_files', filename)
+
+def forum_file_path(instance, filename):
+    """Generate file path for uploaded forum files"""
+    ext = filename.split('.')[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join('forum_files', filename)
+
+class ClientAssignment(models.Model):
+    """Model to track professional-client relationships"""
+    professional = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='assigned_clients'
+    )
+    client = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        related_name='assigned_professionals'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        unique_together = ('professional', 'client')
+
+    def __str__(self):
+        return f"{self.professional.get_full_name()} - {self.client.get_full_name()}"
+
+
+class Conversation(models.Model):
+    """Model to represent a private conversation between users"""
+    participants = models.ManyToManyField(User, related_name='conversations')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    
+    # For encryption
+    encryption_key = models.CharField(max_length=64, blank=True, null=True)
+    
+    def save(self, *args, **kwargs):
+        # Generate encryption key if not already set
+        if not self.encryption_key:
+            self.encryption_key = get_random_string(64)
+        super().save(*args, **kwargs)
+    
+    def is_participant(self, user):
+        """Check if a user is part of this conversation"""
+        return self.participants.filter(id=user.id).exists()
+    
+    def add_message(self, sender, content, file=None):
+        """Helper method to add a message to the conversation"""
+        message = PrivateMessage.objects.create(
+            conversation=self,
+            sender=sender,
+            content=content,
+            file=file
+        )
+        self.updated_at = timezone.now()
+        self.save(update_fields=['updated_at'])
+        return message
+    
+    def __str__(self):
+        return f"Conversation {self.id} - {self.participants.count()} participants"
+
+
+class PrivateMessage(models.Model):
+    """Model to represent private messages within a conversation"""
+    conversation = models.ForeignKey(
+        Conversation, 
+        on_delete=models.CASCADE,
+        related_name='messages'
+    )
+    sender = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='sent_messages'
+    )
+    content = models.TextField()
+    file = models.FileField(
+        upload_to=message_file_path, 
+        blank=True, 
+        null=True,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt']
+            )
+        ]
+    )
+    file_name = models.CharField(max_length=255, blank=True, null=True)
+    file_size = models.PositiveIntegerField(
+        blank=True, 
+        null=True,
+        validators=[MaxValueValidator(10 * 1024 * 1024)]  # 10MB max
+    )
+    sent_at = models.DateTimeField(auto_now_add=True)
+    is_encrypted = models.BooleanField(default=True)
+    
+    # Read receipt tracking
+    read_by = models.ManyToManyField(
+        User, 
+        related_name='read_messages',
+        blank=True
+    )
+    
+    def __str__(self):
+        return f"Message from {self.sender.get_full_name()} at {self.sent_at}"
+    
+    def mark_as_read(self, user):
+        """Mark message as read by a specific user"""
+        if user != self.sender and self.conversation.is_participant(user):
+            self.read_by.add(user)
+    
+    def is_read_by(self, user):
+        """Check if message has been read by a specific user"""
+        return self.read_by.filter(id=user.id).exists()
+    
+    def save(self, *args, **kwargs):
+        # Set file metadata if file is provided
+        if self.file and not self.file_size:
+            self.file_name = os.path.basename(self.file.name)
+            self.file_size = self.file.size
+        super().save(*args, **kwargs)
+
+
+class ForumCategory(models.Model):
+    """Model to represent forum categories"""
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='created_categories'
+    )
+    allowed_user_types = models.JSONField(
+        default=list,
+        help_text='List of user types allowed to participate in this category'
+    )
+    
+    def __str__(self):
+        return self.name
+
+
+class ForumThread(models.Model):
+    """Model to represent a forum thread"""
+    title = models.CharField(max_length=255)
+    category = models.ForeignKey(
+        ForumCategory,
+        on_delete=models.CASCADE,
+        related_name='threads'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='forum_threads'
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_pinned = models.BooleanField(default=False)
+    is_locked = models.BooleanField(default=False)
+    views_count = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return self.title
+    
+    def increment_views(self):
+        """Increment the views counter"""
+        self.views_count += 1
+        self.save(update_fields=['views_count'])
+        
+    class Meta:
+        ordering = ['-is_pinned', '-updated_at']
+
+
+class ForumThreadFile(models.Model):
+    """Model to handle files attached to forum threads"""
+    thread = models.ForeignKey(
+        ForumThread,
+        on_delete=models.CASCADE,
+        related_name='files'
+    )
+    file = models.FileField(
+        upload_to=forum_file_path,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt']
+            )
+        ]
+    )
+    file_name = models.CharField(max_length=255)
+    file_size = models.PositiveIntegerField(
+        validators=[MaxValueValidator(10 * 1024 * 1024)]  # 10MB max
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"File: {self.file_name} for {self.thread.title}"
+    
+    def save(self, *args, **kwargs):
+        if not self.file_name:
+            self.file_name = os.path.basename(self.file.name)
+        if not self.file_size:
+            self.file_size = self.file.size
+        super().save(*args, **kwargs)
+
+
+class ForumPost(models.Model):
+    """Model to represent posts within a forum thread"""
+    thread = models.ForeignKey(
+        ForumThread,
+        on_delete=models.CASCADE,
+        related_name='posts'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='forum_posts'
+    )
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_reported = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"Post by {self.author.get_full_name()} in {self.thread.title}"
+
+
+class ForumPostFile(models.Model):
+    """Model to handle files attached to forum posts"""
+    post = models.ForeignKey(
+        ForumPost,
+        on_delete=models.CASCADE,
+        related_name='files'
+    )
+    file = models.FileField(
+        upload_to=forum_file_path,
+        validators=[
+            FileExtensionValidator(
+                allowed_extensions=['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx', 'txt']
+            )
+        ]
+    )
+    file_name = models.CharField(max_length=255)
+    file_size = models.PositiveIntegerField(
+        validators=[MaxValueValidator(10 * 1024 * 1024)]  # 10MB max
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"File: {self.file_name} for post {self.post.id}"
+    
+    def save(self, *args, **kwargs):
+        if not self.file_name:
+            self.file_name = os.path.basename(self.file.name)
+        if not self.file_size:
+            self.file_size = self.file.size
+        super().save(*args, **kwargs)
+
+
+class UserTypingStatus(models.Model):
+    """Model to track user typing status in conversations"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='typing_statuses'
+    )
+    conversation = models.ForeignKey(
+        Conversation,
+        on_delete=models.CASCADE,
+        related_name='typing_users'
+    )
+    is_typing = models.BooleanField(default=False)
+    last_updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ('user', 'conversation')
+    
+    def __str__(self):
+        status = "typing" if self.is_typing else "not typing"
+        return f"{self.user.get_full_name()} is {status} in conversation {self.conversation.id}"
+
+
+class Notification(models.Model):
+    """Model to store user notifications"""
+    NOTIFICATION_TYPES = (
+        ('message', 'New Message'),
+        ('forum_reply', 'Forum Reply'),
+        ('assignment', 'Client Assignment'),
+        ('system', 'System Notification'),
+    )
+    
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+    sender = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='sent_notifications',
+        null=True,
+        blank=True
+    )
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    related_conversation = models.ForeignKey(
+        Conversation,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='notifications'
+    )
+    related_thread = models.ForeignKey(
+        ForumThread,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='notifications'
+    )
+    
+    def __str__(self):
+        return f"{self.notification_type} for {self.recipient.get_full_name()}"
+    
+    def mark_as_read(self):
+        """Mark notification as read"""
+        self.is_read = True
+        self.save(update_fields=['is_read'])
+
+
+class MessageRateLimit(models.Model):
+    """Model to track message rate limiting"""
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='rate_limit'
+    )
+    message_count = models.PositiveIntegerField(default=0)
+    reset_at = models.DateTimeField()
+    
+    def __str__(self):
+        return f"Rate limit for {self.user.get_full_name()}"
+    
+    def increment(self):
+        """Increment message count and check if user has reached the limit"""
+        # Reset counter if the reset time has passed
+        if timezone.now() >= self.reset_at:
+            self.message_count = 0
+            self.reset_at = timezone.now() + timezone.timedelta(minutes=1)
+        
+        # Increment counter
+        self.message_count += 1
+        self.save()
+        
+        # Return True if under limit, False if over
+        return self.message_count <= 10  # 10 messages per minute
+    
+    @classmethod
+    def check_rate_limit(cls, user):
+        """Check if user has exceeded rate limit"""
+        rate_limit, created = cls.objects.get_or_create(
+            user=user,
+            defaults={'reset_at': timezone.now() + timezone.timedelta(minutes=1)}
+        )
+        return rate_limit.increment()
+
+
+
+class MessageReaction(models.Model):
+    """Model to represent reactions to messages"""
+    REACTION_CHOICES = (
+        ('like', 'Like'),
+        ('love', 'Love'),
+        ('laugh', 'Laugh'),
+        ('sad', 'Sad'),
+        ('angry', 'Angry'),
+    )
+    
+    message = models.ForeignKey(
+        PrivateMessage,
+        on_delete=models.CASCADE,
+        related_name='reactions'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='message_reactions'
+    )
+    reaction_type = models.CharField(max_length=20, choices=REACTION_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('message', 'user')
+    
+    def __str__(self):
+        return f"{self.user.get_full_name()} reacted with {self.reaction_type} to message {self.message.id}"
+    def save(self, *args, **kwargs):
+        # Ensure the reaction type is valid
+        if self.reaction_type not in dict(self.REACTION_CHOICES):
+            raise ValueError("Invalid reaction type")
+        super().save(*args, **kwargs)
+    def get_reaction_count(self):
+        """Get the count of reactions for this message"""
+        return self.message.reactions.count()
+    def get_reaction_summary(self):
+        """Get a summary of reactions for this message"""
+        summary = {}
+        for reaction in self.message.reactions.all():
+            summary[reaction.reaction_type] = summary.get(reaction.reaction_type, 0) + 1
+        return summary
+    def get_reaction_users(self):
+        """Get a list of users who reacted to this message"""
+        return [reaction.user for reaction in self.message.reactions.all()]
+    def get_reaction_users_by_type(self, reaction_type):
+        """Get a list of users who reacted with a specific type"""
+        return [reaction.user for reaction in self.message.reactions.filter(reaction_type=reaction_type)]
+    def get_reaction_summary_by_type(self):
+        """Get a summary of reactions for this message by type"""
+        summary = {}
+        for reaction in self.message.reactions.all():
+            summary[reaction.reaction_type] = summary.get(reaction.reaction_type, 0) + 1
+        return summary
+    def get_reaction_users_by_user(self, user):
+        """Get a list of users who reacted with a specific type"""
+        return [reaction.user for reaction in self.message.reactions.filter(user=user)]
+   
 

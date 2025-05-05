@@ -1,18 +1,6 @@
 from django import forms
-from .models import AnonymousQuestion, ContactMessage, MentorshipRelationship, NewsletterSubscriber, SuccessStory, Thread
-from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
-from .models import User
-from django import forms
-from .models import User
-from .models import AppointmentRequest, AppointmentReview, AppointmentNote
-from django import forms
-from .models import JournalEntry, WellnessResource, ResourceCategory, JournalTemplate, JournalPrompt
-from .models import Comment
-
-from django import forms
+from django.contrib.auth import get_user_model
 from .models import (
     AnonymousQuestion, ContactMessage, MentorshipRelationship, 
     NewsletterSubscriber, SuccessStory, Thread, Comment,
@@ -20,6 +8,10 @@ from .models import (
     JournalEntry, WellnessResource, ResourceCategory, 
     JournalTemplate, JournalPrompt, SupportGroupParticipant
 )
+
+# Get the custom User model
+User = get_user_model()
+
 
 class ContactForm(forms.ModelForm):
     class Meta:

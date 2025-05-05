@@ -76,8 +76,18 @@
                             <a href="{% url 'NutritionistResources' %}" class="{% block nav_resources %}text-white border-transparent hover:border-white{% endblock %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 Resources
                             </a>
-                            <a href="{% url 'NutritionistForum' %}" class="{% block nav_forum %}text-white border-transparent hover:border-white{% endblock %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                            <a href="{% url 'professional_dashboard' %}" class="{% block nav_forum %}text-white border-transparent hover:border-white{% endblock %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                                 Forum
+                            </a>
+                            <a href="{% url 'chat_home' %}" class="{% block nav_forum %}text-white border-transparent hover:border-white{% endblock %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                Chat Message
+                            </a>
+                        </a>
+                        
+                        <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                            <a href="{% url 'create_support_group' %}" class="flex items-center px-4 py-3 rounded-xl hover:bg-white hover:bg-opacity-10 transition-all text-sm sidebar-link {% if request.resolver_match.url_name == 'nutritionist_dashboard' %}active-nav-item{% endif %}">
+                                <i class="fas fa-tachometer-alt w-6 sidebar-icon text-lg"></i>
+                                <span class="ml-3">Support Group</span>
                             </a>
                             <a href="{% url 'NutritionistSetting' %}" class="flex items-center px-4 py-3 rounded-xl hover:bg-white hover:bg-opacity-10 transition-all text-sm sidebar-link {% if request.resolver_match.url_name == 'settings' %}active-nav-item{% endif %}">
                                 <i class="fas fa-cog w-6 sidebar-icon text-lg"></i>
@@ -136,7 +146,7 @@
                     <a href="{% url 'manage_appointment_requests' %}" class="text-white hover:bg-blue-700 block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium">Appointments</a>
                     <a href="{% url 'NutritionistAthletes' %}" class="text-white hover:bg-blue-700 block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium">Athletes</a>
                     <a href="{% url 'NutritionistResources' %}" class="text-white hover:bg-blue-700 block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium">Resources</a>
-                    <a href="{% url 'NutritionistForum' %}" class="text-white hover:bg-blue-700 block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium">Forum</a>
+                    <a href="{% url 'professional_dashboard' %}" class="text-white hover:bg-blue-700 block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium">Forum</a>
                     <a href="{% url 'NutritionistSetting' %}" class="text-white hover:bg-blue-700 block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium">Settings</a>
 
                 </div>

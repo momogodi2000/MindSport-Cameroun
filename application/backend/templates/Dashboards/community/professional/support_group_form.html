@@ -1,0 +1,254 @@
+{% extends 'Dashboards/Layout/professional_base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit Support Group{% else %}Create Support Group{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<style>
+    .form-card {
+        transition: all 0.3s ease;
+    }
+    .form-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .floating {
+        animation: floating 3s ease-in-out infinite;
+    }
+    @keyframes floating {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+    .input-focus-effect:focus {
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3);
+        transition: all 0.3s ease;
+    }
+    .radio-card {
+        transition: all 0.3s ease;
+    }
+    .radio-card:hover {
+        transform: scale(1.02);
+        border-color: #6366f1;
+    }
+    .radio-card.selected {
+        border-color: #6366f1;
+        background-color: #eef2ff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+        <div class="mb-4 md:mb-0">
+            <h1 class="text-3xl font-bold text-gray-800">
+                {% if form.instance.pk %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 inline mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Support Group
+                {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 inline mr-2 text-indigo-600 floating" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Create New Support Group
+                {% endif %}
+            </h1>
+            <p class="text-gray-600">{% if form.instance.pk %}Update your existing support group{% else %}Set up a new support group for athletes{% endif %}</p>
+        </div>
+        <a href="{% url 'professional_dashboard' %}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <form method="POST" class="animate__animated animate__fadeIn">
+        {% csrf_token %}
+        <div class="bg-white rounded-xl shadow-md overflow-hidden form-card mb-8">
+            <div class="bg-gradient-to-r from-indigo-500 to-blue-600 p-4 text-white">
+                <h3 class="font-bold text-lg">Basic Information</h3>
+                <p class="text-sm opacity-90">Essential details about your support group</p>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Group Name</label>
+                        {{ form.name }}
+                    </div>
+                    <div>
+                        <label for="{{ form.max_participants.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Max Participants</label>
+                        {{ form.max_participants }}
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    {{ form.description }}
+                    <p class="mt-1 text-sm text-gray-500">Describe the purpose and focus of this support group</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md overflow-hidden form-card mb-8">
+            <div class="bg-gradient-to-r from-indigo-500 to-blue-600 p-4 text-white">
+                <h3 class="font-bold text-lg">Meeting Details</h3>
+                <p class="text-sm opacity-90">How and when the group will meet</p>
+            </div>
+            <div class="p-6">
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Meeting Frequency</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {% for choice in form.frequency %}
+                        <label class="radio-card border rounded-lg p-4 cursor-pointer {% if choice.data.selected %}selected{% endif %}">
+                            <input type="radio" name="{{ form.frequency.name }}" value="{{ choice.data.value }}" class="sr-only" {% if choice.data.selected %}checked{% endif %}>
+                            <div class="flex flex-col items-center">
+                                <div class="text-indigo-600 mb-2">
+                                    {% if choice.data.value == 'weekly' %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {% elif choice.data.value == 'biweekly' %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    {% elif choice.data.value == 'monthly' %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    {% else %}
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {% endif %}
+                                </div>
+                                <span class="text-sm font-medium text-gray-700">{{ choice.choice_label }}</span>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.meeting_link.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
+                        {{ form.meeting_link }}
+                        <p class="mt-1 text-sm text-gray-500">Zoom, Google Meet, or other video platform</p>
+                    </div>
+                    <div>
+                        <label for="{{ form.meeting_password.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Meeting Password (optional)</label>
+                        {{ form.meeting_password }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-md overflow-hidden form-card mb-8">
+            <div class="bg-gradient-to-r from-indigo-500 to-blue-600 p-4 text-white">
+                <h3 class="font-bold text-lg">Additional Information</h3>
+                <p class="text-sm opacity-90">Optional details for your records</p>
+            </div>
+            <div class="p-6">
+                <div>
+                    <label for="{{ form.notes.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                    {{ form.notes }}
+                    <p class="mt-1 text-sm text-gray-500">Internal notes not visible to participants</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end">
+            <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 animate-pulse">
+                {% if form.instance.pk %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Update Support Group
+                {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Create Support Group
+                {% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add focus effect to form inputs
+        const inputs = document.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.classList.add('input-focus-effect');
+        });
+
+        // Radio card selection animation
+        const radioCards = document.querySelectorAll('.radio-card');
+        radioCards.forEach(card => {
+            card.addEventListener('click', function() {
+                const radioInput = this.querySelector('input[type="radio"]');
+                radioInput.checked = true;
+                
+                // Update UI
+                radioCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // Animation
+                gsap.to(this, {
+                    scale: 1.05,
+                    duration: 0.2,
+                    yoyo: true,
+                    repeat: 1,
+                    ease: "power1.out"
+                });
+            });
+        });
+
+        // Form submission button animation
+        const submitButton = document.querySelector('button[type="submit"]');
+        submitButton.addEventListener('mouseenter', function() {
+            gsap.to(this, {
+                scale: 1.05,
+                duration: 0.3,
+                ease: "elastic.out(1, 0.3)"
+            });
+        });
+        submitButton.addEventListener('mouseleave', function() {
+            gsap.to(this, {
+                scale: 1,
+                duration: 0.3,
+                ease: "elastic.out(1, 0.3)"
+            });
+        });
+
+        // 3D hover effect for form cards
+        const formCards = document.querySelectorAll('.form-card');
+        formCards.forEach(card => {
+            card.addEventListener('mousemove', function(e) {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 20;
+                const rotateY = (centerX - x) / 20;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
+            });
+        });
+    });
+</script>
+{% endblock %}

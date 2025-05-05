@@ -152,17 +152,26 @@
                     <li class="px-3">
                         <a href="{% url 'journal_home' %}" class="flex items-center space-x-3 {% if active_page == 'community' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
                             <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'community' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
-                                <i class="fas fa-users text-lg {% if active_page == 'community' %}text-white{% else %}text-primary-500{% endif %}"></i>
+                                <i class="fas fa-book text-lg {% if active_page == 'community' %}text-white{% else %}text-primary-500{% endif %}"></i>
                             </div>
                             <span class="text-sm">Journaling</span>
                         </a>
                     </li>
+                                        
                     <li class="px-3">
                         <a href="{% url 'community_home' %}" class="flex items-center space-x-3 {% if active_page == 'community' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
                             <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'community' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
                                 <i class="fas fa-users text-lg {% if active_page == 'community' %}text-white{% else %}text-primary-500{% endif %}"></i>
                             </div>
                             <span class="text-sm">Athlete Community</span>
+                        </a>
+                    </li>
+                    <li class="px-3">
+                        <a href="{% url 'chat_home' %}" class="flex items-center space-x-3 {% if active_page == 'progress' %}bg-primary-500 text-white font-medium{% else %}text-secondary-600 hover:text-primary-700 hover:bg-primary-50{% endif %} p-3 rounded-xl transition-all duration-300">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-lg {% if active_page == 'progress' %}bg-primary-600{% else %}bg-primary-100/50{% endif %}">
+                                <i class="fas fa-comment-medical text-lg {% if active_page == 'progress' %}text-white{% else %}text-primary-500{% endif %}"></i>
+                            </div>
+                            <span class="text-sm">Chat With Professional</span>
                         </a>
                     </li>
                     <li class="px-3">

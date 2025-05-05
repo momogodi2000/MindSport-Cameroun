@@ -19,7 +19,7 @@ def athlete_required(function):
         def wrapper(request, *args, **kwargs):
             if not hasattr(request.user, 'athlete_profile'):
                 messages.warning(request, "This feature is only available for registered athletes.")
-                return redirect(reverse('home'))
+                return redirect(reverse('login'))
             return function(request, *args, **kwargs)
         return wrapper
     
@@ -28,7 +28,7 @@ def professional_required(function):
         def wrapper(request, *args, **kwargs):
             if not hasattr(request.user, 'professional_profile'):
                 messages.warning(request, "This feature is only available for registered mental health professionals.")
-                return redirect(reverse('home'))
+                return redirect(reverse('login'))
             return function(request, *args, **kwargs)
         return wrapper
     

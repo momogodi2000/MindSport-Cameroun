@@ -110,8 +110,14 @@
                     <div class="px-4 py-2 mt-8 text-xs text-blue-200 uppercase tracking-wider">
                         Community
                     </div>
-                    <a href="{% url 'CoachForums' %}" class="block py-3 px-6 my-1 mx-2 rounded transition-all duration-200 {% if request.resolver_match.url_name == 'coach_forum' %}bg-white bg-opacity-30 text-white font-semibold{% else %}text-blue-100 hover:bg-white hover:bg-opacity-20{% endif %}">
+                    <a href="{% url 'professional_dashboard' %}" class="block py-3 px-6 my-1 mx-2 rounded transition-all duration-200 {% if request.resolver_match.url_name == 'coach_forum' %}bg-white bg-opacity-30 text-white font-semibold{% else %}text-blue-100 hover:bg-white hover:bg-opacity-20{% endif %}">
                         <i class="fas fa-comments mr-3"></i> Forums
+                    </a>
+                    <a href="{% url 'create_support_group' %}" class="{% block nav_forum %}text-white border-transparent hover:border-white{% endblock %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        Support Group
+                    </a>
+                    <a href="{% url 'chat_message' %}" class="{% block nav_forum %}text-white border-transparent hover:border-white{% endblock %} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        chat Message
                     </a>
                     <a href="{% url 'CoachMessages' %}" class="block py-3 px-6 my-1 mx-2 rounded transition-all duration-200 {% if request.resolver_match.url_name == 'coach_messaging' %}bg-white bg-opacity-30 text-white font-semibold{% else %}text-blue-100 hover:bg-white hover:bg-opacity-20{% endif %}">
                         <i class="fas fa-envelope mr-3"></i> Messages

@@ -165,14 +165,22 @@ urlpatterns = [
     path('community/admin/mentorship/', views.MentorshipAdminView.as_view(), name='mentorship_admin'),
     path('community/admin/mentorship/<int:program_id>/', views.mentorship_program_detail, name='mentorship_program_detail'),
     path('community/admin/support-groups/', views.SupportGroupAdminView.as_view(), name='support_group_admin'),
-    path('community/admin/support-groups/<int:group_id>/', views.support_group_detail_admin, name='support_group_detail_admin'),
-
+    path('community/admin/support-groups/<int:group_id>/', views.support_group_detail, name='support_group_detail'),  
 
 ## professional user url for Forum
+
     path('professional/dashboard/', views.ProfessionalDashboard.as_view(), name='professional_dashboard'),
     path('professional/support-groups/create/', views.create_support_group, name='create_support_group'),
     path('psychologist/mentorship/', views.PsychologistMentorshipView.as_view(), name='psychologist_mentorship'),
     path('psychologist/questions/<int:question_id>/', views.respond_to_question, name='respond_to_question'),
+
+
+## chat All user
+
+ # Chat URLs
+    path('chat/', views.chat_home, name='chat_home'),
+    path('chat/token/<uuid:conversation_id>/', views.get_conversation_token, name='chat_token'),
+    path('chat/send/', views.create_message, name='send_message'),
 
 
 
