@@ -1,3 +1,4 @@
+import asyncio
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -7,6 +8,10 @@ import base64
 from cryptography.fernet import Fernet
 from django.core.files.base import ContentFile
 import os
+from channels.db import database_sync_to_async
+import json
+import base64
+from cryptography.fernet import Fernet
 
 from .models import (
     Conversation, PrivateMessage, ForumThread, ForumPost,
@@ -45,6 +50,8 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         
         # Send conversation history
         await self.send_conversation_history()
+        self.heartbeat_task = asyncio.create_task(self.send_heartbeat())
+
 
     async def disconnect(self, close_code):
         # Leave conversation group
@@ -55,6 +62,16 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
         
         # Update typing status to false when disconnecting
         await self.update_typing_status(False)
+        self.heartbeat_task.cancel()
+    
+    async def send_heartbeat(self):
+        while True:
+            await asyncio.sleep(30)
+            await self.send(text_data=json.dumps({
+                "type": "heartbeat",
+                "message": "Heartbeat"
+            }))
+
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -247,13 +264,14 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                 related_conversation=conversation
             )
 
-    @database_sync_to_async
-    def send_conversation_history(self):
+    async def send_conversation_history(self):
         """Send conversation history to the user"""
         try:
-            conversation = Conversation.objects.get(id=self.conversation_id)
-            messages = conversation.messages.order_by('sent_at')[:100]  # Limit to last 100 messages
-            
+            conversation = await database_sync_to_async(Conversation.objects.get)(id=self.conversation_id)
+            messages = await database_sync_to_async(
+                lambda: list(conversation.messages.order_by('sent_at')[:100])
+            )()
+
             # Get encryption key
             encryption_key = conversation.encryption_key
             fernet = Fernet(base64.urlsafe_b64encode(encryption_key.encode()[:32].ljust(32, b'\0')))
@@ -267,32 +285,32 @@ class PrivateChatConsumer(AsyncWebsocketConsumer):
                     encrypted_content = msg.content
                     
                 history.append({
-                    "message_id": msg.id,
+                    "message_id": str(msg.id),
                     "message": encrypted_content,
-                    "sender_id": msg.sender.id,
+                    "sender_id": str(msg.sender.id),
                     "sender_name": msg.sender.get_full_name(),
                     "timestamp": msg.sent_at.isoformat(),
                     "has_file": bool(msg.file),
                     "file_url": msg.file.url if msg.file else None,
                     "file_name": msg.file_name if msg.file else None,
-                    "read_by": [user.id for user in msg.read_by.all()]
+                    "read_by": [str(user.id) for user in await database_sync_to_async(lambda: list(msg.read_by.all()))()]
                 })
-            
+
             # Mark all messages as read by this user
             for msg in messages:
                 if msg.sender != self.user:
-                    msg.mark_as_read(self.user)
-            
+                    await database_sync_to_async(msg.mark_as_read)(self.user)
+
             # Send history to the user
             await self.send(text_data=json.dumps({
                 "type": "conversation_history",
                 "history": history
             }))
             
-        except Conversation.DoesNotExist:
+        except Exception as e:
             await self.send(text_data=json.dumps({
                 "type": "error",
-                "message": "Conversation not found"
+                "message": str(e)
             }))
 
 

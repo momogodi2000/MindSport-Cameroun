@@ -4485,24 +4485,18 @@ def respond_to_question(request, question_id):
 
 
 ##chat
-
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, HttpResponseForbidden
-from django.db.models import Q
-from .models import Conversation, PrivateMessage, ForumCategory, ForumThread, ClientAssignment
-from django.contrib.auth import get_user_model
-import json
-from django.conf import settings
+from .models import Conversation, PrivateMessage, ClientAssignment
 import jwt
 from datetime import datetime, timedelta
-
-# Get the actual User model class
-UserModel = get_user_model()
+from django.conf import settings
 
 @login_required
 def chat_home(request):
     """Main chat view with WebSocket token generation"""
+    User = get_user_model()  # Get the User model here
+    
     try:
         # Generate JWT token for WebSocket authentication
         token = jwt.encode({
@@ -4513,6 +4507,14 @@ def chat_home(request):
         conversations = Conversation.objects.filter(
             participants=request.user
         ).order_by('-updated_at').prefetch_related('participants', 'messages')
+        
+        # Annotate each conversation with unread count
+        for conv in conversations:
+            conv.unread_count = conv.messages.exclude(
+                read_by=request.user
+            ).exclude(
+                sender=request.user
+            ).count()
         
         active_conversation_id = request.GET.get('conversation')
         active_conversation = None
@@ -4532,20 +4534,22 @@ def chat_home(request):
             'active_conversation': active_conversation,
             'available_users': get_available_users_for_chat(request.user),
             'websocket_token': token,
-            'user_type': request.user.user_type,
         }
         return render(request, 'Dashboards/Chat/chat_message.html', context)
     except Exception as e:
-        print(f"Error in chat_home: {str(e)}")  # Log the error
-        raise  # Re-raise the exception after logging
+        print(f"Error in chat_home: {str(e)}")
+        raise
 
+    
 def get_available_users_for_chat(user):
     """Get users that can be messaged based on user type"""
+    User = get_user_model()  # Call it inside the function
+    
     try:
-        if not hasattr(user, '_meta'):  # Check if it's a model instance
-            return UserModel.objects.none()
-        
-        base_query = UserModel.objects.exclude(id=user.id)
+        if not user.is_authenticated:
+            return User.objects.none()
+            
+        base_query = User.objects.exclude(id=user.id).filter(is_active=True)
         
         if user.user_type == 'admin':
             return base_query.order_by('first_name')
@@ -4553,36 +4557,19 @@ def get_available_users_for_chat(user):
         if user.user_type == 'athlete':
             return base_query.filter(
                 assigned_clients__client=user,
-                assigned_clients__active=True
+                assigned_professionals__active=True
             ).order_by('first_name')
         
         if user.user_type in ['psychologist', 'coach', 'nutritionist']:
-            # Get assigned clients and colleagues
             return base_query.filter(
                 Q(assigned_professionals__professional=user, assigned_professionals__active=True) |
                 Q(user_type=user.user_type)
             ).distinct().order_by('first_name')
         
-        return UserModel.objects.none()
+        return User.objects.none()
     except Exception as e:
         print(f"Error in get_available_users_for_chat: {str(e)}")
-        return UserModel.objects.none()
-
-@login_required
-def get_conversation_token(request, conversation_id):
-    """API endpoint to get JWT token for specific conversation"""
-    try:
-        conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
-        
-        token = jwt.encode({
-            'user_id': str(request.user.id),
-            'conversation_id': str(conversation_id),
-            'exp': datetime.utcnow() + timedelta(hours=1)
-        }, settings.SECRET_KEY, algorithm='HS256')
-        
-        return JsonResponse({'token': token})
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=400)
+        return User.objects.none()
 
 @login_required
 def create_message(request):
@@ -4605,6 +4592,10 @@ def create_message(request):
                 content=content
             )
             
+            # Update conversation timestamp
+            conversation.updated_at = timezone.now()
+            conversation.save()
+            
             return JsonResponse({
                 'status': 'success',
                 'message_id': str(message.id)
@@ -4614,8 +4605,39 @@ def create_message(request):
     
     return JsonResponse({'status': 'error'}, status=405)
 
-
-
+@login_required
+def new_conversation(request):
+    """Create a new conversation with another user"""
+    if request.method == 'POST':
+        try:
+            user_id = request.POST.get('user_id')
+            other_user = get_object_or_404(User, id=user_id)
+            
+            # Check if conversation already exists
+            existing_conversation = Conversation.objects.filter(
+                participants=request.user
+            ).filter(
+                participants=other_user
+            ).first()
+            
+            if existing_conversation:
+                return JsonResponse({
+                    'status': 'success',
+                    'conversation_id': str(existing_conversation.id)
+                })
+            
+            # Create new conversation
+            conversation = Conversation.objects.create()
+            conversation.participants.add(request.user, other_user)
+            
+            return JsonResponse({
+                'status': 'success',
+                'conversation_id': str(conversation.id)
+            })
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+    return JsonResponse({'status': 'error'}, status=405)
 
 
 

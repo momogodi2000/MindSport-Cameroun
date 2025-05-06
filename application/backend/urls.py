@@ -176,11 +176,9 @@ urlpatterns = [
 
 
 ## chat All user
-
- # Chat URLs
     path('chat/', views.chat_home, name='chat_home'),
-    path('chat/token/<uuid:conversation_id>/', views.get_conversation_token, name='chat_token'),
-    path('chat/send/', views.create_message, name='send_message'),
+    path('send/', views.create_message, name='send_message'),
+    path('new/', views.new_conversation, name='new_conversation'),
 
 
 

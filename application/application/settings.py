@@ -27,7 +27,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    'django.contrib.staticfiles',  # Only one instance needed
+    'channels',
     'backend',  #app name
     'allauth',
     'allauth.account',
@@ -35,7 +36,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.facebook',
     'social_django',
-    'channels',
     'rest_framework',
     'rest_framework_simplejwt',
 ]
@@ -147,15 +147,25 @@ SOCIALACCOUNT_EMAIL_REQUIRED = False
 
 
 # Channels
+# Channels
 ASGI_APPLICATION = 'application.asgi.application'
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('127.0.0.1', 6379)],
+            "hosts": [("127.0.0.1", 6379)],
+            "symmetric_encryption_keys": [SECRET_KEY],
         },
     },
 }
+
+# File upload restrictions
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+FILE_UPLOAD_PERMISSIONS = 0o644
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
+
 
 # REST Framework
 REST_FRAMEWORK = {

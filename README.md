@@ -212,5 +212,23 @@ Student Developer – Yaoundé, Cameroon
 > _Building a better mental health ecosystem for African athletes._
 
 ```
+for webstocket
 
+# Install required packages
+pip install channels channels-redis daphne cryptography
+
+# Set up Redis (Ubuntu example)
+sudo apt-get install redis-server
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+
+
+
+
+(venv) (venv) ┌─[momoyvan@parrot]─[~/Desktop/project/MentalApp/application]
+└──╼ $daphne application.asgi:application --port 8000
+2025-05-06 20:42:00,816 INFO     Starting server at tcp:port=8000:interface=127.0.0.1
+2025-05-06 20:42:00,816 INFO     HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+2025-05-06 20:42:00,816 INFO     Configuring endpoint tcp:port=8000:interface=127.0.0.1
+2025-05-06 20:42:00,817 INFO     Listening on TCP address 127.0.0.1:8000
 ---
