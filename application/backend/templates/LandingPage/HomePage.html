@@ -1,30 +1,87 @@
 {% load static %}
 
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MindSport Cameroon | Mental Health Platform for Combat Athletes</title>
+    <meta name="description" content="Comprehensive mental health support platform for combat athletes in Cameroon. Professional psychological services tailored for boxers, MMA fighters, wrestlers and martial artists.">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" as="style">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" as="style">
+    
+    <!-- CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'logo/favicon.png' %}">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+        }
         
         body {
             font-family: 'Poppins', sans-serif;
             scroll-behavior: smooth;
+            background-color: var(--light);
+            color: var(--dark);
+            transition: all 0.3s ease;
+        }
+        
+        .dark body {
+            background-color: #0f172a;
+            color: #f8fafc;
         }
         
         .hero-gradient {
-            background: linear-gradient(90deg, #3182ce 0%, #2b6cb0 100%);
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .feature-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
         }
         
         .feature-card:hover {
-            transform: translateY(-10px);
+            transform: translateY(-8px) scale(1.02);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(29, 78, 216, 0) 100%);
+            border-radius: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .feature-card:hover::before {
+            opacity: 1;
         }
         
         .animate-float {
@@ -39,10 +96,51 @@
         
         .testimonial-card {
             transition: all 0.3s ease;
+            perspective: 1000px;
         }
         
         .testimonial-card:hover {
-            transform: scale(1.03);
+            transform: translateY(-5px) rotateY(5deg);
+        }
+        
+        .nav-link {
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, #e67e22 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
         }
         
         .custom-shape-divider-bottom {
@@ -52,6 +150,7 @@
             width: 100%;
             overflow: hidden;
             line-height: 0;
+            transform: rotate(180deg);
         }
         
         .custom-shape-divider-bottom svg {
@@ -64,34 +163,173 @@
         .custom-shape-divider-bottom .shape-fill {
             fill: #FFFFFF;
         }
+        
+        .dark .custom-shape-divider-bottom .shape-fill {
+            fill: #0f172a;
+        }
+        
+        /* Loading animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        /* Theme toggle */
+        .theme-toggle {
+            position: relative;
+            width: 3rem;
+            height: 1.5rem;
+            border-radius: 9999px;
+            background-color: #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 0.125rem;
+            left: 0.125rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 9999px;
+            background-color: white;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .dark .theme-toggle {
+            background-color: #334155;
+        }
+        
+        .dark .theme-toggle::after {
+            transform: translateX(1.5rem);
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        .dark ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        
+        .dark ::-webkit-scrollbar-thumb {
+            background: var(--primary-dark);
+        }
+        
+        /* Lottie animation container */
+        .lottie-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* 3D card effect */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        
+        .card-3d:hover {
+            transform: rotateY(10deg) rotateX(5deg);
+        }
+        
+        /* Particle background */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Glow effect */
+        .glow {
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.5);
+        }
+        
+        .dark .glow {
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.8);
+        }
+        
+        /* Animated underline */
+        .animated-underline {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .animated-underline::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary);
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease;
+        }
+        
+        .animated-underline:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="antialiased">
+    <!-- Loading screen -->
+    <div id="loading-screen" class="fixed inset-0 bg-white dark:bg-slate-900 z-50 flex flex-col items-center justify-center transition-opacity duration-500">
+        <div class="w-24 h-24 mb-4 relative">
+            <img src="{% static 'logo/logo.png' %}" alt="MindSport Logo" class="w-full h-full object-contain animate-pulse">
+        </div>
+        <div class="text-2xl font-bold text-blue-600 dark:text-blue-400">MindSport Cameroon</div>
+        <div class="mt-2 text-gray-600 dark:text-gray-400">Loading...</div>
+    </div>
+
     <!-- Navigation -->
-    <nav class="bg-white shadow fixed w-full z-50 transition-all duration-300" id="navbar">
+    <nav class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm fixed w-full z-50 transition-all duration-300 border-b border-gray-200 dark:border-slate-800" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <img class="block h-8 w-auto" src="{% static 'logo/logo.png' %}" alt="MindChampion Logo">
-                        <span class="ml-2 text-blue-800 font-bold text-xl">MindSport</span>
+                        <img class="block h-8 w-auto" src="{% static 'logo/logo.png' %}" alt="MindSport Logo">
+                        <span class="ml-2 text-blue-800 dark:text-blue-400 font-bold text-xl">MindSport</span>
                     </div>
                 </div>
-                <div class="hidden md:ml-6 md:flex md:items-center md:space-x-4">
-                    <a href="#features" class="text-gray-700 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Features</a>
-                    <a href="#how-it-works" class="text-gray-700 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium transition duration-300">How It Works</a>
-                    <a href="#about" class="text-gray-700 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium transition duration-300">About Us</a>
-                    <a href="#testimonials" class="text-gray-700 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Testimonials</a>
-                    <a href="#contact" class="text-gray-700 hover:text-blue-800 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Contact</a>
+                <div class="hidden md:ml-6 md:flex md:items-center md:space-x-6">
+                    <a href="#features" class="nav-link text-gray-700 dark:text-gray-300 px-3 py-2 text-sm font-medium transition duration-300">Features</a>
+                    <a href="#how-it-works" class="nav-link text-gray-700 dark:text-gray-300 px-3 py-2 text-sm font-medium transition duration-300">How It Works</a>
+                    <a href="#about" class="nav-link text-gray-700 dark:text-gray-300 px-3 py-2 text-sm font-medium transition duration-300">About Us</a>
+                    <a href="#testimonials" class="nav-link text-gray-700 dark:text-gray-300 px-3 py-2 text-sm font-medium transition duration-300">Testimonials</a>
+                    <a href="#contact" class="nav-link text-gray-700 dark:text-gray-300 px-3 py-2 text-sm font-medium transition duration-300">Contact</a>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="{% url 'login' %}" class="hidden md:inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-800 hover:bg-blue-700 transition duration-300">
+                    <button id="theme-toggle" class="p-1 rounded-full focus:outline-none">
+                        <div class="theme-toggle"></div>
+                    </button>
+                    <a href="{% url 'login' %}" class="hidden md:inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition duration-300">
                         Login
                     </a>
-                    <a href="{% url 'register' %}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-500 transition duration-300">
+                    <a href="{% url 'register' %}" class="inline-flex items-center justify-center px-4 py-2 rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition duration-300">
                         Sign Up
                     </a>
-                    <button type="button" class="md:hidden bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-expanded="false" id="mobile-menu-button">
+                    <button type="button" class="md:hidden bg-white dark:bg-slate-800 rounded-md p-2 inline-flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500" aria-expanded="false" id="mobile-menu-button">
                         <span class="sr-only">Open main menu</span>
                         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -101,63 +339,89 @@
             </div>
         </div>
         
-        <!-- Mobile menu, show/hide based on menu state -->
+        <!-- Mobile menu -->
         <div class="md:hidden hidden transition-all duration-300 ease-in-out" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Features</a>
-                <a href="#how-it-works" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">How It Works</a>
-                <a href="#testimonials" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Testimonials</a>
-                <a href="#contact" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Contact</a>
-                <a href="{% url 'login' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50">Login</a>
+            <div class="px-2 pt-2 pb-4 space-y-1 sm:px-3 bg-white dark:bg-slate-800">
+                <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700">Features</a>
+                <a href="#how-it-works" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700">How It Works</a>
+                <a href="#about" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700">About Us</a>
+                <a href="#testimonials" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700">Testimonials</a>
+                <a href="#contact" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700">Contact</a>
+                <a href="{% url 'login' %}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-700">Login</a>
             </div>
         </div>
     </nav>
 
     {% if messages %}
-<div class="fixed top-16 left-0 right-0 z-50">
-    {% for message in messages %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="alert alert-{{ message.tags }} p-4 mb-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
-            {{ message }}
+    <div class="fixed top-20 left-0 right-0 z-50">
+        {% for message in messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="{% if message.tags == 'success' %}bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200{% elif message.tags == 'error' %}bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200{% else %}bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200{% endif %} p-4 mb-4 rounded-lg">
+                {{ message }}
+            </div>
         </div>
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
-{% endif %}
+    {% endif %}
 
     <!-- Hero Section -->
     <section class="hero-gradient text-white relative pt-32 pb-40 overflow-hidden">
+        <!-- Particle background -->
+        <div class="particles" id="particles-js"></div>
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="md:flex md:items-center md:justify-between">
-                <div class="md:w-1/2 mb-12 md:mb-0 animate__animated animate__fadeInLeft">
-                    <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">Mental Wellness for Combat Athletes in Cameroon</h1>
-                    <p class="text-xl mb-8 text-blue-100">A secure platform providing tailored psychological support to help athletes perform at their best both in and out of competition.</p>
+                <div class="md:w-1/2 mb-12 md:mb-0" data-aos="fade-right" data-aos-duration="800">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                        <span class="block">Champion Minds</span>
+                        <span class="block text-blue-200">For Combat Athletes</span>
+                    </h1>
+                    <p class="text-xl mb-8 text-blue-100 max-w-lg">A secure digital platform providing tailored psychological support to help Cameroonian combat athletes perform at their peak both in and out of competition.</p>
                     <div class="flex flex-wrap gap-4">
-                        <a href="{% url 'login' %}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-blue-800 bg-white hover:bg-gray-50 transition duration-300">
-                            Get Started
+                        <a href="{% url 'register' %}" class="btn-primary inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white transition duration-300">
+                            Get Started Free
                             <svg class="ml-2 -mr-1 w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </a>
-                        <a href="#about" class="inline-flex items-center justify-center px-6 py-3 border border-white rounded-lg text-base font-medium text-white hover:bg-blue-700 transition duration-300">
-                            Learn More
+                        <a href="#features" class="inline-flex items-center justify-center px-6 py-3 border border-white rounded-lg text-base font-medium text-white hover:bg-blue-700 transition duration-300">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Watch Demo
                         </a>
                     </div>
+                    <div class="mt-8 flex items-center">
+                        <div class="flex -space-x-2">
+                            <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="{% static 'avatars/avatar1.jpg' %}" alt="Athlete 1">
+                            <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="{% static 'avatars/avatar2.jpg' %}" alt="Athlete 2">
+                            <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="{% static 'avatars/avatar3.jpg' %}" alt="Athlete 3">
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm text-blue-100">Trusted by <span class="font-bold">500+</span> athletes across Cameroon</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="md:w-1/2 flex justify-center animate__animated animate__fadeInRight">
-                    <img src="{% static 'logo/logo.png' %}" alt="Athlete mental health illustration" class="rounded-lg shadow-lg animate-float">
+                <div class="md:w-1/2 flex justify-center" data-aos="fade-left" data-aos-duration="800">
+                    <div class="relative">
+                        <img src="{% static 'images/hero-athlete.png' %}" alt="Combat athlete illustration" class="rounded-lg shadow-xl w-full max-w-md animate-float">
+                        <div class="absolute -bottom-6 -left-6 bg-white dark:bg-slate-800 p-4 rounded-lg shadow-lg" data-aos="fade-up" data-aos-delay="300">
+                            <div class="flex items-center">
+                                <div class="p-2 bg-blue-100 dark:bg-blue-900 rounded-full">
+                                    <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Certified Professionals</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">40+ experts available</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="absolute top-0 right-0 hidden lg:block">
-            <svg width="404" height="384" fill="none" viewBox="0 0 404 384">
-                <defs>
-                    <pattern id="pattern-circles" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-                        <circle cx="10" cy="10" r="3" fill="rgba(255, 255, 255, 0.1)"></circle>
-                    </pattern>
-                </defs>
-                <rect width="404" height="384" fill="url(#pattern-circles)"></rect>
-            </svg>
         </div>
         <div class="custom-shape-divider-bottom">
             <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
@@ -167,120 +431,185 @@
     </section>
 
     <!-- Stats Section -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-white dark:bg-slate-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 gap-6 md:grid-cols-4">
-                <div class="p-6 text-center animate__animated animate__fadeIn" data-wow-delay="0.1s">
-                    <h3 class="text-3xl md:text-4xl font-bold text-blue-800">85%</h3>
-                    <p class="text-gray-600 mt-2">Athletes face mental health challenges</p>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="p-6 text-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                        <span class="counter" data-target="85">0</span>%
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">Athletes face mental health challenges</p>
                 </div>
-                <div class="p-6 text-center animate__animated animate__fadeIn" data-wow-delay="0.3s">
-                    <h3 class="text-3xl md:text-4xl font-bold text-blue-800">24/7</h3>
-                    <p class="text-gray-600 mt-2">Support access</p>
+                <div class="p-6 text-center" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                        <span class="counter" data-target="24">0</span>/7
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">Support access</p>
                 </div>
-                <div class="p-6 text-center animate__animated animate__fadeIn" data-wow-delay="0.5s">
-                    <h3 class="text-3xl md:text-4xl font-bold text-blue-800">40+</h3>
-                    <p class="text-gray-600 mt-2">Mental health experts</p>
+                <div class="p-6 text-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                        <span class="counter" data-target="40">0</span>+
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">Mental health experts</p>
                 </div>
-                <div class="p-6 text-center animate__animated animate__fadeIn" data-wow-delay="0.7s">
-                    <h3 class="text-3xl md:text-4xl font-bold text-blue-800">3x</h3>
-                    <p class="text-gray-600 mt-2">Performance improvement</p>
+                <div class="p-6 text-center" data-aos="fade-up" data-aos-delay="400">
+                    <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                        <span class="counter" data-target="3">0</span>x
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">Performance improvement</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-20 bg-gray-50">
+    <section id="features" class="py-20 bg-gray-50 dark:bg-slate-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">FEATURES</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
                     <span class="block">Tailored Support for Combat Athletes</span>
                 </h2>
-                <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
-                    Our platform offers specialized tools and services designed for the unique challenges faced by combat athletes in Cameroon.
+                <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                    Our platform offers specialized tools and services designed for the unique psychological challenges faced by combat athletes in Cameroon.
                 </p>
             </div>
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <!-- Feature 1 -->
-                <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
-                    <div class="text-blue-600 mb-4">
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md p-6 relative overflow-hidden feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-blue-600 dark:text-blue-400 mb-4">
                         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Private Consultations</h3>
-                    <p class="text-gray-600">Connect with certified psychologists, nutritionists, and mental coaches through secure video sessions.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Private Consultations</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Secure 1-on-1 video sessions with certified psychologists, nutritionists, and mental coaches specializing in combat sports.</p>
+                    <div class="mt-4">
+                        <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Feature 2 -->
-                <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
-                    <div class="text-blue-600 mb-4">
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md p-6 relative overflow-hidden feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-blue-600 dark:text-blue-400 mb-4">
                         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path>
+                            <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z"></path>
+                            <path d="M2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Self-Assessment Tools</h3>
-                    <p class="text-gray-600">Track your mental well-being with specialized assessment tools designed for athletes.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Performance Analytics</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Track your mental well-being with specialized assessment tools and get personalized insights to optimize your performance.</p>
+                    <div class="mt-4">
+                        <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Feature 3 -->
-                <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
-                    <div class="text-blue-600 mb-4">
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md p-6 relative overflow-hidden feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-blue-600 dark:text-blue-400 mb-4">
                         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"></path>
                             <path d="M15 7v2a4 4 0 01-4 4H9.828l-1.766 1.767c.28.149.599.233.938.233h2l3 3v-3h2a2 2 0 002-2V9a2 2 0 00-2-2h-1z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Community Support</h3>
-                    <p class="text-gray-600">Connect with fellow athletes in a confidential environment to share experiences and advice.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Athlete Community</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Connect with fellow combat athletes in a confidential environment to share experiences, strategies, and peer support.</p>
+                    <div class="mt-4">
+                        <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Feature 4 -->
-                <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
-                    <div class="text-blue-600 mb-4">
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md p-6 relative overflow-hidden feature-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-blue-600 dark:text-blue-400 mb-4">
                         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd"></path>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Stress Management</h3>
-                    <p class="text-gray-600">Access guided meditation, breathing exercises, and visualization techniques tailored for combat sports.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Mental Training</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Access guided meditation, breathing exercises, and visualization techniques specifically designed for combat sports.</p>
+                    <div class="mt-4">
+                        <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Feature 5 -->
-                <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
-                    <div class="text-blue-600 mb-4">
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md p-6 relative overflow-hidden feature-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-blue-600 dark:text-blue-400 mb-4">
                         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Progress Tracking</h3>
-                    <p class="text-gray-600">Monitor your mental wellness journey with detailed analytics and personalized insights.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Competition Prep</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Specialized programs to help you mentally prepare for competitions, manage pre-fight anxiety, and recover post-event.</p>
+                    <div class="mt-4">
+                        <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Feature 6 -->
-                <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
-                    <div class="text-blue-600 mb-4">
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md p-6 relative overflow-hidden feature-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-blue-600 dark:text-blue-400 mb-4">
                         <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path d="M7 2a1 1 0 00-.707 1.707L7 4.414v3.758a1 1 0 01-.293.707l-4 4C.817 14.769 2.156 18 4.828 18h10.343c2.673 0 4.012-3.231 2.122-5.121l-4-4A1 1 0 0113 8.172V4.414l.707-.707A1 1 0 0013 2H7z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Cultural Integration</h3>
-                    <p class="text-gray-600">Resources and approaches that respect Cameroonian cultural values and perspectives.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Cultural Integration</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Resources and approaches that respect Cameroonian cultural values while incorporating global best practices.</p>
+                    <div class="mt-4">
+                        <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                            Learn more
+                            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="mt-16 text-center" data-aos="fade-up">
+                <a href="{% url 'register' %}" class="btn-primary inline-flex items-center justify-center px-8 py-4 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white transition duration-300">
+                    Start Your Mental Wellness Journey Today
+                </a>
             </div>
         </div>
     </section>
 
     <!-- How It Works Section -->
-    <section id="how-it-works" class="py-20 bg-white">
+    <section id="how-it-works" class="py-20 bg-white dark:bg-slate-900">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-                    <span class="block">How It Works</span>
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">HOW IT WORKS</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+                    <span class="block">Simple Steps to Better Mental Performance</span>
                 </h2>
-                <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+                <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
                     Our platform makes it easy to get the mental health support you need in just a few simple steps.
                 </p>
             </div>
@@ -288,77 +617,117 @@
             <div class="relative">
                 <!-- Steps desktop -->
                 <div class="hidden md:block">
-                    <div class="absolute left-1/2 w-0.5 h-full bg-blue-600 transform -translate-x-1/2"></div>
+                    <div class="absolute left-1/2 w-0.5 h-full bg-gradient-to-b from-blue-500 to-blue-300 dark:from-blue-600 dark:to-blue-400 transform -translate-x-1/2"></div>
                     <div class="space-y-24 relative">
                         <!-- Step 1 -->
-                        <div class="flex items-center relative">
+                        <div class="flex items-center relative" data-aos="fade-right">
                             <div class="hidden md:block w-1/2 pr-12 text-right">
-                                <h3 class="text-xl font-bold text-gray-900 mb-2">Create Your Profile</h3>
-                                <p class="text-gray-600">Sign up and complete your athlete profile with your sport, goals, and challenges.</p>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Create Your Profile</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Sign up and complete your athlete profile with details about your sport, competitive level, goals, and challenges.</p>
+                                <div class="mt-4">
+                                    <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                                        See example profile
+                                        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-blue-600 z-10 shadow-lg">
-                                <span class="text-white font-bold">1</span>
+                            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-14 h-14 rounded-full border-4 border-white dark:border-slate-900 bg-blue-600 z-10 shadow-lg">
+                                <span class="text-white font-bold text-xl">1</span>
                             </div>
                             <div class="md:w-1/2 md:pl-12 md:text-left sm:text-center">
-                                <div class="md:hidden mb-4">
-                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Create Your Profile</h3>
-                                    <p class="text-gray-600">Sign up and complete your athlete profile with your sport, goals, and challenges.</p>
+                                <div class="md:hidden mb-6">
+                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Create Your Profile</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Sign up and complete your athlete profile with details about your sport, competitive level, goals, and challenges.</p>
                                 </div>
-                                <img src="{% static 'image/signe.jpeg' %}" alt="Create profile" class="rounded-lg shadow-md mx-auto md:mx-0">
+                                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-700 dark:to-slate-800 p-1 rounded-xl shadow-lg">
+                                    <img src="{% static 'images/profile-step.png' %}" alt="Create profile" class="rounded-lg w-full">
+                                </div>
                             </div>
                         </div>
 
                         <!-- Step 2 -->
-                        <div class="flex items-center relative">
+                        <div class="flex items-center relative" data-aos="fade-left">
                             <div class="md:w-1/2 md:pr-12 md:text-right sm:text-center">
-                                <div class="md:hidden mb-4">
-                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Take Assessment</h3>
-                                    <p class="text-gray-600">Complete initial mental wellness assessment to identify your specific needs.</p>
+                                <div class="md:hidden mb-6">
+                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Take Assessment</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Complete our initial mental wellness assessment to identify your specific needs and create a personalized plan.</p>
                                 </div>
-                                <img src="{% static 'image/asset.jpeg' %}" alt="Take assessment" class="rounded-lg shadow-md mx-auto md:ml-auto">
+                                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-700 dark:to-slate-800 p-1 rounded-xl shadow-lg">
+                                    <img src="{% static 'images/assessment-step.png' %}" alt="Take assessment" class="rounded-lg w-full">
+                                </div>
                             </div>
-                            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-blue-600 z-10 shadow-lg">
-                                <span class="text-white font-bold">2</span>
+                            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-14 h-14 rounded-full border-4 border-white dark:border-slate-900 bg-blue-600 z-10 shadow-lg">
+                                <span class="text-white font-bold text-xl">2</span>
                             </div>
                             <div class="hidden md:block w-1/2 pl-12 text-left">
-                                <h3 class="text-xl font-bold text-gray-900 mb-2">Take Assessment</h3>
-                                <p class="text-gray-600">Complete initial mental wellness assessment to identify your specific needs.</p>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Take Assessment</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Complete our initial mental wellness assessment to identify your specific needs and create a personalized plan.</p>
+                                <div class="mt-4">
+                                    <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                                        View sample questions
+                                        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Step 3 -->
-                        <div class="flex items-center relative">
+                        <div class="flex items-center relative" data-aos="fade-right">
                             <div class="hidden md:block w-1/2 pr-12 text-right">
-                                <h3 class="text-xl font-bold text-gray-900 mb-2">Connect with Professionals</h3>
-                                <p class="text-gray-600">Browse and book sessions with psychologists, nutritionists, and mental coaches.</p>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Connect with Professionals</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Browse and book sessions with psychologists, nutritionists, and mental coaches who specialize in combat sports.</p>
+                                <div class="mt-4">
+                                    <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                                        Meet our experts
+                                        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-blue-600 z-10 shadow-lg">
-                                <span class="text-white font-bold">3</span>
+                            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-14 h-14 rounded-full border-4 border-white dark:border-slate-900 bg-blue-600 z-10 shadow-lg">
+                                <span class="text-white font-bold text-xl">3</span>
                             </div>
                             <div class="md:w-1/2 md:pl-12 md:text-left sm:text-center">
-                                <div class="md:hidden mb-4">
-                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Connect with Professionals</h3>
-                                    <p class="text-gray-600">Browse and book sessions with psychologists, nutritionists, and mental coaches.</p>
+                                <div class="md:hidden mb-6">
+                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Connect with Professionals</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Browse and book sessions with psychologists, nutritionists, and mental coaches who specialize in combat sports.</p>
                                 </div>
-                                <img src="{% static 'image/connect.jpeg' %}" alt="Connect with professionals" class="rounded-lg shadow-md mx-auto md:mx-0">
+                                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-700 dark:to-slate-800 p-1 rounded-xl shadow-lg">
+                                    <img src="{% static 'images/professionals-step.png' %}" alt="Connect with professionals" class="rounded-lg w-full">
+                                </div>
                             </div>
                         </div>
 
                         <!-- Step 4 -->
-                        <div class="flex items-center relative">
+                        <div class="flex items-center relative" data-aos="fade-left">
                             <div class="md:w-1/2 md:pr-12 md:text-right sm:text-center">
-                                <div class="md:hidden mb-4">
-                                    <h3 class="text-xl font-bold text-gray-900 mb-2">Track Your Progress</h3>
-                                    <p class="text-gray-600">Monitor your mental health journey with personalized analytics and insights.</p>
+                                <div class="md:hidden mb-6">
+                                    <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Track Your Progress</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">Monitor your mental health journey with detailed analytics, personalized insights, and progress reports.</p>
                                 </div>
-                                <img src="{% static 'image/track.png' %}" alt="Track progress" class="rounded-lg shadow-md mx-auto md:ml-auto">
+                                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-700 dark:to-slate-800 p-1 rounded-xl shadow-lg">
+                                    <img src="{% static 'images/progress-step.png' %}" alt="Track progress" class="rounded-lg w-full">
+                                </div>
                             </div>
-                            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-12 h-12 rounded-full border-4 border-white bg-blue-600 z-10 shadow-lg">
-                                <span class="text-white font-bold">4</span>
+                            <div class="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-14 h-14 rounded-full border-4 border-white dark:border-slate-900 bg-blue-600 z-10 shadow-lg">
+                                <span class="text-white font-bold text-xl">4</span>
                             </div>
                             <div class="hidden md:block w-1/2 pl-12 text-left">
-                                <h3 class="text-xl font-bold text-gray-900 mb-2">Track Your Progress</h3>
-                                <p class="text-gray-600">Monitor your mental health journey with personalized analytics and insights.</p>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Track Your Progress</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Monitor your mental health journey with detailed analytics, personalized insights, and progress reports.</p>
+                                <div class="mt-4">
+                                    <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                                        See sample reports
+                                        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -367,566 +736,1085 @@
                 <!-- Steps mobile -->
                 <div class="md:hidden space-y-12">
                     <!-- Step 1 -->
-                    <div class="relative pl-10 pb-8 border-l-2 border-blue-600">
-                        <div class="absolute left-0 flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-blue-600 transform -translate-x-1/2 shadow-lg">
-                            <span class="text-white font-bold text-sm">1</span>
+                    <div class="relative pl-10 pb-8 border-l-2 border-blue-600" data-aos="fade-up">
+                        <div class="absolute left-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-blue-600 transform -translate-x-1/2 shadow-lg">
+                            <span class="text-white font-bold">1</span>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Create Your Profile</h3>
-                        <p class="text-gray-600 mb-4">Sign up and complete your athlete profile with your sport, goals, and challenges.</p>
-                        <img src="/api/placeholder/300/200" alt="Create profile" class="rounded-lg shadow-md w-full">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Create Your Profile</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Sign up and complete your athlete profile with details about your sport, competitive level, goals, and challenges.</p>
+                        <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-700 dark:to-slate-800 p-1 rounded-xl shadow-lg">
+                            <img src="{% static 'images/profile-step.png' %}" alt="Create profile" class="rounded-lg w-full">
+                        </div>
                     </div>
 
                     <!-- Step 2 -->
-                    <div class="relative pl-10 pb-8 border-l-2 border-blue-600">
-                        <div class="absolute left-0 flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-blue-600 transform -translate-x-1/2 shadow-lg">
-                            <span class="text-white font-bold text-sm">2</span>
+                    <div class="relative pl-10 pb-8 border-l-2 border-blue-600" data-aos="fade-up" data-aos-delay="100">
+                        <div class="absolute left-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-blue-600 transform -translate-x-1/2 shadow-lg">
+                            <span class="text-white font-bold">2</span>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Take Assessment</h3>
-                        <p class="text-gray-600 mb-4">Complete initial mental wellness assessment to identify your specific needs.</p>
-                        <img src="/api/placeholder/300/200" alt="Take assessment" class="rounded-lg shadow-md w-full">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Take Assessment</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Complete our initial mental wellness assessment to identify your specific needs and create a personalized plan.</p>
+                        <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-700 dark:to-slate-800 p-1 rounded-xl shadow-lg">
+                            <img src="{% static 'images/assessment-step.png' %}" alt="Take assessment" class="rounded-lg w-full">
+                        </div>
                     </div>
 
                     <!-- Step 3 -->
-                    <div class="relative pl-10 pb-8 border-l-2 border-blue-600">
-                        <div class="absolute left-0 flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-blue-600 transform -translate-x-1/2 shadow-lg">
-                            <span class="text-white font-bold text-sm">3</span>
+                    <div class="relative pl-10 pb-8 border-l-2 border-blue-600" data-aos="fade-up" data-aos-delay="200">
+                        <div class="absolute left-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-blue-600 transform -translate-x-1/2 shadow-lg">
+                            <span class="text-white font-bold">3</span>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Connect with Professionals</h3>
-                        <p class="text-gray-600 mb-4">Browse and book sessions with psychologists, nutritionists, and mental coaches.</p>
-                        <img src="/api/placeholder/300/200" alt="Connect with professionals" class="rounded-lg shadow-md w-full">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Connect with Professionals</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Browse and book sessions with psychologists, nutritionists, and mental coaches who specialize in combat sports.</p>
+                        <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-700 dark:to-slate-800 p-1 rounded-xl shadow-lg">
+                            <img src="{% static 'images/professionals-step.png' %}" alt="Connect with professionals" class="rounded-lg w-full">
+                        </div>
                     </div>
 
-                   <!-- Step 4 -->
-                   <div class="relative pl-10 pb-8 border-l-2 border-blue-600">
-                    <div class="absolute left-0 flex items-center justify-center w-8 h-8 rounded-full border-2 border-white bg-blue-600 transform -translate-x-1/2 shadow-lg">
-                        <span class="text-white font-bold text-sm">4</span>
+                    <!-- Step 4 -->
+                    <div class="relative pl-10 pb-8 border-l-2 border-blue-600" data-aos="fade-up" data-aos-delay="300">
+                        <div class="absolute left-0 flex items-center justify-center w-10 h-10 rounded-full border-2 border-white dark:border-slate-900 bg-blue-600 transform -translate-x-1/2 shadow-lg">
+                            <span class="text-white font-bold">4</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Track Your Progress</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">Monitor your mental health journey with detailed analytics, personalized insights, and progress reports.</p>
+                        <div class="bg-gradient-to-br from-blue-50 to-white dark:from-slate-700 dark:to-slate-800 p-1 rounded-xl shadow-lg">
+                            <img src="{% static 'images/progress-step.png' %}" alt="Track progress" class="rounded-lg w-full">
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Track Your Progress</h3>
-                    <p class="text-gray-600 mb-4">Monitor your mental health journey with personalized analytics and insights.</p>
-                    <img src="/api/placeholder/300/200" alt="Track progress" class="rounded-lg shadow-md w-full">
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- About Us Section -->
-<section id="about" class="py-20 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-                <span class="block">About MindSport Cameroon</span>
-            </h2>
-            <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
-                Pioneering mental health support for combat athletes across Cameroon.
-            </p>
+    <!-- About Us Section -->
+    <section id="about" class="py-20 bg-gray-50 dark:bg-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">ABOUT US</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+                    <span class="block">Pioneering Mental Health Support</span>
+                    <span class="block text-blue-600 dark:text-blue-400">For Combat Athletes</span>
+                </h2>
+                <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+                    Transforming the mental wellness landscape for combat sports in Cameroon through innovative, culturally-relevant solutions.
+                </p>
+            </div>
+
+            <!-- Our Story -->
+            <div class="grid md:grid-cols-2 gap-12 items-center mb-20">
+                <div data-aos="fade-right">
+                    <h3 class="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-4">Our Story</h3>
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">MindSport Cameroon was founded in 2023 by Dr. Adrien Mbarga, a former national boxing champion turned sports psychologist, who recognized a critical gap in mental health support services for athletes in Cameroon.</p>
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">After years of witnessing talented athletes struggle with performance anxiety, competition stress, and post-defeat recovery, Dr. Mbarga assembled a team of mental health professionals, former athletes, and technologists to create a comprehensive mental wellness platform specifically tailored to the unique challenges faced by combat athletes.</p>
+                    <p class="text-gray-700 dark:text-gray-300">Today, MindSport Cameroon serves hundreds of athletes across boxing, wrestling, judo, taekwondo, MMA, and other combat sports, helping them develop mental resilience alongside physical strength.</p>
+                    <div class="mt-6">
+                        <a href="#" class="inline-flex items-center text-blue-600 dark:text-blue-400 font-medium">
+                            Read our full story
+                            <svg class="ml-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div data-aos="fade-left">
+                    <div class="relative">
+                        <img src="{% static 'images/about-team.jpg' %}" alt="MindSport team" class="rounded-xl shadow-xl w-full">
+                        <div class="absolute -bottom-6 -right-6 bg-white dark:bg-slate-700 p-4 rounded-lg shadow-lg" data-aos="fade-up" data-aos-delay="300">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">Our Headquarters</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Yaoundé, Cameroon</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mission & Vision -->
+            <div class="bg-white dark:bg-slate-700 rounded-xl shadow-md p-8 mb-20" data-aos="fade-up">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <div class="flex-shrink-0 text-blue-600 dark:text-blue-400">
+                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="ml-4 text-2xl font-bold text-gray-900 dark:text-white">Our Mission</h3>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300">To empower combat athletes in Cameroon with accessible, culturally-responsive mental health resources that enhance performance, wellbeing, and long-term career success. We aim to break the stigma around mental health in sports while providing evidence-based interventions tailored to the African athlete experience.</p>
+                    </div>
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <div class="flex-shrink-0 text-blue-600 dark:text-blue-400">
+                                <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="ml-4 text-2xl font-bold text-gray-900 dark:text-white">Our Vision</h3>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300">To create a future where mental health support is as integral to athlete development as physical training in Cameroon. We envision a sports culture that produces champions who are as mentally resilient as they are physically strong, with psychological wellbeing recognized as a cornerstone of athletic excellence.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Our Values -->
+            <div class="mb-20" data-aos="fade-up">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-10">Our Core Values</h3>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
+                        <div class="text-blue-600 dark:text-blue-400 mb-4">
+                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Accessibility</h4>
+                        <p class="text-gray-600 dark:text-gray-300">We believe quality mental health support should be available to all athletes regardless of economic background, location, or competitive level. Our tiered pricing and mobile-first approach ensure services reach athletes across Cameroon.</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
+                        <div class="text-blue-600 dark:text-blue-400 mb-4">
+                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Cultural Relevance</h4>
+                        <p class="text-gray-600 dark:text-gray-300">Our approaches are rooted in understanding the specific cultural context of Cameroonian athletes. We blend global best practices with local traditions to create effective, culturally-appropriate interventions.</p>
+                    </div>
+                    <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
+                        <div class="text-blue-600 dark:text-blue-400 mb-4">
+                            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Confidentiality</h4>
+                        <p class="text-gray-600 dark:text-gray-300">We maintain the highest standards of privacy and data protection, creating a safe space for athletes to be vulnerable. Our platform uses end-to-end encryption and strict access controls to protect your information.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Our Team -->
+            <div data-aos="fade-up">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-10">Meet Our Leadership Team</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Team Member 1 -->
+                    <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden card-3d">
+                        <div class="relative h-60 overflow-hidden">
+                            <img src="{% static 'avatars/dr-mbarga.jpg' %}" alt="Dr. Adrien Mbarga" class="w-full h-full object-cover transition duration-500 hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4">
+                                <h4 class="font-bold text-lg text-white">Dr. Adrien Mbarga</h4>
+                                <p class="text-blue-300 text-sm">Founder & CEO</p>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 dark:text-gray-300 text-sm">Former National Boxing Champion with a PhD in Sports Psychology from the University of Yaoundé. 15+ years experience in athlete mental performance.</p>
+                            <div class="mt-4 flex space-x-3">
+                                <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Team Member 2 -->
+                    <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden card-3d">
+                        <div class="relative h-60 overflow-hidden">
+                            <img src="{% static 'avatars/dr-nkodo.jpg' %}" alt="Dr. Françoise Nkodo" class="w-full h-full object-cover transition duration-500 hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4">
+                                <h4 class="font-bold text-lg text-white">Dr. Françoise Nkodo</h4>
+                                <p class="text-blue-300 text-sm">Chief Mental Health Officer</p>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 dark:text-gray-300 text-sm">Clinical Psychologist specializing in trauma recovery and performance anxiety. Former consultant for Cameroon Olympic Committee.</p>
+                            <div class="mt-4 flex space-x-3">
+                                <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fab fa-twitter"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Team Member 3 -->
+                    <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden card-3d">
+                        <div class="relative h-60 overflow-hidden">
+                            <img src="{% static 'avatars/emmanuel-ndongo.jpg' %}" alt="Emmanuel Ndongo" class="w-full h-full object-cover transition duration-500 hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4">
+                                <h4 class="font-bold text-lg text-white">Emmanuel Ndongo</h4>
+                                <p class="text-blue-300 text-sm">Chief Technology Officer</p>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 dark:text-gray-300 text-sm">Tech entrepreneur with expertise in developing secure healthcare platforms for the African market. MSc in Computer Science.</p>
+                            <div class="mt-4 flex space-x-3">
+                                <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fab fa-github"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Team Member 4 -->
+                    <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden card-3d">
+                        <div class="relative h-60 overflow-hidden">
+                            <img src="{% static 'avatars/carole-essombe.jpg' %}" alt="Carole Essombe" class="w-full h-full object-cover transition duration-500 hover:scale-110">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-4">
+                                <h4 class="font-bold text-lg text-white">Carole Essombe</h4>
+                                <p class="text-blue-300 text-sm">Director of Athlete Relations</p>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-gray-600 dark:text-gray-300 text-sm">Former Olympic Judo competitor and mental health advocate. Works directly with athletes to ensure our services meet their needs.</p>
+                            <div class="mt-4 flex space-x-3">
+                                <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                                    <i class="fab fa-instagram"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-10">
+                    <a href="#" class="btn-primary inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-medium text-white transition duration-300">
+                        Meet Our Full Team
+                        <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Our Impact -->
+            <div class="mt-20 bg-blue-50 dark:bg-blue-900/30 rounded-xl p-8" data-aos="fade-up">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-8">Our Impact in Numbers</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center p-4">
+                        <div class="text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                            <span class="counter" data-target="500">0</span>+
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300 font-medium">Athletes supported</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">From amateur to professional levels across 8 combat sports</p>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                            <span class="counter" data-target="15">0</span>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300 font-medium">Training centers</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">Partnered across Cameroon's 10 regions</p>
+                    </div>
+                    <div class="text-center p-4">
+                        <div class="text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                            <span class="counter" data-target="86">0</span>%
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300 font-medium">Improved performance</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mt-2">Reported by athletes after 3+ months on our platform</p>
+                    </div>
+                </div>
+                <div class="text-center mt-8">
+                    <p class="text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">Since our founding, MindSport Cameroon has partnered with the Cameroon Olympic Committee, National Sports Federations, and local athletics clubs to transform the approach to mental health in combat sports across the country.</p>
+                </div>
+            </div>
+            
+            <!-- Partners Section -->
+            <div class="mt-20" data-aos="fade-up">
+                <h3 class="text-2xl font-bold text-gray-900 dark:text-white text-center mb-10">Our Trusted Partners</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
+                    <div class="bg-white dark:bg-slate-700 p-6 rounded-lg shadow flex justify-center h-24 items-center">
+                        <img src="{% static 'logos/cno.png' %}" alt="Cameroon Olympic Committee" class="h-12 object-contain opacity-70 hover:opacity-100 transition duration-300">
+                    </div>
+                    <div class="bg-white dark:bg-slate-700 p-6 rounded-lg shadow flex justify-center h-24 items-center">
+                        <img src="{% static 'logos/ministere-sports.png' %}" alt="Ministry of Sports" class="h-12 object-contain opacity-70 hover:opacity-100 transition duration-300">
+                    </div>
+                    <div class="bg-white dark:bg-slate-700 p-6 rounded-lg shadow flex justify-center h-24 items-center">
+                        <img src="{% static 'logos/boxing-federation.png' %}" alt="Cameroon Boxing Federation" class="h-12 object-contain opacity-70 hover:opacity-100 transition duration-300">
+                    </div>
+                    <div class="bg-white dark:bg-slate-700 p-6 rounded-lg shadow flex justify-center h-24 items-center">
+                        <img src="{% static 'logos/african-mental-health.png' %}" alt="African Mental Health Foundation" class="h-12 object-contain opacity-70 hover:opacity-100 transition duration-300">
+                    </div>
+                </div>
+                <div class="text-center mt-8">
+                    <a href="#" class="text-blue-600 dark:text-blue-400 text-sm font-medium inline-flex items-center">
+                        View all partners
+                        <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
         </div>
+    </section>
 
-        <!-- Our Story -->
-        <div class="grid md:grid-cols-2 gap-12 items-center mb-20">
-            <div class="animate__animated animate__fadeInLeft">
-                <h3 class="text-2xl font-bold text-blue-800 mb-4">Our Story</h3>
-                <p class="text-gray-700 mb-4">MindSport Cameroon was founded in 2023 by a dedicated team of sports psychologists, former combat athletes, and mental health advocates who recognized a critical gap in support services for athletes in Cameroon.</p>
-                <p class="text-gray-700 mb-4">After witnessing talented athletes struggle with performance anxiety, competition stress, and post-defeat recovery, we committed to creating a comprehensive mental wellness platform specifically tailored to the unique challenges faced by combat athletes.</p>
-                <p class="text-gray-700">Today, MindSport Cameroon serves hundreds of athletes across boxing, wrestling, judo, taekwondo, MMA, and other combat sports, helping them develop mental resilience alongside physical strength.</p>
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20 bg-gray-50 dark:bg-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">TESTIMONIALS</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+                    <span class="block">What Athletes Say</span>
+                </h2>
+                <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    Hear from combat athletes who have transformed their mental game with MindSport Cameroon.
+                </p>
             </div>
-            <div class="animate__animated animate__fadeInRight">
-                <img src="{% static 'logo/logo.png' %}" alt="MindChampion founding team" class="rounded-lg shadow-xl w-full">
-            </div>
-        </div>
 
-        <!-- Mission & Vision -->
-        <div class="bg-white rounded-xl shadow-md p-8 mb-20">
-            <div class="grid md:grid-cols-2 gap-8">
-                <div>
-                    <div class="text-blue-600 mb-4">
-                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                <!-- Testimonial 1 -->
+                <div class="bg-white dark:bg-slate-700 rounded-xl shadow-md p-6 testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center mb-4">
+                        <img src="{% static 'avatars/marie-essome.jpg' %}" alt="Marie Essome" class="h-12 w-12 rounded-full mr-4 object-cover">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Marie Essome</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Boxing, National Champion</p>
+                        </div>
+                    </div>
+                    <div class="text-yellow-400 flex mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300">"MindSport Cameroon helped me overcome competition anxiety that was affecting my performance. The personalized strategies from my psychologist made all the difference in my last championship. I went from doubting myself to stepping into the ring with complete confidence."</p>
+                    <div class="mt-4 flex justify-end">
+                        <svg class="w-10 h-10 text-blue-600 dark:text-blue-400 opacity-30" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Our Mission</h3>
-                    <p class="text-gray-700">To empower combat athletes in Cameroon with accessible, culturally-responsive mental health resources that enhance performance, wellbeing, and long-term career success.</p>
                 </div>
-                <div>
-                    <div class="text-blue-600 mb-4">
-                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path>
-                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Our Vision</h3>
-                    <p class="text-gray-700">To create a future where mental health support is integrated into every combat athlete's training in Cameroon, transforming the sports culture and producing champions who are as mentally resilient as they are physically strong.</p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Our Values -->
-        <div class="mb-20">
-            <h3 class="text-2xl font-bold text-gray-900 text-center mb-10">Our Core Values</h3>
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
-                    <div class="text-blue-600 mb-4">
-                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M6.625 2.655A9 9 0 0119 11a1 1 0 11-2 0 7 7 0 00-9.625-6.492 1 1 0 11-.75-1.853zM4.662 4.959A1 1 0 014.75 6.37 6.97 6.97 0 003 11a1 1 0 11-2 0 8.97 8.97 0 012.25-5.953 1 1 0 011.412-.088z" clip-rule="evenodd"></path>
-                            <path fill-rule="evenodd" d="M5 11a5 5 0 1110 0 1 1 0 11-2 0 3 3 0 10-6 0c0 1.677-.345 3.276-.968 4.729a1 1 0 11-1.838-.789A9.964 9.964 0 005 11z" clip-rule="evenodd"></path>
+                <!-- Testimonial 2 -->
+                <div class="bg-white dark:bg-slate-700 rounded-xl shadow-md p-6 testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center mb-4">
+                        <img src="{% static 'avatars/jean-kamto.jpg' %}" alt="Jean Kamto" class="h-12 w-12 rounded-full mr-4 object-cover">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Jean Kamto</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Judo, Olympic Athlete</p>
+                        </div>
+                    </div>
+                    <div class="text-yellow-400 flex mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300">"The community support on MindSport Cameroon helped me realize I wasn't alone in my struggles. The platform's accessibility means I can get help wherever my competitions take me. The mental recovery tools after losses have been particularly valuable for my career longevity."</p>
+                    <div class="mt-4 flex justify-end">
+                        <svg class="w-10 h-10 text-blue-600 dark:text-blue-400 opacity-30" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                         </svg>
                     </div>
-                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Accessibility</h4>
-                    <p class="text-gray-600">We believe quality mental health support should be available to all athletes regardless of economic background or location.</p>
                 </div>
-                <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
-                    <div class="text-blue-600 mb-4">
-                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M18 13V5a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2h3l3 3 3-3h3a2 2 0 002-2zM5 7a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1zm1 3a1 1 0 100 2h3a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Cultural Relevance</h4>
-                    <p class="text-gray-600">Our approaches are rooted in understanding the specific cultural context of Cameroonian athletes and their communities.</p>
-                </div>
-                <div class="bg-white rounded-lg shadow-md p-6 transition duration-300 ease-in-out feature-card">
-                    <div class="text-blue-600 mb-4">
-                        <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <h4 class="text-xl font-semibold text-gray-900 mb-2">Confidentiality</h4>
-                    <p class="text-gray-600">We maintain the highest standards of privacy and data protection, creating a safe space for athletes to be vulnerable.</p>
-                </div>
-            </div>
-        </div>
 
-        <!-- Our Team -->
-        <div>
-            <h3 class="text-2xl font-bold text-gray-900 text-center mb-10">Meet Our Leadership Team</h3>
-            <div class="grid md:grid-cols-4 gap-6">
-                <!-- Team Member 1 -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="{% static 'avatars/avartar.jpeg' %}" alt="Dr. Adrien Mbarga" class="w-full object-cover h-60">
-                    <div class="p-4">
-                        <h4 class="font-bold text-lg">Dr. Adrien Mbarga</h4>
-                        <p class="text-blue-600 text-sm mb-2">Founder & CEO</p>
-                        <p class="text-gray-600 text-sm">Former National Boxing Champion with a PhD in Sports Psychology from the University of Yaoundé.</p>
+                <!-- Testimonial 3 -->
+                <div class="bg-white dark:bg-slate-700 rounded-xl shadow-md p-6 testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex items-center mb-4">
+                        <img src="{% static 'avatars/samuel-etoo.jpg' %}" alt="Samuel Etoo" class="h-12 w-12 rounded-full mr-4 object-cover">
+                        <div>
+                            <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Samuel Etoo</h4>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">MMA, Rising Star</p>
+                        </div>
                     </div>
-                </div>
-                <!-- Team Member 2 -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="{% static 'avatars/avartar.jpeg' %}" alt="Dr. Françoise Nkodo" class="w-full object-cover h-60">
-                    <div class="p-4">
-                        <h4 class="font-bold text-lg">Dr. Françoise Nkodo</h4>
-                        <p class="text-blue-600 text-sm mb-2">Chief Mental Health Officer</p>
-                        <p class="text-gray-600 text-sm">Clinical Psychologist with 15+ years specializing in athlete mental performance and trauma recovery.</p>
+                    <div class="text-yellow-400 flex mb-3">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
                     </div>
-                </div>
-                <!-- Team Member 3 -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="{% static 'avatars/avatar1.jpg' %}" alt="Emmanuel Ndongo" class="w-full object-cover h-60">
-                    <div class="p-4">
-                        <h4 class="font-bold text-lg">Emmanuel Ndongo</h4>
-                        <p class="text-blue-600 text-sm mb-2">Chief Technology Officer</p>
-                        <p class="text-gray-600 text-sm">Tech entrepreneur with expertise in developing secure healthcare platforms for the African market.</p>
-                    </div>
-                </div>
-                <!-- Team Member 4 -->
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="{% static 'avatars/avatar2.jpg' %}" alt="Carole Essombe" class="w-full object-cover h-60">
-                    <div class="p-4">
-                        <h4 class="font-bold text-lg">Carole Essombe</h4>
-                        <p class="text-blue-600 text-sm mb-2">Director of Athlete Relations</p>
-                        <p class="text-gray-600 text-sm">Former Olympic Judo competitor and advocate for athlete mental health awareness.</p>
+                    <p class="text-gray-700 dark:text-gray-300">"After a tough loss, I struggled with motivation. The tools and professional guidance through MindSport Cameroon helped me regain my confidence and mental strength. Now I'm stronger than ever, both physically and mentally. The pre-fight visualization exercises have become an essential part of my routine."</p>
+                    <div class="mt-4 flex justify-end">
+                        <svg class="w-10 h-10 text-blue-600 dark:text-blue-400 opacity-30" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                        </svg>
                     </div>
                 </div>
             </div>
-            <div class="text-center mt-10">
-                <a href="#" class="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 transition duration-300">
-                    Meet Our Full Team
+
+            <div class="mt-12 text-center" data-aos="fade-up">
+                <a href="#" class="btn-primary inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-medium text-white transition duration-300">
+                    Read More Success Stories
+                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                    </svg>
                 </a>
             </div>
         </div>
-        
-        <!-- Our Impact -->
-        <div class="mt-20 bg-blue-50 rounded-xl p-8">
-            <h3 class="text-2xl font-bold text-gray-900 text-center mb-8">Our Impact</h3>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="text-center p-4">
-                    <div class="text-4xl font-bold text-blue-800 mb-2">500+</div>
-                    <p class="text-gray-700">Athletes supported</p>
-                </div>
-                <div class="text-center p-4">
-                    <div class="text-4xl font-bold text-blue-800 mb-2">15</div>
-                    <p class="text-gray-700">Training centers across Cameroon</p>
-                </div>
-                <div class="text-center p-4">
-                    <div class="text-4xl font-bold text-blue-800 mb-2">86%</div>
-                    <p class="text-gray-700">Athletes report improved performance</p>
-                </div>
-            </div>
-            <div class="text-center mt-8">
-                <p class="text-gray-700 max-w-3xl mx-auto">Since our founding, MindSport Cameroon has partnered with the Cameroon Olympic Committee, National Sports Federations, and local athletics clubs to transform the approach to mental health in combat sports across the country.</p>
-            </div>
-        </div>
-        
-        <!-- Partners Section -->
-        <div class="mt-20">
-            <h3 class="text-2xl font-bold text-gray-900 text-center mb-10">Our Partners</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 items-center">
-                <div class="bg-white p-6 rounded-lg shadow flex justify-center">
-                    <img src="{% static 'image/cno.png' %}" alt="Cameroon Olympic Committee" class="h-12 object-contain">
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow flex justify-center">
-                    <img src="{% static 'image/cmr.jpeg' %}" alt="Ministry of Sports" class="h-12 object-contain">
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow flex justify-center">
-                    <img src="{% static 'image/box.jpeg' %}" alt="Cameroon Boxing Federation" class="h-12 object-contain">
-                </div>
-                <div class="bg-white p-6 rounded-lg shadow flex justify-center">
-                    <img src="{% static 'image/africain.png' %}" alt="African Mental Health Foundation" class="h-12 object-contain">
+    </section>
+
+    <!-- Call to Action -->
+    <section class="py-20 bg-gradient-to-r from-blue-800 to-blue-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div class="max-w-3xl mx-auto" data-aos="fade-up">
+                <h2 class="text-3xl font-extrabold sm:text-4xl mb-6">
+                    <span class="block">Ready to Transform Your Mental Game?</span>
+                </h2>
+                <p class="text-xl text-blue-100 mb-8">
+                    Join hundreds of combat athletes in Cameroon who are already experiencing the benefits of professional mental health support.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="{% url 'register' %}" class="btn-primary inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white transition duration-300">
+                        Get Started Free
+                    </a>
+                    <a href="#contact" class="inline-flex items-center justify-center px-6 py-3 border border-white rounded-lg text-base font-medium text-white hover:bg-blue-700 transition duration-300">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Watch Demo
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Testimonials Section -->
-<section id="testimonials" class="py-20 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-                <span class="block">What Athletes Say</span>
-            </h2>
-            <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
-                Hear from combat athletes who have transformed their mental game with MindSport Cameroon.
-            </p>
-        </div>
-
-        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <!-- Testimonial 1 -->
-            <div class="bg-white rounded-xl shadow-md p-6 testimonial-card">
-                <div class="flex items-center mb-4">
-                    <img src="{% static 'avatars/avartar.jpeg' %}" alt="User avatar" class="h-12 w-12 rounded-full mr-4">
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-900">Marie Essome</h4>
-                        <p class="text-sm text-gray-600">Boxing, National Champion</p>
-                    </div>
-                </div>
-                <div class="text-yellow-400 flex mb-3">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                </div>
-                <p class="text-gray-700">"MindSport Cameroon helped me overcome competition anxiety that was affecting my performance. The personalized strategies from my psychologist made all the difference in my last championship."</p>
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-white dark:bg-slate-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">CONTACT US</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+                    <span class="block">Get in Touch</span>
+                </h2>
+                <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    Have questions about MindSport Cameroon? Our team is here to help you.
+                </p>
             </div>
 
-            <!-- Testimonial 2 -->
-            <div class="bg-white rounded-xl shadow-md p-6 testimonial-card">
-                <div class="flex items-center mb-4">
-                    <img src="{% static 'avatars/avatar1.jpg' %}" alt="User avatar" class="h-12 w-12 rounded-full mr-4">
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-900">Jean Kamto</h4>
-                        <p class="text-sm text-gray-600">Judo, Olympic Athlete</p>
-                    </div>
+            <div class="grid md:grid-cols-2 gap-10">
+                <div data-aos="fade-right">
+                    <form class="space-y-6" method="POST" action="{% url 'contact_submit' %}">
+                        {% csrf_token %}
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name *</label>
+                            <input type="text" id="name" name="name" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address *</label>
+                            <input type="email" id="email" name="email" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="subject" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subject *</label>
+                            <input type="text" id="subject" name="subject" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Message *</label>
+                            <textarea id="message" name="message" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-slate-800 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn-primary w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Send Message
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="text-yellow-400 flex mb-3">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star-half-alt"></i>
-                </div>
-                <p class="text-gray-700">"The community support on MindSport Cameroon helped me realize I wasn't alone in my struggles. The platform's accessibility means I can get help wherever my competitions take me."</p>
-            </div>
-
-            <!-- Testimonial 3 -->
-            <div class="bg-white rounded-xl shadow-md p-6 testimonial-card">
-                <div class="flex items-center mb-4">
-                    <img src="{% static 'avatars/avatar2.jpg' %}" alt="User avatar" class="h-12 w-12 rounded-full mr-4">
-                    <div>
-                        <h4 class="text-lg font-semibold text-gray-900">Samuel Etoo</h4>
-                        <p class="text-sm text-gray-600">MMA, Rising Star</p>
-                    </div>
-                </div>
-                <div class="text-yellow-400 flex mb-3">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                </div>
-                <p class="text-gray-700">"After a tough loss, I struggled with motivation. The tools and professional guidance through MindSport Cameroon helped me regain my confidence and mental strength. Now I'm stronger than ever."</p>
-            </div>
-        </div>
-
-        <div class="text-center mt-12">
-            <a href="#" class="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-blue-600 hover:bg-blue-700 transition duration-300">
-                Read More Success Stories
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Call to Action -->
-<section class="py-20 bg-blue-800 text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl font-extrabold sm:text-4xl mb-6">Ready to Transform Your Mental Game?</h2>
-        <p class="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">Join hundreds of combat athletes in Cameroon who are already experiencing the benefits of professional mental health support.</p>
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="{% url 'login' %}" class="inline-flex items-center justify-center px-6 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-blue-800 bg-white hover:bg-gray-50 transition duration-300">
-                Get Started Free
-            </a>
-            <a href="{% url 'register' %}" class="inline-flex items-center justify-center px-6 py-3 border border-white rounded-lg text-base font-medium text-white hover:bg-blue-700 transition duration-300">
-                Schedule a Demo
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Contact Section -->
-<section id="contact" class="py-20 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-            <h2 class="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-                <span class="block">Get in Touch</span>
-            </h2>
-            <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
-                Have questions about MindSport Cameroon? Our team is here to help you.
-            </p>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-10">
-            <div>
-                <form class="space-y-6" method="POST" action="{% url 'contact_submit' %}">
-                    {% csrf_token %}
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">Full Name</label>
-                        <input type="text" id="name" name="name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                        <input type="email" id="email" name="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
-                        <input type="text" id="subject" name="subject" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
-                        <textarea id="message" name="message" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-                    </div>
-                    <div>
-                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Send Message
-                        </button>
-                    </div>
-                </form>
-            </div>
-            <div>
-                <div class="bg-gray-50 rounded-lg p-6 h-full">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Contact Information</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 text-blue-600">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
+                <div data-aos="fade-left">
+                    <div class="bg-gray-50 dark:bg-slate-800 rounded-lg p-6 h-full">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Contact Information</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 text-blue-600 dark:text-blue-400">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3 text-gray-700 dark:text-gray-300">
+                                    <p class="text-base font-medium">MindSport Cameroon Headquarters</p>
+                                    <p class="text-sm">123 Avenue de l'Union Africaine, Yaoundé, Cameroon</p>
+                                </div>
                             </div>
-                            <div class="ml-3 text-gray-700">
-                                <p class="text-base">MindSport Cameroon Headquarters</p>
-                                <p class="text-sm">123 Avenue de l'Union Africaine, Yaoundé, Cameroon</p>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 text-blue-600 dark:text-blue-400">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3 text-gray-700 dark:text-gray-300">
+                                    <p class="text-base font-medium">Phone</p>
+                                    <p class="text-sm">+237 655 123 456</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 text-blue-600 dark:text-blue-400">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3 text-gray-700 dark:text-gray-300">
+                                    <p class="text-base font-medium">Email</p>
+                                    <p class="text-sm">info@mindsport.cm</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0 text-blue-600 dark:text-blue-400">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3 text-gray-700 dark:text-gray-300">
+                                    <p class="text-base font-medium">Working Hours</p>
+                                    <p class="text-sm">Monday - Friday: 8:00 AM - 6:00 PM</p>
+                                    <p class="text-sm">Saturday: 9:00 AM - 2:00 PM</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 text-blue-600">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                            </div>
-                            <div class="ml-3 text-gray-700">
-                                <p class="text-base">Phone</p>
-                                <p class="text-sm">+237 655 123 456</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start">
-                            <div class="flex-shrink-0 text-blue-600">
-                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                            </div>
-                            <div class="ml-3 text-gray-700">
-                                <p class="text-base">Email</p>
-                                <p class="text-sm">info@MindSport Cameroon.cm</p>
+                        <div class="mt-8">
+                            <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Follow Us</h4>
+                            <div class="flex space-x-4">
+                                <a href="#" class="text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition duration-300">
+                                    <i class="fab fa-facebook-f fa-lg"></i>
+                                </a>
+                                <a href="#" class="text-gray-500 hover:text-blue-400 dark:hover:text-blue-400 transition duration-300">
+                                    <i class="fab fa-twitter fa-lg"></i>
+                                </a>
+                                <a href="#" class="text-gray-500 hover:text-pink-600 dark:hover:text-pink-400 transition duration-300">
+                                    <i class="fab fa-instagram fa-lg"></i>
+                                </a>
+                                <a href="#" class="text-gray-500 hover:text-blue-700 dark:hover:text-blue-400 transition duration-300">
+                                    <i class="fab fa-linkedin-in fa-lg"></i>
+                                </a>
+                                <a href="#" class="text-gray-500 hover:text-red-600 dark:hover:text-red-400 transition duration-300">
+                                    <i class="fab fa-youtube fa-lg"></i>
+                                </a>
                             </div>
                         </div>
-                    </div>
-                    <div class="mt-8">
-                        <h4 class="text-lg font-medium text-gray-900 mb-4">Follow Us</h4>
-                        <div class="flex space-x-4">
-                            <a href="#" class="text-gray-500 hover:text-blue-600">
-                                <i class="fab fa-facebook-f fa-lg"></i>
-                            </a>
-                            <a href="#" class="text-gray-500 hover:text-blue-600">
-                                <i class="fab fa-twitter fa-lg"></i>
-                            </a>
-                            <a href="#" class="text-gray-500 hover:text-blue-600">
-                                <i class="fab fa-instagram fa-lg"></i>
-                            </a>
-                            <a href="#" class="text-gray-500 hover:text-blue-600">
-                                <i class="fab fa-linkedin-in fa-lg"></i>
-                            </a>
+                        <div class="mt-8">
+                            <!-- Map placeholder - replace with actual map embed -->
+                            <div class="bg-gray-200 dark:bg-slate-700 rounded-lg overflow-hidden h-48 flex items-center justify-center">
+                                <div class="text-center p-4">
+                                    <svg class="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Map of our location</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Footer -->
-<footer class="bg-gray-900 text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div>
-                <div class="flex items-center mb-4">
-                    <img class="h-8 w-auto" src="{% static 'logo/logo.png' %}" alt="MindChampion Logo">
-                    <span class="ml-2 text-white font-bold text-xl">MindSport Cameroon</span>
+    <!-- FAQ Section -->
+    <section class="py-20 bg-gray-50 dark:bg-slate-800">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <span class="inline-block px-3 py-1 text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900 rounded-full mb-4">FAQS</span>
+                <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white sm:text-4xl">
+                    <span class="block">Frequently Asked Questions</span>
+                </h2>
+                <p class="mt-4 text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    Find answers to common questions about MindSport Cameroon.
+                </p>
+            </div>
+
+            <div class="space-y-6" data-aos="fade-up">
+                <!-- FAQ Item 1 -->
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Who can use MindSport Cameroon?</h3>
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6 hidden">
+                        <p class="text-gray-600 dark:text-gray-300">MindSport Cameroon is designed for combat athletes of all levels in Cameroon - from beginners to professionals. This includes practitioners of boxing, wrestling, judo, taekwondo, karate, MMA, and other martial arts. Coaches and trainers can also benefit from our resources to better support their athletes.</p>
+                    </div>
                 </div>
-                <p class="text-gray-400 mb-4">Supporting the mental wellness of combat athletes across Cameroon with professional resources and community.</p>
-                <div class="flex space-x-4">
-                    <a href="#" class="text-gray-400 hover:text-white">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white">
-                        <i class="fab fa-twitter"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white">
-                        <i class="fab fa-instagram"></i>
-                    </a>
-                    <a href="#" class="text-gray-400 hover:text-white">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
+
+                <!-- FAQ Item 2 -->
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">How much does it cost to use the platform?</h3>
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6 hidden">
+                        <p class="text-gray-600 dark:text-gray-300">We offer tiered pricing to accommodate different needs and budgets:</p>
+                        <ul class="mt-2 space-y-2 text-gray-600 dark:text-gray-300">
+                            <li class="flex items-start">
+                                <span class="text-blue-600 dark:text-blue-400 mr-2">•</span>
+                                <span>Basic (free): Access to community forums and limited resources</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-600 dark:text-blue-400 mr-2">•</span>
+                                <span>Premium (15,000 XAF/month): Full access to all resources and discounted professional sessions</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-600 dark:text-blue-400 mr-2">•</span>
+                                <span>Professional (varies): Custom packages with dedicated mental coaches</span>
+                            </li>
+                        </ul>
+                        <p class="mt-3 text-gray-600 dark:text-gray-300">We also offer scholarships for athletes with financial constraints.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Is my information kept confidential?</h3>
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6 hidden">
+                        <p class="text-gray-600 dark:text-gray-300">Absolutely. Confidentiality is a cornerstone of our service. All sessions and personal information are protected under strict privacy policies. Our platform uses end-to-end encryption, and we comply with all Cameroonian data protection regulations. Only you and your chosen professionals can access your session details.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">How do I know which professional is right for me?</h3>
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6 hidden">
+                        <p class="text-gray-600 dark:text-gray-300">After completing your initial assessment, our system will recommend professionals based on your specific needs and goals. Each professional has a detailed profile showing their specialties, experience, and approach. You can also schedule introductory calls with potential matches before committing to sessions.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 5 -->
+                <div class="bg-white dark:bg-slate-700 rounded-lg shadow-md overflow-hidden">
+                    <button class="faq-toggle w-full flex justify-between items-center p-6 text-left focus:outline-none">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Can I use MindSport Cameroon on my mobile phone?</h3>
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="faq-content px-6 pb-6 hidden">
+                        <p class="text-gray-600 dark:text-gray-300">Yes! MindSport Cameroon is fully optimized for mobile devices. You can access all features through our mobile-responsive website. We're also developing a dedicated mobile app that will be available for both Android and iOS devices in the coming months.</p>
+                    </div>
                 </div>
             </div>
-            <div>
-                <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
-                    <li><a href="#features" class="text-gray-400 hover:text-white transition duration-300">Features</a></li>
-                    <li><a href="#how-it-works" class="text-gray-400 hover:text-white transition duration-300">How It Works</a></li>
-                    <li><a href="#testimonials" class="text-gray-400 hover:text-white transition duration-300">Testimonials</a></li>
-                    <li><a href="#contact" class="text-gray-400 hover:text-white transition duration-300">Contact</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3 class="text-lg font-semibold mb-4">Resources</h3>
-                <ul class="space-y-2">
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Mental Health Tips</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">FAQs</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Community Guidelines</a></li>
-                    <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Support</a></li>
-                </ul>
-            </div>
-            <div>
-                <h3 class="text-lg font-semibold mb-4">Newsletter</h3>
-                <p class="text-gray-400 mb-4">Subscribe to our newsletter for the latest updates and resources.</p>
-           <!-- Change the newsletter form to: -->
-        <form class="space-y-2" method="POST" action="{% url 'homepage' %}">
-            {% csrf_token %}
-            <div>
-                <input type="email" name="email" placeholder="Your email address" class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500" required>
-            </div>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition duration-300">
-                Subscribe
-            </button>
-        </form>
-                <p class="text-gray-400 mt-4">We respect your privacy. Unsubscribe at any time.</p>
+
+            <div class="mt-12 text-center" data-aos="fade-up">
+                <p class="text-gray-600 dark:text-gray-400 mb-4">Still have questions?</p>
+                <a href="#contact" class="btn-primary inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-medium text-white transition duration-300">
+                    Contact Our Support Team
+                </a>
             </div>
         </div>
-        <div class="border-t border-gray-800 mt-10 pt-8">
+    </section>
+
+    <!-- Newsletter Section -->
+    <section class="py-16 bg-blue-600 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="md:flex md:items-center md:justify-between">
-                <div class="text-sm text-gray-400">
-                    &copy; 2025 MindSport Cameroon. All rights reserved.
+                <div class="md:w-1/2 mb-8 md:mb-0" data-aos="fade-right">
+                    <h2 class="text-2xl font-bold mb-2">Stay Updated</h2>
+                    <p class="text-blue-100">Subscribe to our newsletter for the latest mental performance tips, platform updates, and exclusive offers.</p>
                 </div>
-                <div class="mt-4 md:mt-0">
-                    <ul class="flex space-x-6">
-                        <li><a href="{% url 'term' %}" class="text-sm text-gray-400 hover:text-white transition duration-300">Privacy Policy</a></li>
-                        <li><a href="{% url 'term' %}" class="text-sm text-gray-400 hover:text-white transition duration-300">Terms of Service</a></li>
-                        <li><a href="{% url 'term' %}" class="text-sm text-gray-400 hover:text-white transition duration-300">Cookie Policy</a></li>
+                <div class="md:w-1/2" data-aos="fade-left">
+                    <form class="flex flex-col sm:flex-row gap-3" method="POST" action="{% url 'homepage' %}">
+                        {% csrf_token %}
+                        <input type="email" name="email" placeholder="Your email address" required class="flex-grow px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 text-gray-900">
+                        <button type="submit" class="btn-secondary px-6 py-3 rounded-lg text-white font-medium">
+                            Subscribe
+                        </button>
+                    </form>
+                    <p class="mt-2 text-sm text-blue-200">We respect your privacy. Unsubscribe at any time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <img class="h-8 w-auto" src="{% static 'logo/logo-white.png' %}" alt="MindSport Logo">
+                        <span class="ml-2 text-white font-bold text-xl">MindSport</span>
+                    </div>
+                    <p class="text-gray-400 mb-4">Supporting the mental wellness of combat athletes across Cameroon with professional resources and community.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white transition duration-300">
+                            <i class="fab fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Home</a></li>
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition duration-300">Features</a></li>
+                        <li><a href="#how-it-works" class="text-gray-400 hover:text-white transition duration-300">How It Works</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition duration-300">About Us</a></li>
+                        <li><a href="#testimonials" class="text-gray-400 hover:text-white transition duration-300">Testimonials</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition duration-300">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Resources</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Mental Health Tips</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">FAQs</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Community Guidelines</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Support</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">Press Kit</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Legal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{% url 'term' %}" class="text-gray-400 hover:text-white transition duration-300">Privacy Policy</a></li>
+                        <li><a href="{% url 'term' %}" class="text-gray-400 hover:text-white transition duration-300">Terms of Service</a></li>
+                        <li><a href="{% url 'term' %}" class="text-gray-400 hover:text-white transition duration-300">Cookie Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition duration-300">GDPR Compliance</a></li>
                     </ul>
                 </div>
             </div>
+            <div class="border-t border-gray-800 mt-10 pt-8">
+                <div class="md:flex md:items-center md:justify-between">
+                    <div class="text-sm text-gray-400">
+                        &copy; 2025 MindSport Cameroon. All rights reserved.
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                        <p class="text-sm text-gray-400">Made with <span class="text-red-500">♥</span> in Cameroon</p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</footer>
+    </footer>
 
-<!-- Back to top button -->
-<a href="#" class="back-to-top fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg opacity-0 invisible transition-all duration-300" id="back-to-top">
-    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
-    </svg>
-</a>
+    <!-- Back to top button -->
+    <a href="#" class="back-to-top fixed bottom-6 right-6 p-3 bg-blue-600 text-white rounded-full shadow-lg opacity-0 invisible transition-all duration-300 hover:bg-blue-700" id="back-to-top">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+        </svg>
+    </a>
 
-<!-- JavaScript -->
-<script>
-    // Mobile menu toggle
-    const mobileMenuButton = document.getElementById('mobile-menu-button');
-    const mobileMenu = document.getElementById('mobile-menu');
-
-    mobileMenuButton.addEventListener('click', function() {
-        mobileMenu.classList.toggle('hidden');
-    });
-
-    // Back to top button functionality
-    const backToTopButton = document.getElementById('back-to-top');
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.9.1/lottie.min.js"></script>
     
-    window.addEventListener('scroll', function() {
-        if (window.pageYOffset > 300) {
-            backToTopButton.classList.remove('opacity-0', 'invisible');
-            backToTopButton.classList.add('opacity-100', 'visible');
-        } else {
-            backToTopButton.classList.add('opacity-0', 'invisible');
-            backToTopButton.classList.remove('opacity-100', 'visible');
-        }
-    });
+    <script>
+        // Initialize AOS animation library
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
 
-    backToTopButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+        // Loading screen
+        window.addEventListener('load', function() {
+            const loadingScreen = document.getElementById('loading-screen');
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        });
 
-    // Navbar scroll effect
-    const navbar = document.getElementById('navbar');
-    
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 50) {
-            navbar.classList.add('bg-white', 'shadow');
-        } else {
-            navbar.classList.remove('bg-white', 'shadow');
-        }
-    });
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
 
-    // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            
-            const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
-            
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                targetElement.scrollIntoView({
-                    behavior: 'smooth'
-                });
-                
-                // Close mobile menu if open
-                if (!mobileMenu.classList.contains('hidden')) {
-                    mobileMenu.classList.add('hidden');
-                }
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Back to top button functionality
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', function() {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.remove('opacity-0', 'invisible');
+                backToTopButton.classList.add('opacity-100', 'visible');
+            } else {
+                backToTopButton.classList.add('opacity-0', 'invisible');
+                backToTopButton.classList.remove('opacity-100', 'visible');
             }
         });
-    });
-</script>
+
+        backToTopButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) {
+                navbar.classList.add('shadow-md', 'bg-white/95', 'dark:bg-slate-900/95');
+                navbar.classList.remove('bg-white/80', 'dark:bg-slate-900/80');
+            } else {
+                navbar.classList.remove('shadow-md', 'bg-white/95', 'dark:bg-slate-900/95');
+                navbar.classList.add('bg-white/80', 'dark:bg-slate-900/80');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        
+        // Check for saved theme preference or use preferred color scheme
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        themeToggle.addEventListener('click', function() {
+            // Toggle icon
+            document.documentElement.classList.toggle('dark');
+            
+            // Save preference to localStorage
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                localStorage.setItem('color-theme', 'light');
+            }
+        });
+
+        // FAQ accordion functionality
+        document.querySelectorAll('.faq-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const content = button.nextElementSibling;
+                const icon = button.querySelector('svg');
+                
+                // Toggle content
+                content.classList.toggle('hidden');
+                
+                // Rotate icon
+                icon.classList.toggle('rotate-180');
+                
+                // Close other open FAQs
+                document.querySelectorAll('.faq-toggle').forEach(otherButton => {
+                    if (otherButton !== button) {
+                        otherButton.nextElementSibling.classList.add('hidden');
+                        otherButton.querySelector('svg').classList.remove('rotate-180');
+                    }
+                });
+            });
+        });
+
+        // Counter animation
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            const speed = 200;
+            
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const count = +counter.innerText;
+                const increment = target / speed;
+                
+                if (count < target) {
+                    counter.innerText = Math.ceil(count + increment);
+                    setTimeout(animateCounters, 1);
+                } else {
+                    counter.innerText = target;
+                }
+            });
+        }
+        
+        // Initialize counters when they come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        document.querySelectorAll('.counter').forEach(counter => {
+            observer.observe(counter);
+        });
+
+        // Particle.js configuration
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ffffff"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 0.3,
+                    "random": false,
+                    "anim": {
+                        "enable": false,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": false,
+                        "speed": 40,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ffffff",
+                    "opacity": 0.2,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 2,
+                    "direction": "none",
+                    "random": false,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 1
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 200,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+
+        // Lottie animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // You can initialize Lottie animations here if needed
+            // Example:
+            // const animation = lottie.loadAnimation({
+            //     container: document.getElementById('lottie-container'),
+            //     renderer: 'svg',
+            //     loop: true,
+            //     autoplay: true,
+            //     path: 'path/to/animation.json'
+            // });
+        });
+
+        // Form validation example
+        const contactForm = document.querySelector('#contact form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                const email = this.querySelector('input[type="email"]');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (!emailRegex.test(email.value)) {
+                    e.preventDefault();
+                    email.classList.add('border-red-500');
+                    alert('Please enter a valid email address');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
